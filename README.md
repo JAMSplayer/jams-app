@@ -1,5 +1,7 @@
 # JAMS App
 
+![128x128](https://github.com/user-attachments/assets/b9816724-a71f-45c4-8213-5eb72b889d7a)
+
 ## Installation
 
 1. **Install Yarn** on your system.
