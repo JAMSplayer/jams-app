@@ -16,7 +16,6 @@ export function Footer() {
                     </a>
                     .
                 </p>
-                <ThemeToggler />
             </div>
         </div>
     );
