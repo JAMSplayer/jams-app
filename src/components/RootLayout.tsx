@@ -1,0 +1,26 @@
+import { ReactNode } from "react";
+import { ThemeProvider } from "./ThemeProvider";
+import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
+import "../index.css";
+
+interface RootLayoutProps {
+    children: ReactNode; // Explicitly type children as ReactNode
+}
+
+const RootLayout = ({ children }: RootLayoutProps) => {
+    return (
+        <div className={`antialiased flex flex-col min-h-screen`}>
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                disableTransitionOnChange
+            >
+                <AdminPanelLayout>
+                    <main className="flex-grow px-6 py-4">{children}</main>
+                </AdminPanelLayout>
+            </ThemeProvider>
+        </div>
+    );
+};
+
+export default RootLayout;

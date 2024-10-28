@@ -1,0 +1,33 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "shell:allow-open",
+    "store:default",
+    "core:path:default",
+    "fs:allow-open",
+    "fs:allow-stat",
+    "dialog:default",
+    "fs:default",
+    "fs:read-all",
+    "core:event:default",
+    "core:event:allow-emit",
+    "core:event:allow-listen",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$HOME/**"
+        }
+      ]
+    }
+  ]
+}
