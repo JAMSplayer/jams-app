@@ -1,4 +1,4 @@
-const formatAddress = (address: string) => {
+export const formatAddress = (address: string) => {
     if (address.length <= 20) return address;
 
     const start = address.slice(0, 10);

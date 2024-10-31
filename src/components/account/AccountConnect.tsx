@@ -1,13 +1,14 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Copy, PowerIcon } from "lucide-react";
-import { motion } from "framer-motion";
 import Avatar from "./Avatar";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { formatAddress } from "@/lib/utils/address";
+import { formatBalance } from "@/lib/utils/balance";
 
-export default function WalletConnect() {
+export default function AccountConnect() {
     const isConnected = true; // TODO update to use the new hook
-    const address = "users-address"; // TODO update to use the new hook
+    const address = "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A"; // TODO update to use the new hook
 
     // TODO get this from the to be created hook by loziniak
     const addressData = {
@@ -17,7 +18,10 @@ export default function WalletConnect() {
     };
 
     const balance = addressData ? (
-        `${addressData.symbol}: ${addressData.value}`
+        `${addressData.symbol}: ${formatBalance(
+            addressData.value,
+            addressData.decimals
+        )}`
     ) : (
         <></>
     );
@@ -69,16 +73,9 @@ export default function WalletConnect() {
                                         </div>
                                     </div>
 
-                                    <div className="mt-3 px-1 font-sm uppercase tracking-wider text-gray-900 dark:text-white">
-                                        {balance}
-                                    </div>
-
                                     {address && (
-                                        <div className="px-1 font-sm uppercase tracking-wider text-gray-900 dark:text-white">
-                                            {formatBalance(
-                                                addressData.value,
-                                                addressData.decimals
-                                            )}
+                                        <div className="mt-3 px-1 font-sm uppercase tracking-wider text-gray-900 dark:text-white">
+                                            {balance}
                                         </div>
                                     )}
                                 </div>
@@ -88,12 +85,9 @@ export default function WalletConnect() {
                                         className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-gray-50 dark:text-white dark:hover:bg-gray-800 w-full"
                                         onClick={() => disconnect()}
                                     >
-                                        <motion.div
-                                            whileHover={{ scale: 1.25 }}
-                                            className="flex items-center justify-center"
-                                        >
+                                        <div className="flex items-center justify-center">
                                             <PowerIcon />
-                                        </motion.div>
+                                        </div>
                                         <span className="uppercase text-center">
                                             Disconnect
                                         </span>
@@ -109,7 +103,7 @@ export default function WalletConnect() {
                     size={"sm"}
                     onClick={() => connect()}
                 >
-                    Connect Wallet
+                    Connect Account
                 </Button>
             )}
         </div>
