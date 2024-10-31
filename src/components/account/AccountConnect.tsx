@@ -9,7 +9,7 @@ import { formatBalance } from "@/lib/utils/balance";
 export default function AccountConnect() {
     const isConnected = true; // TODO update to use the new hook
     const address = "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A"; // TODO update to use the new hook
-
+    const username = "Dirvine"; // TODO update to use the new hook
     // TODO get this from the to be created hook by loziniak
     const addressData = {
         symbol: "ANT",
@@ -53,16 +53,17 @@ export default function AccountConnect() {
 
                     {infoPanelOpen && (
                         <div className="">
-                            <div className="absolute right-3 mt-4 w-73 origin-top-right rounded-lg bg-white shadow-large  dark:bg-gray-900 border z-50">
-                                <div className="border-b border-dashed border-gray-200 px-4 py-5 dark:border-gray-700">
+                            <div className="absolute right-3 mt-4 w-73 origin-top-right rounded-lg bg-card shadow-large  border z-50">
+                                <div className="border-b border-dashed border-gray-200 px-4 py-5 border-secondary">
+                                    {username}
                                     <div className="flex w-full mt-3 ">
-                                        <div className="flex-grow rounded-lg bg-gray-100 px-2 py-1 text-sm tracking-tighter dark:bg-gray-800">
+                                        <div className="flex-grow rounded-lg bg-secondary px-2 py-1 text-sm tracking-tighter ">
                                             {address && formatAddress(address)}
                                         </div>
 
                                         <div
                                             title="Copy Address"
-                                            className="ml-2 flex cursor-pointer items-center text-gray-500 transition hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                                            className="ml-2 flex cursor-pointer items-center transition"
                                             onClick={() => {
                                                 if (address) {
                                                     copyToClipboard(address);
@@ -74,7 +75,7 @@ export default function AccountConnect() {
                                     </div>
 
                                     {address && (
-                                        <div className="mt-3 px-1 font-sm uppercase tracking-wider text-gray-900 dark:text-white">
+                                        <div className="mt-3 px-1 font-sm uppercase tracking-wider">
                                             {balance}
                                         </div>
                                     )}
@@ -82,7 +83,7 @@ export default function AccountConnect() {
 
                                 <div className="p-3 flex justify-center">
                                     <div
-                                        className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-gray-50 dark:text-white dark:hover:bg-gray-800 w-full"
+                                        className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
                                         onClick={() => disconnect()}
                                     >
                                         <div className="flex items-center justify-center">
