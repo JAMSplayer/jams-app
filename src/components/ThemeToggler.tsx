@@ -2,7 +2,7 @@ import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useTheme } from "next-themes";
 import { Switch } from "@headlessui/react";
 import { useEffect, useState } from "react";
-import { createStore, Store } from "@tauri-apps/plugin-store";
+import { load, Store } from "@tauri-apps/plugin-store";
 
 export function ThemeToggler() {
     const { theme, setTheme, resolvedTheme } = useTheme();
@@ -14,7 +14,7 @@ export function ThemeToggler() {
     useEffect(() => {
         const initializeStore = async () => {
             try {
-                const storeInstance = await createStore("store.bin", {
+                const storeInstance = await load("store.bin", {
                     autoSave: true,
                 });
                 setStore(storeInstance); // Set the store instance
