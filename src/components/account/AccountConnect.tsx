@@ -54,7 +54,7 @@ export default function AccountConnect() {
                     {infoPanelOpen && (
                         <div className="">
                             <div className="absolute right-3 mt-4 w-73 origin-top-right rounded-lg bg-card shadow-large  border z-50">
-                                <div className="border-b border-dashed border-gray-200 px-4 py-5 border-secondary">
+                                <div className="border-b border-dashed px-4 py-5 border-secondary">
                                     {username}
                                     <div className="flex w-full mt-3 ">
                                         <div className="flex-grow rounded-lg bg-secondary px-2 py-1 text-sm tracking-tighter ">
