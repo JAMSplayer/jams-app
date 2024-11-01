@@ -1,5 +1,4 @@
 //import { invoke } from "@tauri-apps/api/core";
-import GreenAudioPlayer from "green-audio-player";
 
 let newSongEl: HTMLButtonElement | null;
 let playerEl: HTMLAudioElement | null;
@@ -20,9 +19,6 @@ let loadPlayer = function(src: string) {
   audio.src = src;
   div.append(audio);
   playerEl.replaceChildren(div);
-
-  player = new GreenAudioPlayer('#player > div');
-  console.log(player);
 }
 
 window.addEventListener("DOMContentLoaded", () => {
