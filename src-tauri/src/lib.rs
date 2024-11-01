@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 use tauri::{AppHandle, Manager, State};
 
+mod server;
+
 #[derive(Debug, Serialize, Deserialize)]
 struct Error {
     message: String,
@@ -309,6 +311,10 @@ pub fn run() {
             client_address,
             balance,
         ])
+        .setup(|app| {
+            server::run(app.handle().clone());
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
