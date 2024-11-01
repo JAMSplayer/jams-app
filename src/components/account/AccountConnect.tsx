@@ -8,7 +8,7 @@ import { formatBalance } from "@/lib/utils/balance";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+
 import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -24,8 +24,13 @@ import {
     FormMessage,
 } from "../ui/form";
 import { RecentAccount } from "@/types/recent-account";
+import RecentAccounts from "./RecentAccounts";
 
 export default function AccountConnect() {
+    // ====================================================================================
+    // Account / Balance Functionality
+    // ====================================================================================
+
     const address = "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A"; // TODO update to use the new hook
     // TODO get this from the to be created hook by loziniak
     const addressData = {
@@ -43,13 +48,40 @@ export default function AccountConnect() {
         <></>
     );
 
+    // ====================================================================================
+    // Visbility Functionality
+    // ====================================================================================
+
     const [isConnected, setIsConnected] = useState(false); // TODO update to use the new hook
     const [isConnectedPanelOpen, setIsConnectedPanelOpen] = useState(false);
     const [isSignInPanelOpen, setIsSignInPanelOpen] = useState(false);
 
-    const [currentlySelectedRecentAccount, setCurrentlySelectedRecentAccount] =
-        useState<RecentAccount | null>(null);
+    // ====================================================================================
+    // Recent Accounts Functionality
+    // ====================================================================================
 
+    // Callback function to update the currently selected account from the RecentAccounts tab
+    const handleSelectAccount = (recentAccount: RecentAccount) => {
+        // set the username field to be the recent account
+
+        // check for the account and update the accountExists state
+        const foundAccount = recentAccountList.find(
+            (account) => account.username === recentAccount.username
+        );
+        setAccountExists(foundAccount || null); // Update accountExists state
+        if (!accountExists) {
+            toast("Register Warning", {
+                description: "This username does not exist.",
+            });
+        } else {
+            // Set the username field in the form to the selected recent account's username
+            setValue("username", recentAccount.username);
+            // set the active tab to sign-in
+            setActiveTab("sign-in");
+        }
+    };
+
+    // currently we are using this as a way to store all existing accounts
     const [recentAccountList, setRecentAccountList] = useState<RecentAccount[]>(
         [
             {
@@ -70,6 +102,18 @@ export default function AccountConnect() {
             },
         ]
     );
+
+    // ====================================================================================
+    // Tab Functionality
+    // ====================================================================================
+
+    const [activeTab, setActiveTab] = useState(
+        recentAccountList.length === 0 ? "sign-in" : "recent"
+    );
+
+    const handleTabChange = (tab: string) => {
+        setActiveTab(tab);
+    };
 
     const signInForm = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
@@ -119,12 +163,6 @@ export default function AccountConnect() {
 
     const addAccount = () => {
         //  TODO
-    };
-
-    const clickedRecentAccount = (recentAccount: RecentAccount) => {
-        // TODO
-        // populate sign in username field + address info text and switch to it
-        setCurrentlySelectedRecentAccount(recentAccount);
     };
 
     return (
@@ -203,11 +241,8 @@ export default function AccountConnect() {
                         <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
                             <div className="border-b border-dashed px-4 py-5 border-secondary">
                                 <Tabs
-                                    defaultValue={
-                                        recentAccountList.length == 0
-                                            ? "sign-in"
-                                            : "recent"
-                                    }
+                                    value={activeTab}
+                                    onValueChange={handleTabChange}
                                 >
                                     <TabsList className="flex w-full">
                                         <TabsTrigger
@@ -340,48 +375,12 @@ export default function AccountConnect() {
                                         </div>
                                     </TabsContent>
                                     <TabsContent value="recent">
-                                        <ScrollArea className="h-[200px] w-full rounded-md border">
-                                            {recentAccountList.map(
-                                                (recentAccount) => (
-                                                    <div
-                                                        key={
-                                                            recentAccount.address
-                                                        }
-                                                        className="flex items-center space-x-2 p-2  px-4 border-b border-muted cursor-pointer hover:bg-gray-200 transition-colors duration-200"
-                                                        onClick={() => {
-                                                            clickedRecentAccount(
-                                                                recentAccount
-                                                            );
-                                                        }}
-                                                    >
-                                                        <div className="shrink-0">
-                                                            <Avatar
-                                                                address={
-                                                                    recentAccount.address
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <div className="flex flex-col overflow-hidden">
-                                                            <div className="font-medium">
-                                                                {formatAddress(
-                                                                    recentAccount.address
-                                                                )}
-                                                            </div>
-                                                            <div className="text-xs text-muted-foreground">
-                                                                {
-                                                                    recentAccount.username
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )
-                                            )}
-
-                                            <ScrollBar
-                                                orientation="vertical"
-                                                className="bg-secondary"
-                                            />
-                                        </ScrollArea>
+                                        <RecentAccounts
+                                            recentAccounts={recentAccountList}
+                                            onSelectRecentAccount={
+                                                handleSelectAccount
+                                            }
+                                        />
                                     </TabsContent>
                                 </Tabs>
                             </div>
