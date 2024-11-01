@@ -28,6 +28,10 @@
           "path": "$HOME/**"
         }
       ]
+    },
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "http://127.0.0.1:8000/*" }]
     }
   ]
 }
