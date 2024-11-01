@@ -2,6 +2,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { RecentAccount } from "@/types/recent-account";
 import Avatar from "../Avatar";
 import { formatAddress } from "@/lib/utils/address";
+import { Label } from "@/components/ui/label";
 
 type RecentAccountsProps = {
     recentAccounts: RecentAccount[];
@@ -14,27 +15,33 @@ const RecentAccounts: React.FC<RecentAccountsProps> = ({
 }) => {
     return (
         <ScrollArea className="h-[200px] w-full rounded-md border">
-            {recentAccounts.map((recentAccount) => (
-                <div
-                    key={recentAccount.address}
-                    className="flex items-center space-x-2 p-2  px-4 border-b border-muted cursor-pointer hover:bg-gray-200 transition-colors duration-200"
-                    onClick={() => {
-                        onSelectRecentAccount(recentAccount);
-                    }}
-                >
-                    <div className="shrink-0">
-                        <Avatar address={recentAccount.address} />
-                    </div>
-                    <div className="flex flex-col overflow-hidden">
-                        <div className="font-medium">
-                            {formatAddress(recentAccount.address)}
+            {recentAccounts.length > 0 ? (
+                recentAccounts.map((recentAccount) => (
+                    <div
+                        key={recentAccount.address}
+                        className="flex items-center space-x-2 p-2  px-4 border-b border-muted cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                        onClick={() => {
+                            onSelectRecentAccount(recentAccount);
+                        }}
+                    >
+                        <div className="shrink-0">
+                            <Avatar address={recentAccount.address} />
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                            {recentAccount.username}
+                        <div className="flex flex-col overflow-hidden">
+                            <div className="font-medium">
+                                {formatAddress(recentAccount.address)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {recentAccount.username}
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))
+            ) : (
+                <Label className="text-md pt-8 flex justify-center">
+                    No Recent Accounts Exist
+                </Label>
+            )}
 
             <ScrollBar orientation="vertical" className="bg-secondary" />
         </ScrollArea>
