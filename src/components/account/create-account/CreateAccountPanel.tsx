@@ -104,6 +104,9 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                 onClick={handleReturnToSignInPanelClicked}
             />{" "}
             <div className="px-4">
+                <div className="flex justify-center items-center">
+                    <div className="text-md">Create Account</div>
+                </div>
                 <Form {...createAccountForm}>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
