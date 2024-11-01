@@ -10,10 +10,23 @@ import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signInSchema } from "@/form-schemas/sign-in-schema";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "../ui/form";
+import { RecentAccount } from "@/types/recent-account";
 
 export default function AccountConnect() {
     const address = "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A"; // TODO update to use the new hook
-    const [username, setUsername] = useState("");
     // TODO get this from the to be created hook by loziniak
     const addressData = {
         symbol: "ANT",
@@ -37,11 +50,6 @@ export default function AccountConnect() {
     const [currentlySelectedRecentAccount, setCurrentlySelectedRecentAccount] =
         useState<RecentAccount | null>(null);
 
-    interface RecentAccount {
-        username: string;
-        address: string;
-    }
-
     const [recentAccountList, setRecentAccountList] = useState<RecentAccount[]>(
         [
             {
@@ -63,26 +71,29 @@ export default function AccountConnect() {
         ]
     );
 
+    const signInForm = useForm<z.infer<typeof signInSchema>>({
+        resolver: zodResolver(signInSchema),
+        defaultValues: {
+            username: "",
+            password: "",
+        },
+    });
+    const { watch, handleSubmit, control, formState, setValue, register } =
+        signInForm;
+    const username = watch("username");
+    const [accountExists, setAccountExists] = useState<RecentAccount | null>(
+        null
+    );
+
+    // Effect to update accountExists based on username input
     useEffect(() => {
-        if (currentlySelectedRecentAccount) {
-            setUsername(currentlySelectedRecentAccount.username);
-        } else {
-            setUsername(""); // Clear input if no account is selected
-        }
-    }, [currentlySelectedRecentAccount]);
+        const foundAccount = recentAccountList.find(
+            (account) => account.username === username
+        );
+        setAccountExists(foundAccount || null); // Set accountExists to found account or null
+    }, [username, recentAccountList]);
 
-    const disconnect = () => {
-        //  TODO functionality to disconnect - this can be created via tauri commands to the backend.
-        setIsConnected(false);
-        setIsConnectedPanelOpen(false);
-    };
-
-    const connect = () => {
-        //  TODO functionality to connect - this can be created via tauri commands to the backend.
-        setIsSignInPanelOpen(!isSignInPanelOpen);
-    };
-
-    const signIn = () => {
+    const signIn = (values: z.infer<typeof signInSchema>) => {
         //  TODO
         const usernameExists = recentAccountList.some(
             (account) => account.username === username
@@ -93,6 +104,17 @@ export default function AccountConnect() {
                 description: "This username does not exist.",
             });
         }
+    };
+
+    const disconnect = () => {
+        //  TODO functionality to disconnect - this can be created via tauri commands to the backend.
+        setIsConnected(false);
+        setIsConnectedPanelOpen(false);
+    };
+
+    const connect = () => {
+        //  TODO functionality to connect - this can be created via tauri commands to the backend.
+        setIsSignInPanelOpen(!isSignInPanelOpen);
     };
 
     const addAccount = () => {
@@ -208,64 +230,100 @@ export default function AccountConnect() {
 
                                     <TabsContent value="sign-in">
                                         <div className="px-4">
-                                            <div className="flex flex-col space-y-4 pt-4">
-                                                <div className="flex flex-col">
-                                                    <div className="flex items-center">
-                                                        <Label
-                                                            htmlFor="username"
-                                                            className="mr-2"
-                                                        >
-                                                            Username
-                                                        </Label>
-                                                        <Input
-                                                            id="username"
-                                                            type="text"
-                                                            placeholder="Enter your username"
-                                                            className="flex-1"
-                                                            value={username}
-                                                            onChange={(e) =>
-                                                                setUsername(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="flex justify-end text-sm mt-1">
-                                                        {currentlySelectedRecentAccount?.username ==
-                                                        username
-                                                            ? formatAddress(
-                                                                  currentlySelectedRecentAccount.address
-                                                              )
-                                                            : ""}
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center pb-2">
-                                                    <Label
-                                                        htmlFor="password"
-                                                        className="mr-2"
-                                                    >
-                                                        Password
-                                                    </Label>
-                                                    <Input
-                                                        id="password"
-                                                        type="password"
-                                                        placeholder="Enter your password"
-                                                        className="flex-1"
-                                                    />
-                                                </div>
-
-                                                <Button
-                                                    onClick={() => signIn()}
-                                                    className="mt-4"
-                                                    disabled={
-                                                        username.length === 0
-                                                    }
+                                            <Form {...signInForm}>
+                                                <form
+                                                    onSubmit={handleSubmit(
+                                                        signIn
+                                                    )}
+                                                    className="space-y-8 pt-4"
                                                 >
-                                                    Sign In
-                                                </Button>
-                                            </div>
+                                                    <FormField
+                                                        control={control}
+                                                        name="username"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Username
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="Enter your username"
+                                                                        autoCapitalize="off"
+                                                                        autoComplete="off"
+                                                                        autoCorrect="off"
+                                                                        {...field} // Spread field instead of using register directly
+                                                                        onChange={(
+                                                                            e
+                                                                        ) => {
+                                                                            field.onChange(
+                                                                                e
+                                                                            ); // Call the default onChange to update the form state
+                                                                            setAccountExists(
+                                                                                recentAccountList.find(
+                                                                                    (
+                                                                                        account
+                                                                                    ) =>
+                                                                                        account.username ===
+                                                                                        e
+                                                                                            .target
+                                                                                            .value
+                                                                                ) ||
+                                                                                    null
+                                                                            );
+                                                                        }}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                                <div className="flex justify-end text-sm mt-1">
+                                                                    {accountExists && (
+                                                                        <div className="flex justify-end text-sm mt-1">
+                                                                            {formatAddress(
+                                                                                accountExists.address
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    <FormField
+                                                        control={
+                                                            signInForm.control
+                                                        }
+                                                        name="password"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Password
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="Enter your password"
+                                                                        type="password"
+                                                                        autoCapitalize="off"
+                                                                        autoComplete="off"
+                                                                        autoCorrect="off"
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    <Button
+                                                        type="submit"
+                                                        className="mt-4 w-full"
+                                                        disabled={
+                                                            !formState.isValid
+                                                        }
+                                                    >
+                                                        Sign In
+                                                    </Button>
+                                                </form>
+                                            </Form>
+
                                             <div className="pt-3 flex justify-center">
                                                 <div
                                                     className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
