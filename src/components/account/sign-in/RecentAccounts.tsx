@@ -19,7 +19,7 @@ const RecentAccounts: React.FC<RecentAccountsProps> = ({
                 recentAccounts.map((recentAccount) => (
                     <div
                         key={recentAccount.address}
-                        className="flex items-center space-x-2 p-2  px-4 border-b border-muted cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                        className="flex items-center space-x-2 p-2  px-4 border-b border-muted cursor-pointer hover:bg-secondary transition-colors duration-200"
                         onClick={() => {
                             onSelectRecentAccount(recentAccount);
                         }}
