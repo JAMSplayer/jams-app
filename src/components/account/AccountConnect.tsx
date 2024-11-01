@@ -50,15 +50,15 @@ export default function AccountConnect() {
             },
             {
                 username: "username2",
-                address: "0x9153176c72100b25bdA3A312E5d2fe12a1806a9B",
+                address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
             },
             {
                 username: "username3",
-                address: "0x9153176c72100b25bdA3A312E5d2fe12a1806a9B",
+                address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
             },
             {
                 username: "username4",
-                address: "0x9153176c72100b25bdA3A312E5d2fe12a1806a9B",
+                address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
             },
         ]
     );
@@ -208,7 +208,7 @@ export default function AccountConnect() {
 
                                     <TabsContent value="sign-in">
                                         <div className="px-4">
-                                            <div className="flex flex-col space-y-4">
+                                            <div className="flex flex-col space-y-4 pt-4">
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center">
                                                         <Label
@@ -241,7 +241,7 @@ export default function AccountConnect() {
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center">
+                                                <div className="flex items-center pb-2">
                                                     <Label
                                                         htmlFor="password"
                                                         className="mr-2"
@@ -266,7 +266,7 @@ export default function AccountConnect() {
                                                     Sign In
                                                 </Button>
                                             </div>
-                                            <div className="p-3 flex justify-center">
+                                            <div className="pt-3 flex justify-center">
                                                 <div
                                                     className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
                                                     onClick={() => addAccount()}
