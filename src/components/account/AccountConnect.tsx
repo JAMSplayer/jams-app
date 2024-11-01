@@ -9,6 +9,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 export default function AccountConnect() {
     const address = "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A"; // TODO update to use the new hook
@@ -29,7 +30,7 @@ export default function AccountConnect() {
         <></>
     );
 
-    const [isConnected, setIsConnected] = useState(true); // TODO update to use the new hook
+    const [isConnected, setIsConnected] = useState(false); // TODO update to use the new hook
     const [isConnectedPanelOpen, setIsConnectedPanelOpen] = useState(false);
     const [isSignInPanelOpen, setIsSignInPanelOpen] = useState(false);
 
@@ -83,6 +84,15 @@ export default function AccountConnect() {
 
     const signIn = () => {
         //  TODO
+        const usernameExists = recentAccountList.some(
+            (account) => account.username === username
+        );
+
+        if (!usernameExists) {
+            toast("Register Warning", {
+                description: "This username does not exist.",
+            });
+        }
     };
 
     const addAccount = () => {
@@ -198,7 +208,7 @@ export default function AccountConnect() {
 
                                     <TabsContent value="sign-in">
                                         <div className="px-4">
-                                            <form className="flex flex-col space-y-4">
+                                            <div className="flex flex-col space-y-4">
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center">
                                                         <Label
@@ -249,10 +259,13 @@ export default function AccountConnect() {
                                                 <Button
                                                     onClick={() => signIn()}
                                                     className="mt-4"
+                                                    disabled={
+                                                        username.length === 0
+                                                    }
                                                 >
                                                     Sign In
                                                 </Button>
-                                            </form>
+                                            </div>
                                             <div className="p-3 flex justify-center">
                                                 <div
                                                     className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
