@@ -212,15 +212,18 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                             )}
                         />
 
-                        <Button
-                            type="submit"
-                            className="mt-4 w-full"
-                            disabled={
-                                !formState.isValid || confirmPasswordError != ""
-                            }
-                        >
-                            Create Account
-                        </Button>
+                        <div className="pt-2">
+                            <Button
+                                type="submit"
+                                className="mt-4 w-full"
+                                disabled={
+                                    !formState.isValid ||
+                                    confirmPasswordError != ""
+                                }
+                            >
+                                Create Account
+                            </Button>
+                        </div>
                     </form>
                 </Form>
             </div>
