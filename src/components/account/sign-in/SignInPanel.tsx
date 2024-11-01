@@ -22,7 +22,11 @@ import { Button } from "@/components/ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./RecentAccounts";
 
-export default function SignInPanel() {
+interface SignInPanelProps {
+    onAddAccountClicked: () => void;
+}
+
+const SignInPanel: React.FC<SignInPanelProps> = ({ onAddAccountClicked }) => {
     // ====================================================================================
     // Sign In Form Functionality
     // ====================================================================================
@@ -127,6 +131,10 @@ export default function SignInPanel() {
         }
     };
 
+    const handleAddAccountClicked = () => {
+        onAddAccountClicked();
+    };
+
     return (
         <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="flex w-full">
@@ -218,7 +226,7 @@ export default function SignInPanel() {
                     <div className="pt-3 flex justify-center">
                         <div
                             className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
-                            onClick={() => addAccount()}
+                            onClick={handleAddAccountClicked}
                         >
                             <div className="flex items-center justify-center">
                                 <UserRoundPlusIcon />
@@ -238,4 +246,6 @@ export default function SignInPanel() {
             </TabsContent>
         </Tabs>
     );
-}
+};
+
+export default SignInPanel;

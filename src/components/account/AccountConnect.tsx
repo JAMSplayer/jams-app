@@ -7,6 +7,7 @@ import { formatAddress } from "@/lib/utils/address";
 import { formatBalance } from "@/lib/utils/balance";
 import SignInPanel from "./sign-in/SignInPanel";
 import SignedInPanel from "./signed-in/SignedInPanel";
+import AddAccountPanel from "./add-account/AddAccountPanel";
 
 export default function AccountConnect() {
     // ====================================================================================
@@ -17,9 +18,35 @@ export default function AccountConnect() {
         username: "Dirvine",
         address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
     }); // TODO get signed in account from new hook - make this null to see what signed out looks like
-    const [isConnected, setIsConnected] = useState(true); // TODO update to use the new hook
+    const [isConnected, setIsConnected] = useState(false); // TODO update to use the new hook
     const [isConnectedPanelOpen, setIsConnectedPanelOpen] = useState(false);
-    const [isSignInPanelOpen, setIsSignInPanelOpen] = useState(false);
+    // const [isSignInPanelOpen, setIsSignInPanelOpen] = useState(false);
+    // const [isAddAccountPanelOpen, setIsAddAccountPanelOpen] = useState(false);
+
+    const SignedOutPanelState = {
+        NONE: "none",
+        SIGN_IN: "sign_in",
+        ADD_ACCOUNT: "add_account",
+    };
+
+    const [currentPanel, setCurrentPanel] = useState(SignedOutPanelState.NONE);
+
+    const toggleSignInPanel = () => {
+        // Toggle to SignInPanel if not currently open
+        setCurrentPanel(
+            currentPanel === SignedOutPanelState.SIGN_IN
+                ? SignedOutPanelState.NONE
+                : SignedOutPanelState.SIGN_IN
+        );
+    };
+
+    const handleAddAccountClicked = () => {
+        setCurrentPanel(SignedOutPanelState.ADD_ACCOUNT); // Close SignInPanel and open AddAccountPanel
+    };
+
+    const handleReturnToSignInPanelClicked = () => {
+        setCurrentPanel(SignedOutPanelState.SIGN_IN);
+    };
 
     const disconnect = () => {
         //  TODO functionality to disconnect - this can be created via tauri commands to the backend.
@@ -29,18 +56,20 @@ export default function AccountConnect() {
 
     const connect = () => {
         //  TODO functionality to connect - this can be created via tauri commands to the backend.
-        setIsSignInPanelOpen(!isSignInPanelOpen);
+        //setIsSignInPanelOpen(!isSignInPanelOpen);
+        toggleSignInPanel();
     };
 
     return (
         <div>
             {isConnected ? (
                 <>
+                    {/* Account Signed In Area */}
                     {account && (
                         <div
                             className="cursor-pointer"
                             onClick={() => {
-                                setIsConnectedPanelOpen(!isConnectedPanelOpen);
+                                toggleSignInPanel();
                             }}
                         >
                             <Avatar address={account.address} />
@@ -71,6 +100,7 @@ export default function AccountConnect() {
                 </>
             ) : (
                 <>
+                    {/* Signing In Area */}
                     <Button
                         variant={"default"}
                         size={"sm"}
@@ -79,10 +109,26 @@ export default function AccountConnect() {
                         Connect Account
                     </Button>
 
-                    {isSignInPanelOpen && (
+                    {currentPanel === SignedOutPanelState.SIGN_IN && (
                         <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
                             <div className="border-b border-dashed px-4 py-5 border-secondary">
-                                <SignInPanel />
+                                <SignInPanel
+                                    onAddAccountClicked={
+                                        handleAddAccountClicked
+                                    }
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {currentPanel === SignedOutPanelState.ADD_ACCOUNT && (
+                        <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
+                            <div className="border-b border-dashed px-4 py-5 border-secondary">
+                                <AddAccountPanel
+                                    onReturnToSignInPanelClicked={
+                                        handleReturnToSignInPanelClicked
+                                    }
+                                />
                             </div>
                         </div>
                     )}
