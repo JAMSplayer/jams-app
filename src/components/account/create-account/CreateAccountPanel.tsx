@@ -16,15 +16,15 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { RecentAccount } from "@/types/recent-account";
 
-interface AddAccountPanelProps {
+interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
 }
 
-const AddAccountPanel: React.FC<AddAccountPanelProps> = ({
+const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     onReturnToSignInPanelClicked,
 }) => {
     // ====================================================================================
-    // Add Account Form Functionality
+    // Create Account Form Functionality
     // ====================================================================================
 
     const createAccountForm = useForm<z.infer<typeof createAccountSchema>>({
@@ -107,7 +107,7 @@ const AddAccountPanel: React.FC<AddAccountPanelProps> = ({
                 <Form {...createAccountForm}>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
-                        className="space-y-8 pt-4"
+                        className="space-y-2 pt-4"
                     >
                         <FormField
                             control={control}
@@ -225,4 +225,4 @@ const AddAccountPanel: React.FC<AddAccountPanelProps> = ({
     );
 };
 
-export default AddAccountPanel;
+export default CreateAccountPanel;

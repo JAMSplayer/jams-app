@@ -1,13 +1,10 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { Copy, PowerIcon, UserRoundPlusIcon } from "lucide-react";
+import { PowerIcon } from "lucide-react";
 import Avatar from "./Avatar";
-import { copyToClipboard } from "@/lib/utils/clipboard";
-import { formatAddress } from "@/lib/utils/address";
-import { formatBalance } from "@/lib/utils/balance";
 import SignInPanel from "./sign-in/SignInPanel";
 import SignedInPanel from "./signed-in/SignedInPanel";
-import AddAccountPanel from "./add-account/AddAccountPanel";
+import CreateAccountPanel from "./create-account/CreateAccountPanel";
 
 export default function AccountConnect() {
     // ====================================================================================
@@ -20,13 +17,11 @@ export default function AccountConnect() {
     }); // TODO get signed in account from new hook - make this null to see what signed out looks like
     const [isConnected, setIsConnected] = useState(false); // TODO update to use the new hook
     const [isConnectedPanelOpen, setIsConnectedPanelOpen] = useState(false);
-    // const [isSignInPanelOpen, setIsSignInPanelOpen] = useState(false);
-    // const [isAddAccountPanelOpen, setIsAddAccountPanelOpen] = useState(false);
 
     const SignedOutPanelState = {
         NONE: "none",
         SIGN_IN: "sign_in",
-        ADD_ACCOUNT: "add_account",
+        CREATE_ACCOUNT: "create_account",
     };
 
     const [currentPanel, setCurrentPanel] = useState(SignedOutPanelState.NONE);
@@ -40,8 +35,8 @@ export default function AccountConnect() {
         );
     };
 
-    const handleAddAccountClicked = () => {
-        setCurrentPanel(SignedOutPanelState.ADD_ACCOUNT); // Close SignInPanel and open AddAccountPanel
+    const handleCreateAccountClicked = () => {
+        setCurrentPanel(SignedOutPanelState.CREATE_ACCOUNT); // Close SignInPanel and open AddAccountPanel
     };
 
     const handleReturnToSignInPanelClicked = () => {
@@ -113,18 +108,18 @@ export default function AccountConnect() {
                         <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
                             <div className="border-b border-dashed px-4 py-5 border-secondary">
                                 <SignInPanel
-                                    onAddAccountClicked={
-                                        handleAddAccountClicked
+                                    onCreateAccountClicked={
+                                        handleCreateAccountClicked
                                     }
                                 />
                             </div>
                         </div>
                     )}
 
-                    {currentPanel === SignedOutPanelState.ADD_ACCOUNT && (
+                    {currentPanel === SignedOutPanelState.CREATE_ACCOUNT && (
                         <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
                             <div className="border-b border-dashed px-4 py-5 border-secondary">
-                                <AddAccountPanel
+                                <CreateAccountPanel
                                     onReturnToSignInPanelClicked={
                                         handleReturnToSignInPanelClicked
                                     }

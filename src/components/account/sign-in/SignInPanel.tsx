@@ -23,10 +23,12 @@ import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./RecentAccounts";
 
 interface SignInPanelProps {
-    onAddAccountClicked: () => void;
+    onCreateAccountClicked: () => void;
 }
 
-const SignInPanel: React.FC<SignInPanelProps> = ({ onAddAccountClicked }) => {
+const SignInPanel: React.FC<SignInPanelProps> = ({
+    onCreateAccountClicked,
+}) => {
     // ====================================================================================
     // Sign In Form Functionality
     // ====================================================================================
@@ -38,16 +40,11 @@ const SignInPanel: React.FC<SignInPanelProps> = ({ onAddAccountClicked }) => {
             password: "",
         },
     });
-    const { watch, handleSubmit, control, formState, setValue, register } =
-        signInForm;
+    const { watch, handleSubmit, control, formState, setValue } = signInForm;
     const username = watch("username");
     const [accountExists, setAccountExists] = useState<RecentAccount | null>(
         null
     );
-
-    const addAccount = () => {
-        //  TODO
-    };
 
     // ====================================================================================
     // Recent Accounts Functionality
@@ -76,7 +73,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({ onAddAccountClicked }) => {
         }
     };
 
-    // currently we are using this as a way to store all existing accounts
+    // TODO currently we are using this as a way to store all existing accounts - get from the hook
     const [recentAccountList, setRecentAccountList] = useState<RecentAccount[]>(
         [
             {
@@ -131,8 +128,8 @@ const SignInPanel: React.FC<SignInPanelProps> = ({ onAddAccountClicked }) => {
         }
     };
 
-    const handleAddAccountClicked = () => {
-        onAddAccountClicked();
+    const handleCreateAccountClicked = () => {
+        onCreateAccountClicked();
     };
 
     return (
@@ -149,10 +146,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({ onAddAccountClicked }) => {
             <TabsContent value="sign-in">
                 <div className="px-4">
                     <Form {...signInForm}>
-                        <form
-                            onSubmit={handleSubmit(signIn)}
-                            className="space-y-8 pt-4"
-                        >
+                        <form onSubmit={handleSubmit(signIn)} className=" pt-4">
                             <FormField
                                 control={control}
                                 name="username"
@@ -226,13 +220,13 @@ const SignInPanel: React.FC<SignInPanelProps> = ({ onAddAccountClicked }) => {
                     <div className="pt-3 flex justify-center">
                         <div
                             className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
-                            onClick={handleAddAccountClicked}
+                            onClick={handleCreateAccountClicked}
                         >
                             <div className="flex items-center justify-center">
                                 <UserRoundPlusIcon />
                             </div>
                             <span className="uppercase text-center">
-                                Add Account
+                                Create Account
                             </span>
                         </div>
                     </div>

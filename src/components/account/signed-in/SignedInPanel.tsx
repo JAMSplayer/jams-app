@@ -2,7 +2,6 @@ import { formatAddress } from "@/lib/utils/address";
 import { formatBalance } from "@/lib/utils/balance";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import { Copy } from "lucide-react";
-import { useState } from "react";
 
 interface SignedInPanelProps {
     account: {
