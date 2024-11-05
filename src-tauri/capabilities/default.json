@@ -18,6 +18,10 @@
     "core:event:default",
     "core:event:allow-emit",
     "core:event:allow-listen",
+    "clipboard-manager:allow-write-text",
+    "clipboard-manager:default",
+    "sql:default",
+    "sql:allow-execute",
     {
       "identifier": "fs:scope",
       "allow": [

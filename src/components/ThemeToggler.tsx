@@ -2,7 +2,7 @@ import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useTheme } from "next-themes";
 import { Switch } from "@headlessui/react";
 import { useEffect, useState } from "react";
-import { createStore, Store } from "@tauri-apps/plugin-store";
+import { load, Store } from "@tauri-apps/plugin-store";
 
 export function ThemeToggler() {
     const { theme, setTheme, resolvedTheme } = useTheme();
@@ -14,7 +14,7 @@ export function ThemeToggler() {
     useEffect(() => {
         const initializeStore = async () => {
             try {
-                const storeInstance = await createStore("store.bin", {
+                const storeInstance = await load("store.bin", {
                     autoSave: true,
                 });
                 setStore(storeInstance); // Set the store instance
@@ -86,7 +86,7 @@ export function ThemeToggler() {
         <Switch
             checked={enabled}
             onChange={handleThemeToggle} // Toggle theme on change
-            className={`${enabled ? "bg-gray-700" : "bg-gray-200"}
+            className={`${enabled ? "bg-secondary" : "bg-border"}
           group relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none`}
         >
             <span className="sr-only">Use setting</span>

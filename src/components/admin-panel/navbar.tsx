@@ -1,5 +1,6 @@
 import { SheetMenu } from "@/components/admin-panel/sheet-menu";
 import { ThemeToggler } from "../ThemeToggler";
+import AccountConnect from "../account/AccountConnect";
 
 interface NavbarProps {
     title: string;
@@ -13,8 +14,9 @@ export function Navbar({ title }: NavbarProps) {
                     <SheetMenu />
                     <h1 className="font-bold">{title}</h1>
                 </div>
-                <div className="flex flex-1 items-center justify-end">
+                <div className="flex flex-1 items-center justify-end gap-4">
                     <ThemeToggler />
+                    <AccountConnect />
                 </div>
             </div>
         </header>
