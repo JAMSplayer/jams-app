@@ -7,7 +7,7 @@ import {
     FormLabel,
     FormMessage,
 } from "../../ui/form";
-import { ArrowLeft, UserRoundPlusIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
