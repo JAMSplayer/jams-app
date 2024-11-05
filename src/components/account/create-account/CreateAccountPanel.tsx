@@ -217,7 +217,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                 type="submit"
                                 className="mt-4 w-full"
                                 disabled={
-                                    !formState.isValid ||
+                                    !formState.isValid &&
                                     confirmPasswordError != ""
                                 }
                             >
