@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
-import { ThemeProvider } from "./ThemeProvider";
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
 import "../index.css";
 import { ContentLayout } from "./admin-panel/content-layout";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
@@ -17,8 +17,8 @@ const RootLayout = ({ children }: RootLayoutProps) => {
                 disableTransitionOnChange
             >
                 <AdminPanelLayout>
-                    <ContentLayout title="Dashboard">
-                        <main className="flex-grow px-6 py-4">{children}</main>
+                    <ContentLayout>
+                        <main className="flex-grow">{children}</main>
                     </ContentLayout>
                 </AdminPanelLayout>
             </ThemeProvider>
