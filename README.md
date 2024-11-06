@@ -2,11 +2,25 @@
 
 ![128x128](https://github.com/user-attachments/assets/b9816724-a71f-45c4-8213-5eb72b889d7a)
 
-## Installation
+## Getting Started
 
-1. **Install Yarn** on your system.
+### Backend
 
-2. **Install Node modules**:  
+* System libraries and Rust: https://v2.tauri.app/start/prerequisites/
+
+* Download Rust dependencies.
+
+```bash
+git clone git@github.com:JAMSplayer/safe.git
+```
+
+Edit `src-tauri/Cargo.toml` and provide path to *safe* lib in `[dependencies]` section. Please, do not commit this change back to the repo.
+
+### Frontend
+
+1. Node.js and npm/yarn
+
+1. **Install Node modules**:  
    Run the following command in your terminal:
 
     ```bash
@@ -14,7 +28,7 @@
 
     ```
 
-3. **Build Tauri App**:  
+1. **Build Tauri App**:  
    Run the following command in your terminal:
 
     ```bash
@@ -22,7 +36,7 @@
 
     ```
 
-4. **Run Tauri App**:  
+1. **Run Tauri App**:  
    Run the following command in your terminal:
     ```bash
     yarn run tauri dev
@@ -34,3 +48,17 @@ Side-note: If you wish to run the development web server (if you for some reason
 yarn run dev
 
 ```
+
+### Network
+
+* Connecting to a network isn't required at the moment to run the app, but you can run a local testnet:
+
+https://github.com/maidsafe/safe_network/blob/main/README.md#Using-a-local-network
+
+* Connect to local testnet:
+
+Edit `peers.push [...]` line in `connect()` function in `src-tauri/src/lib.rs` file, and replace node's MultiAddress with one of your local nodes' address, which can be found in node logs. You can see where logs are stored when starting local network, the startup process will output something like "Logging to directory: [...]". In the logfile you search for the line looking like this: `Local node is listening ListenerId(1) on "/ip4/127.0.0.1/udp/11111/quic-v1/p2p/AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaA"`. Address can also be checked running this command:
+
+`cargo run --bin safenode-manager --features local-discovery -- status --details`
+
+* (alternatively) Connecting to official testnet: https://github.com/maidsafe/safe_network/blob/main/README.md#connecting-to-the-beta-network

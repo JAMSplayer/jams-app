@@ -1,20 +1,22 @@
 {
   "$schema": "https://schema.tauri.app/config/2.0.0-rc",
-  "productName": "jams player",
+  "productName": "jams-desktop",
   "version": "0.1.0",
-  "identifier": "com.jams.player",
+  "identifier": "community.jams.desktop",
   "build": {
-    "beforeDevCommand": "yarn dev",
+    "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "yarn build",
-    "frontendDist": "../dist"
+    "beforeDevCommand": "yarn dev",
+    "beforeBuildCommand": "yarn build"
   },
   "app": {
     "windows": [
       {
-        "title": "JAMS Player",
+        "title": "JAMS",
         "width": 1100,
-        "height": 600
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
       }
     ],
     "security": {
@@ -23,14 +25,16 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "category": "Music",
+    "targets": "deb",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": ["resources/A_Lazy_Farmer_Boy_by_Buster_Carter_And_Preston_Young.mp3"]
   },
   "plugins": {
 
