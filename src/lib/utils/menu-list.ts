@@ -33,7 +33,7 @@ export function getMenuList(_pathname: string): Group[] {
             groupLabel: "",
             menus: [
                 {
-                    href: "/dashboard",
+                    href: "/",
                     label: "Dashboard",
                     icon: LayoutGrid,
                     submenus: [],
@@ -71,16 +71,11 @@ export function getMenuList(_pathname: string): Group[] {
             ],
         },
         {
-            groupLabel: "Settings",
+            groupLabel: "Other",
             menus: [
                 {
-                    href: "/playlists",
-                    label: "Playlists",
-                    icon: SquarePen,
-                },
-                {
-                    href: "/account",
-                    label: "Account",
+                    href: "/settings/status",
+                    label: "Settings",
                     icon: Settings,
                 },
             ],
