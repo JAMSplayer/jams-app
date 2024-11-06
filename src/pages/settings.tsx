@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeIcon } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
-import TopLevelBreadcrumbs from "@/components/navigation/TopLevelBreadCrumbs";
+import TopLevelBreadcrumbs from "@/components/navigation/TopLevelBreadcrumbs";
 import SecondaryLevelBreadcrumbs from "@/components/navigation/SecondaryLevelBreadcrumbs";
 
 const secondaryNavigation = [
