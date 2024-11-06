@@ -33,11 +33,8 @@ export function Sidebar() {
                     variant="link"
                     asChild
                 >
-                    <a
-                        href="/dashboard" // Replaced Link with a standard <a> tag
-                        className="flex items-center gap-2"
-                    >
-                        <Link to="/" className="flex items-center ">
+                    <Link to="/dashboard" className="flex items-center gap-2">
+                        <div className="flex items-center ">
                             <div className="w-fit">
                                 <img
                                     src="./icon.png"
@@ -46,7 +43,7 @@ export function Sidebar() {
                                     width={35}
                                 />
                             </div>
-                        </Link>
+                        </div>
 
                         <h1
                             className={cn(
@@ -58,7 +55,7 @@ export function Sidebar() {
                         >
                             JAMS
                         </h1>
-                    </a>
+                    </Link>
                 </Button>
                 <Menu isOpen={getOpenState()} />
             </div>
