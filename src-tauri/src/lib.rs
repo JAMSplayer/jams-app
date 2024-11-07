@@ -1,8 +1,8 @@
-use futures::lock::Mutex;
-use safe::{registers::XorNameBuilder, Safe, SecretKey};
-use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
+use serde::{Deserialize, Serialize};
+use futures::lock::Mutex;
 use tauri::{AppHandle, Manager, State};
+use safe::{registers::XorNameBuilder, Safe, SecretKey};
 
 mod server;
 
@@ -171,7 +171,7 @@ async fn create_register(
     println!("Meta: {}", &meta);
 
 //    let (mut reg, cost, royalties) = safe
-    let mut reg = safe
+    let reg = safe
         .lock()
         .await
         .as_mut()
@@ -189,82 +189,76 @@ async fn create_register(
     Ok(reg.address().to_hex())
 }
 
-//#[tauri::command]
-//async fn read_register(
-//    name: Vec<String>,
-//    safe: State<'_, Mutex<Option<Safe>>>,
-//) -> Result<String, Error> {
-//    let meta = meta_builder(name)?.build();
-//
-//    let mut reg = safe
-//        .lock()
-//        .await
-//        .as_mut()
-//        .ok_or(Error {
-//            message: String::from("Not connected."),
-//        })?
-//        .open_register(meta)
-//        .await?;
-//
-//    let data = Safe::read_register(&mut reg, 0)
-//        .await?
-//        .unwrap_or(Vec::new());
-//
-//    Ok(String::from_utf8(data).map_err(|e| Error {
-//        message: format!("{e}"),
-//    })?)
-//}
-//
-//#[tauri::command]
-//async fn write_register(
-//    name: Vec<String>,
-//    data: String,
-//    safe: State<'_, Mutex<Option<Safe>>>,
-//) -> Result<(), Error> {
-//    println!("\n\nRegister write...");
-//    println!("Name: {:?}", name);
-//
-//    let meta = meta_builder(name)?.build();
-//    println!("Meta: {}", meta);
-//
-//    let mut reg = safe
-//        .lock()
-//        .await
-//        .as_mut()
-//        .ok_or(Error {
-//            message: String::from("Not connected."),
-//        })?
-//        .open_register(meta)
-//        .await?;
-//
-//    println!("\n\nRegister found: {:?}", reg);
-//
-//    println!("Writing data: {}", &data);
-//    if !data.is_empty() {
-//        Safe::register_write(&mut reg, data.as_bytes()).await?;
-//
-//        println!("\n\nRegister updated: {:?}", reg);
-//    } else {
-//        return Err(Error {
-//            message: String::from("Empty data object string."),
-//        });
-//    }
-//
-//    Ok(())
-//}
-//
-//#[tauri::command]
-//async fn receive(transfer: String, safe: State<'_, Mutex<Option<Safe>>>) -> Result<(), Error> {
-//    safe.lock()
-//        .await
-//        .as_mut()
-//        .ok_or(Error {
-//            message: String::from("Not connected."),
-//        })?
-//        .receive(transfer)
-//        .await?;
-//    Ok(())
-//}
+#[tauri::command]
+async fn read_register(
+    name: Vec<String>,
+    safe: State<'_, Mutex<Option<Safe>>>,
+) -> Result<String, Error> {
+    let meta = meta_builder(name)?.build();
+
+    let mut reg = safe
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error {
+            message: String::from("Not connected."),
+        })?
+        .open_register(meta)
+        .await?;
+
+    let data = Safe::read_register(&mut reg, 0)
+        .await?
+        .unwrap_or(Vec::new());
+
+    Ok(String::from_utf8(data).map_err(|e| Error {
+        message: format!("{e}"),
+    })?)
+}
+
+#[tauri::command]
+async fn write_register(
+    name: Vec<String>,
+    data: String,
+    safe: State<'_, Mutex<Option<Safe>>>,
+) -> Result<(), Error> {
+    println!("\n\nRegister write...");
+    println!("Name: {:?}", name);
+
+    let meta = meta_builder(name)?.build();
+    println!("Meta: {}", meta);
+
+    let mut reg = safe
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error {
+            message: String::from("Not connected."),
+        })?
+        .open_register(meta)
+        .await?;
+
+    println!("\n\nRegister found: {:?}", reg);
+
+    println!("Writing data: {}", &data);
+    if !data.is_empty() {
+        let reg = safe
+            .lock()
+            .await
+            .as_mut()
+            .ok_or(Error {
+                message: String::from("Not connected."),
+            })?
+            .register_write(&mut reg, data.as_bytes()).await?;
+
+        println!("\n\nRegister updated: {:?}", reg);
+    } else {
+        return Err(Error {
+            message: String::from("Empty data object string."),
+        });
+    }
+
+    Ok(())
+}
 
 #[tauri::command]
 async fn client_address(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> {
@@ -304,9 +298,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             connect,
             create_register,
-//            read_register,
-//            write_register,
-//            receive,
+            read_register,
+            write_register,
             client_address,
             balance,
         ])
