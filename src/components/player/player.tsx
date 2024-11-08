@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAudioPlayer } from "@/components/player/audio-provider";
 import { ForwardButton } from "@/components/player/forward-button";
-import { MuteButton } from "@/components/player/mute-button";
+import { SoundButton } from "@/components/player/sound-button";
 import { PlaybackRateButton } from "@/components/player/playback-rate-button";
 import { PlayButton } from "@/components/player/play-button";
 import { RewindButton } from "@/components/player/rewind-button";
@@ -40,21 +40,20 @@ const Player = () => {
     }
 
     return (
-        <div className="flex items-center gap-6 bg-card px-4 py-4 border  backdrop-blur-sm md:px-6">
+        <div className="flex items-center gap-6 bg-card px-4 py-4 border  md:px-6">
             <div className="hidden md:block">
                 <PlayButton player={player} />
             </div>
             <div className="mb-[env(safe-area-inset-bottom)] flex flex-1 flex-col gap-3 overflow-hidden p-1">
-                <Link
-                    to={`/${player.song?.location}`}
+                <div
                     className="truncate text-center text-sm font-bold leading-6 md:text-left"
                     title={player.song?.title}
                 >
                     {player.song?.title}
-                </Link>
+                </div>
                 <div className="flex justify-between gap-6">
                     <div className="flex items-center md:hidden">
-                        <MuteButton player={player} />
+                        <SoundButton player={player} />
                     </div>
                     <div className="flex flex-none items-center gap-4">
                         <RewindButton player={player} />
@@ -88,7 +87,7 @@ const Player = () => {
                             <PlaybackRateButton player={player} />
                         </div>
                         <div className="hidden items-center md:flex">
-                            <MuteButton player={player} />
+                            <SoundButton player={player} />
                         </div>
                     </div>
                 </div>

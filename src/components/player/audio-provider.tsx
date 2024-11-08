@@ -4,6 +4,7 @@ import { createContext, useContext, useMemo, useReducer, useRef } from "react";
 interface PlayerState {
     playing: boolean;
     muted: boolean;
+    volume: number; // Track volume level
     duration: number;
     currentTime: number;
     song: Song | null;
@@ -17,6 +18,7 @@ interface PublicPlayerActions {
     seek: (time: number) => void;
     playbackRate: (rate: number) => void;
     toggleMute: () => void;
+    setVolume: (volume: number) => void; // Set volume level
     isPlaying: (song?: Song) => boolean;
 }
 
@@ -29,6 +31,7 @@ const enum ActionKind {
     TOGGLE_MUTE = "TOGGLE_MUTE",
     SET_CURRENT_TIME = "SET_CURRENT_TIME",
     SET_DURATION = "SET_DURATION",
+    SET_VOLUME = "SET_VOLUME", // Action for setting volume
 }
 
 type Action =
@@ -37,7 +40,8 @@ type Action =
     | { type: ActionKind.PAUSE }
     | { type: ActionKind.TOGGLE_MUTE }
     | { type: ActionKind.SET_CURRENT_TIME; payload: number }
-    | { type: ActionKind.SET_DURATION; payload: number };
+    | { type: ActionKind.SET_DURATION; payload: number }
+    | { type: ActionKind.SET_VOLUME; payload: number }; // Volume action type
 
 const AudioPlayerContext = createContext<PlayerAPI | null>(null);
 
@@ -55,6 +59,8 @@ function audioReducer(state: PlayerState, action: Action): PlayerState {
             return { ...state, currentTime: action.payload };
         case ActionKind.SET_DURATION:
             return { ...state, duration: action.payload };
+        case ActionKind.SET_VOLUME:
+            return { ...state, volume: action.payload };
     }
 }
 
@@ -62,11 +68,14 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     let [state, dispatch] = useReducer(audioReducer, {
         playing: false,
         muted: false,
+        volume: 1, // Default volume is 1 (max)
         duration: 0,
         currentTime: 0,
         song: null,
     });
-    let playerRef = useRef<React.ElementRef<"audio">>(null);
+
+    // UseRef with explicit type for the audio element
+    let playerRef = useRef<HTMLAudioElement | null>(null);
 
     let actions = useMemo<PublicPlayerActions>(() => {
         return {
@@ -111,6 +120,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
             toggleMute() {
                 dispatch({ type: ActionKind.TOGGLE_MUTE });
             },
+            setVolume(volume) {
+                if (playerRef.current) {
+                    // Ensure volume is between 0 and 1
+                    playerRef.current.volume = Math.min(Math.max(volume, 0), 1);
+                    dispatch({ type: ActionKind.SET_VOLUME, payload: volume });
+                }
+            },
             isPlaying(song) {
                 return song
                     ? state.playing &&
@@ -131,7 +147,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 {children}
             </AudioPlayerContext.Provider>
             <audio
-                ref={playerRef} // Make sure ref is correctly passed here
+                ref={playerRef} // Ensure ref is correctly passed here
                 onPlay={() => dispatch({ type: ActionKind.PLAY })}
                 onPause={() => dispatch({ type: ActionKind.PAUSE })}
                 onTimeUpdate={(event) => {
@@ -147,6 +163,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                     });
                 }}
                 muted={state.muted}
+                // Do not pass volume as a prop here
             />
         </>
     );
@@ -160,6 +177,7 @@ export function useAudioPlayer(song?: Song) {
         return {
             playing: false,
             muted: false,
+            volume: 1, // Default volume
             duration: 0,
             currentTime: 0,
             song: null,
@@ -170,6 +188,7 @@ export function useAudioPlayer(song?: Song) {
             seek: () => {},
             playbackRate: () => {},
             toggleMute: () => {},
+            setVolume: () => {}, // Add setVolume method
             isPlaying: () => false,
         } as PlayerAPI;
     }
