@@ -12,29 +12,16 @@ import {
     TooltipContent,
     TooltipProvider,
 } from "@/components/ui/tooltip";
+import { Link, useLocation } from "react-router-dom";
 
 interface MenuProps {
     isOpen: boolean | undefined;
 }
 
 export function Menu({ isOpen }: MenuProps) {
-    const [pathname, setPathname] = useState(window.location.pathname);
-    const menuList = getMenuList(pathname);
-
-    // Update the pathname whenever the location changes
-    useEffect(() => {
-        const handleLocationChange = () => {
-            setPathname(window.location.pathname);
-        };
-
-        // Listen for popstate events (back/forward navigation)
-        window.addEventListener("popstate", handleLocationChange);
-
-        // Clean up the event listener on unmount
-        return () => {
-            window.removeEventListener("popstate", handleLocationChange);
-        };
-    }, []);
+    const location = useLocation(); // Get the current location (pathname) from react-router
+    const menuList = getMenuList(location.pathname); // Use location.pathname instead of manually tracking pathname
+    const pathname = location.pathname;
 
     return (
         <ScrollArea className="[&>div>div[style]]:!block">
@@ -87,20 +74,17 @@ export function Menu({ isOpen }: MenuProps) {
                                                     <TooltipTrigger asChild>
                                                         <Button
                                                             variant={
-                                                                (active ===
-                                                                    undefined &&
-                                                                    pathname.startsWith(
-                                                                        href
-                                                                    )) ||
-                                                                active
+                                                                // Modify this part for better active state matching
+                                                                pathname ===
+                                                                href
                                                                     ? "secondary"
                                                                     : "ghost"
                                                             }
                                                             className="w-full justify-start h-10 mb-1"
                                                             asChild
                                                         >
-                                                            <a
-                                                                href={href}
+                                                            <Link
+                                                                to={href}
                                                                 className="w-full flex items-center"
                                                             >
                                                                 <span
@@ -128,7 +112,7 @@ export function Menu({ isOpen }: MenuProps) {
                                                                 >
                                                                     {label}
                                                                 </p>
-                                                            </a>
+                                                            </Link>
                                                         </Button>
                                                     </TooltipTrigger>
                                                     {isOpen === false && (
@@ -145,11 +129,7 @@ export function Menu({ isOpen }: MenuProps) {
                                                 icon={Icon}
                                                 label={label}
                                                 active={
-                                                    active === undefined
-                                                        ? pathname.startsWith(
-                                                              href
-                                                          )
-                                                        : active
+                                                    pathname === href // Exact match for active
                                                 }
                                                 submenus={submenus}
                                                 isOpen={isOpen}

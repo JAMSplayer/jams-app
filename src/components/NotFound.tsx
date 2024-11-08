@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function NotFound() {
     return (
         <>
@@ -9,9 +11,9 @@ export default function NotFound() {
                 Sorry, we couldn’t find the page you’re looking for.
             </p>
             <div className="mt-10">
-                <a href="/" className="text-sm font-semibold leading-7">
+                <Link to="/" className="text-sm font-semibold leading-7">
                     <span aria-hidden="true">&larr;</span> Go back
-                </a>
+                </Link>
             </div>
         </>
     );
