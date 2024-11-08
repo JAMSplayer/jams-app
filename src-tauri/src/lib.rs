@@ -111,7 +111,6 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
 
     let app_root = make_root(&mut app)?;
 
-    // TODO: save sk to app state
     let sk = load_create_key(&app_root)?;
     println!("\n\nSecret Key: {}", &sk.to_hex());
 
@@ -141,6 +140,14 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
 
     Ok(())
 }
+
+#[tauri::command]
+async fn disconnect(mut app: AppHandle) -> Result<(), Error> {
+    app.unmanage::<Mutex<Option<Safe>>>().ok_or(Error {
+        message: String::from("Not connected."),
+    }).map(|_| ())
+}
+
 
 fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
     if name.is_empty() {
@@ -293,10 +300,10 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             connect,
+            disconnect,
             create_register,
             read_register,
             write_register,

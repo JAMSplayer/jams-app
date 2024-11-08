@@ -30,6 +30,25 @@ export async function connect() {
   console.log(await balance());
 }
 
+export async function disconnect() {
+  console.log("disconnecting...");
+  try {
+    await invoke("disconnect");
+  } catch (e) {
+    console.error("disconnect: ", e);
+  }
+  console.log("disconnected.");
+}
+
+export async function isConnected(): boolean {
+  try {
+    await invoke('client_address');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function prepareMeta(name: string[]): string[] {
   return name.unshift(REGISTER_META_PREFIX);
 }
