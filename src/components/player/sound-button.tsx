@@ -1,6 +1,6 @@
 import { type PlayerAPI } from "@/components/player/audio-provider";
 import { VerticalSlider } from "../ui/vertical-slider";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function MuteIcon({
     muted,
@@ -39,10 +39,10 @@ function MuteIcon({
         </svg>
     );
 }
-//defaultValue={[33]} max={100} step={1}
+
 export function SoundButton({ player }: { player: PlayerAPI }) {
-    // Local state to manage the slider value
     const [sliderValue, setSliderValue] = useState(player.volume * 100); // initialize with player volume
+    const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null); // useRef to store the timeout ID
 
     // Sync player volume with sliderValue when it changes externally
     useEffect(() => {
@@ -50,7 +50,6 @@ export function SoundButton({ player }: { player: PlayerAPI }) {
     }, [player.volume]);
 
     function scaleToOneDecimalPlace(value: number) {
-        // Ensure value is between 0 and 100
         if (value < 0 || value > 100) {
             throw new Error("Value must be between 0 and 100.");
         }
@@ -59,8 +58,21 @@ export function SoundButton({ player }: { player: PlayerAPI }) {
     }
 
     const [isHovering, setIsHovering] = useState(false);
-    const handleMouseEnter = () => setIsHovering(true);
-    const handleMouseLeave = () => setIsHovering(false);
+
+    const handleMouseEnter = () => {
+        // Cancel any ongoing timeout when the user re-enters before the time runs out
+        if (hoverTimeout.current) {
+            clearTimeout(hoverTimeout.current);
+        }
+        setIsHovering(true);
+    };
+
+    // hide the slider after 0.7 sec
+    const handleMouseLeave = () => {
+        hoverTimeout.current = setTimeout(() => {
+            setIsHovering(false);
+        }, 700);
+    };
 
     return (
         <div

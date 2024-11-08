@@ -22,7 +22,7 @@ const VerticalSlider = React.forwardRef<
             <SliderPrimitive.Range className="absolute w-full bg-primary" />
         </SliderPrimitive.Track>
         {/* Thumb */}
-        <SliderPrimitive.Thumb className="block w-4 h-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 -ml-1" />
+        <SliderPrimitive.Thumb className="block w-4 h-4 rounded-full border border-primary/50 bg-muted shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 -ml-1" />
     </SliderPrimitive.Root>
 ));
 
