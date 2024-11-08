@@ -1,20 +1,21 @@
-use hex::FromHex;
 use tauri::path::BaseDirectory;
 use tauri::AppHandle;
 use tauri::Manager;
 use warp::{Filter, http::Response};
-use safe::XorName;
+use safe::RegisterAddress;
 
 
-fn autonomi(path: String) -> Result<XorName, String> {
-	// e.g. 3509bad03dc869dec883c7b44662c3503d2517fa9e828bb64f4dbe719d3837bf__BegBlag.mp3
-    let filename = path.get(66..).ok_or(String::from("Error parsing URL"))?;
-    let xor = path.get(..64).ok_or(String::from("Error parsing URL"))?;
-    let xor = <[u8; 32]>::from_hex(xor).or(Err("Error parsing XorName".to_string()))?;
-    let xor = XorName(xor);
-    println!("{} : {}", xor, filename);
-    println!("{:x} : {}", xor, filename);
-    Ok(xor)
+fn autonomi(path: String) -> Result<RegisterAddress, String> {
+	// e.g. 08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3
+    let filename = path.get(162..).ok_or(String::from("Error parsing URL"))?;
+    let address = path.get(..160).ok_or(String::from("Error parsing URL"))?;
+    println!("{address}");
+    let address = RegisterAddress::from_hex(address)
+    	.map_err(|_| format!("Error parsing RegisterAddress: {address}"))?;
+    println!("{} : {}", address, filename);
+    println!("{:?} : {}", address, filename);
+//    println!("{:x} : {}", xor, filename);
+    Ok(address)
 }
 
 fn data(_path: String, app: &AppHandle) -> Result<Vec<u8>, String> {
@@ -27,7 +28,7 @@ fn data(_path: String, app: &AppHandle) -> Result<Vec<u8>, String> {
 pub fn run(app: AppHandle) {
 	tauri::async_runtime::spawn(async {
 		warp::serve(warp::path::param::<String>().map(move |path: String| {
-			let _ = autonomi(path.clone());
+			let _ = autonomi(path.clone()).inspect_err(|e| println!("Error: {e}"));
 			Response::new(data(path, &app).unwrap())
 		}))
 		.run(([127, 0, 0, 1], 12345))
