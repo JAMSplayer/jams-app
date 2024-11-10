@@ -5,6 +5,7 @@ export default function Dashboard() {
         <div className="p-4 space-x-2">
             <SongLoadButton
                 song={{
+                    // http://localhost:12345/3509bad03dc869dec883c7b44662c3503d2517fa9e828bb64f4dbe719d3837bf__BegBlag.mp3
                     location: "./no-copyright-sample.mp3",
                     title: "song-1",
                 }}
