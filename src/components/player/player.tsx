@@ -7,7 +7,7 @@ import { PlayButton } from "@/components/player/play-button";
 import { RewindButton } from "@/components/player/rewind-button";
 import { Slider } from "@/components/player/slider";
 import { ChevronDown } from "lucide-react";
-import { usePlayerStore } from "@/store/store";
+import { usePlayerStore } from "@/store/player-store";
 
 function parseTime(seconds: number) {
     let hours = Math.floor(seconds / 3600);

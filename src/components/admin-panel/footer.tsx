@@ -1,6 +1,8 @@
 import Player from "../player/player";
-import { usePlayerStore } from "@/store/store";
+import { usePlayerStore } from "@/store/player-store";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAudioPlayer } from "../player/audio-provider";
+import { useEffect, useState } from "react";
 
 const accordionVariants = {
     hidden: { height: 0, opacity: 0 },
@@ -13,14 +15,15 @@ const showPlayerVariants = {
 };
 
 export function Footer() {
-    const { isPlayerVisible, setPlayerVisibility } = usePlayerStore();
+    const { isPlayerVisible, hasLoaded, setPlayerVisibility } =
+        usePlayerStore();
 
     return (
         <div className="relative w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="mx-4 md:mx-8 flex h-14 items-center justify-between">
                 <div className="text-xs md:text-sm leading-loose text-muted-foreground text-left">
                     <AnimatePresence>
-                        {!isPlayerVisible && (
+                        {!isPlayerVisible && hasLoaded && (
                             <motion.div
                                 className="fixed top-0 right-4 z-10"
                                 initial="hidden"

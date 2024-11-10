@@ -1,7 +1,7 @@
 import { useAudioPlayer } from "@/components/player/audio-provider";
 import { Song } from "@/types/song";
 import { Button } from "../ui/button";
-import { usePlayerStore } from "@/store/store";
+import { usePlayerStore } from "@/store/player-store";
 
 export function SongLoadButton({
     song,
@@ -9,7 +9,7 @@ export function SongLoadButton({
     song: Song;
 }) {
     let player = useAudioPlayer(song);
-    const { setPlayerVisibility } = usePlayerStore();
+    const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
 
     return (
         <Button
@@ -17,6 +17,7 @@ export function SongLoadButton({
                 e.preventDefault();
                 e.stopPropagation();
                 setPlayerVisibility(true);
+                setHasLoaded(true);
                 player.play(song);
             }}
         >
