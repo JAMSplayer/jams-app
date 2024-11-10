@@ -37,7 +37,7 @@ export function Footer() {
                                     onClick={() => {
                                         setPlayerVisibility(true);
                                     }}
-                                    className="flex items-center justify-center w-10 h-5 bg-background rounded-b-lg  border"
+                                    className="flex items-center justify-center w-10 h-5 bg-background rounded-b-lg  border-x border-b"
                                 >
                                     <span className="text-sm text-primary">
                                         ▲
