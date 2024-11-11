@@ -41,7 +41,7 @@ const Player = () => {
     }
 
     return (
-        <div className="flex items-center gap-6 bg-card px-4 py-4 border md:px-6">
+        <div className="flex items-center gap-6 bg-card px-4 py-4 border-y md:px-6">
             <button
                 onClick={() => {
                     setPlayerVisibility(false);
