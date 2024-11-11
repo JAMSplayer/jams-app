@@ -63,7 +63,7 @@ function Thumb(props: {
                     props.onChangeStart?.();
                 }}
                 className={clsx(
-                    "h-4 rounded-full",
+                    "h-4 rounded-full hidden md:block",
                     isFocusVisible || state.isThumbDragging(index)
                         ? "w-1.5 bg-primary/80"
                         : "w-1 bg-primary"
