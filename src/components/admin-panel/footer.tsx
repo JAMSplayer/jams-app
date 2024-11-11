@@ -17,7 +17,7 @@ export function Footer() {
         usePlayerStore();
 
     return (
-        <div className="relative w-full">
+        <div className="relative w-full bg-background/95  backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="mx-4 md:mx-8 flex h-14 items-center justify-between">
                 <div className="text-xs md:text-sm leading-loose text-muted-foreground text-left">
                     <AnimatePresence>
