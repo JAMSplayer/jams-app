@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 use serde::{Deserialize, Serialize};
 use futures::lock::Mutex;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Manager, State, Emitter};
 use safe::{registers::XorNameBuilder, Safe, SecretKey};
 
 mod server;
@@ -122,13 +122,16 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
     );
 
     Safe::init_logging().map_err(|_| Error {
-        message: format!("Safenet logging error, exiting."),
+        message: format!("Autonomi logging error, exiting."),
     })?;
 
     let connection_result = Safe::connect(peers, Some(sk), app_root.join("wallet")).await;
     if let Err(_) = connection_result {
         main_window.set_title("JAMS (not connected)")?;
     }
+    app.emit("connect", ()).map_err(|_| Error {
+        message: String::from("Event emit error."),
+    })?;
     let safe = connection_result?;
 //    println!("Wallet address: {}", safe.address()?.to_hex());
     println!("ETH wallet address: {}", safe.address()?.to_string());
@@ -145,7 +148,11 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
 async fn disconnect(mut app: AppHandle) -> Result<(), Error> {
     app.unmanage::<Mutex<Option<Safe>>>().ok_or(Error {
         message: String::from("Not connected."),
-    }).map(|_| ())
+    })?;
+
+    app.emit("disconnect", ()).map_err(|_| Error {
+        message: String::from("Event emit error."),
+    })
 }
 
 
