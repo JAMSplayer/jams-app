@@ -15,12 +15,12 @@ import {
     FormLabel,
     FormMessage,
 } from "../../ui/form";
-import { RecentAccount } from "@/types/recent-account";
 import { useEffect, useState } from "react";
 import { formatAddress } from "@/lib/utils/address";
 import { Button } from "@/components/ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./RecentAccounts";
+import { AccountUser } from "@/types/account-user";
 
 interface SignInPanelProps {
     onCreateAccountClicked: () => void;
@@ -42,7 +42,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     });
     const { watch, handleSubmit, control, formState, setValue } = signInForm;
     const username = watch("username");
-    const [accountExists, setAccountExists] = useState<RecentAccount | null>(
+    const [accountExists, setAccountExists] = useState<AccountUser | null>(
         null
     );
 
@@ -51,7 +51,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     // ====================================================================================
 
     // Callback function to update the currently selected account from the RecentAccounts tab
-    const handleSelectAccount = (recentAccount: RecentAccount) => {
+    const handleSelectAccount = (recentAccount: AccountUser) => {
         // Find the account based on the selected recent account
         const foundAccount = recentAccountList.find(
             (account) => account.username === recentAccount.username
@@ -74,26 +74,36 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     };
 
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
-    const [recentAccountList, setRecentAccountList] = useState<RecentAccount[]>(
-        [
-            {
-                username: "username1",
-                address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
-            },
-            {
-                username: "username2",
-                address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
-            },
-            {
-                username: "username3",
-                address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
-            },
-            {
-                username: "username4",
-                address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
-            },
-        ]
-    );
+    const [recentAccountList, setRecentAccountList] = useState<AccountUser[]>([
+        {
+            username: "username1",
+            address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+        {
+            username: "username2",
+            address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+        {
+            username: "username3",
+            address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+        {
+            username: "username4",
+            address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+    ]);
 
     // ====================================================================================
     // Tab Functionality

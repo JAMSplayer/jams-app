@@ -14,7 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { RecentAccount } from "@/types/recent-account";
+import { AccountUser, RegisterAccountUser } from "@/types/account-user";
+import { registerUser } from "@/lib/account/account";
+import { toast } from "sonner";
 
 interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -45,9 +47,18 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     >(null);
 
     type CreateAccountFormData = z.infer<typeof createAccountSchema>;
-    const onSubmit = (data: CreateAccountFormData) => {
+    const onSubmit = async (data: CreateAccountFormData) => {
         console.log(data);
-        // Proceed with account creation
+        let userData: RegisterAccountUser = {
+            username: data.username,
+            password: data.password,
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        };
+        let createdUser = await registerUser(userData);
+        toast("User Registered", {
+            description: `${createdUser?.username} has been registered.`,
+        });
     };
 
     const validatePasswords = (password: string, confirmPassword: string) => {
@@ -59,26 +70,36 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     };
 
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
-    const [recentAccountList, setRecentAccountList] = useState<RecentAccount[]>(
-        [
-            {
-                username: "username1",
-                address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
-            },
-            {
-                username: "username2",
-                address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
-            },
-            {
-                username: "username3",
-                address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
-            },
-            {
-                username: "username4",
-                address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
-            },
-        ]
-    );
+    const [recentAccountList, setRecentAccountList] = useState<AccountUser[]>([
+        {
+            username: "username1",
+            address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+        {
+            username: "username2",
+            address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+        {
+            username: "username3",
+            address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+        {
+            username: "username4",
+            address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
+            password: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        },
+    ]);
 
     const validateUsername = (username: string) => {
         const foundAccount = recentAccountList.find(
