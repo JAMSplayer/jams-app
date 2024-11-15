@@ -1,0 +1,211 @@
+import { Song } from "@/types/song";
+import { createContext, useContext, useMemo, useReducer, useRef } from "react";
+
+interface PlayerState {
+    playing: boolean;
+    muted: boolean;
+    volume: number; // Track volume level
+    duration: number;
+    currentTime: number;
+    song: Song | null;
+}
+
+interface PublicPlayerActions {
+    play: (song?: Song) => void;
+    pause: () => void;
+    toggle: (song?: Song) => void;
+    seekBy: (amount: number) => void;
+    seek: (time: number) => void;
+    playbackRate: (rate: number) => void;
+    toggleMute: () => void;
+    setVolume: (volume: number) => void; // Set volume level
+    isPlaying: (song?: Song) => boolean;
+}
+
+export type PlayerAPI = PlayerState & PublicPlayerActions;
+
+const enum ActionKind {
+    SET_META = "SET_META",
+    PLAY = "PLAY",
+    PAUSE = "PAUSE",
+    TOGGLE_MUTE = "TOGGLE_MUTE",
+    SET_CURRENT_TIME = "SET_CURRENT_TIME",
+    SET_DURATION = "SET_DURATION",
+    SET_VOLUME = "SET_VOLUME", // Action for setting volume
+}
+
+type Action =
+    | { type: ActionKind.SET_META; payload: Song }
+    | { type: ActionKind.PLAY }
+    | { type: ActionKind.PAUSE }
+    | { type: ActionKind.TOGGLE_MUTE }
+    | { type: ActionKind.SET_CURRENT_TIME; payload: number }
+    | { type: ActionKind.SET_DURATION; payload: number }
+    | { type: ActionKind.SET_VOLUME; payload: number }; // Volume action type
+
+const AudioPlayerContext = createContext<PlayerAPI | null>(null);
+
+function audioReducer(state: PlayerState, action: Action): PlayerState {
+    switch (action.type) {
+        case ActionKind.SET_META:
+            return { ...state, song: action.payload };
+        case ActionKind.PLAY:
+            return { ...state, playing: true };
+        case ActionKind.PAUSE:
+            return { ...state, playing: false };
+        case ActionKind.TOGGLE_MUTE:
+            return { ...state, muted: !state.muted };
+        case ActionKind.SET_CURRENT_TIME:
+            return { ...state, currentTime: action.payload };
+        case ActionKind.SET_DURATION:
+            return { ...state, duration: action.payload };
+        case ActionKind.SET_VOLUME:
+            return { ...state, volume: action.payload };
+    }
+}
+
+export function AudioProvider({ children }: { children: React.ReactNode }) {
+    let [state, dispatch] = useReducer(audioReducer, {
+        playing: false,
+        muted: false,
+        volume: 1, // Default volume is 1 (max)
+        duration: 0,
+        currentTime: 0,
+        song: null,
+    });
+
+    // UseRef with explicit type for the audio element
+    let playerRef = useRef<HTMLAudioElement | null>(null);
+
+    let actions = useMemo<PublicPlayerActions>(() => {
+        return {
+            play(song) {
+                if (song) {
+                    dispatch({ type: ActionKind.SET_META, payload: song });
+
+                    if (
+                        playerRef.current &&
+                        playerRef.current.currentSrc !== song.location
+                    ) {
+                        playerRef.current.src = song.location;
+                        playerRef.current.load();
+                        playerRef.current.pause();
+                        playerRef.current.playbackRate = 1;
+                        playerRef.current.currentTime = 0;
+                    }
+                }
+                playerRef.current?.play();
+            },
+            pause() {
+                playerRef.current?.pause();
+            },
+            toggle(song) {
+                this.isPlaying(song) ? actions.pause() : actions.play(song);
+            },
+            seekBy(amount) {
+                if (playerRef.current) {
+                    playerRef.current.currentTime += amount;
+                }
+            },
+            seek(time) {
+                if (playerRef.current) {
+                    playerRef.current.currentTime = time;
+                }
+            },
+            playbackRate(rate) {
+                if (playerRef.current) {
+                    playerRef.current.playbackRate = rate;
+                }
+            },
+            toggleMute() {
+                dispatch({ type: ActionKind.TOGGLE_MUTE });
+            },
+            setVolume(volume) {
+                if (playerRef.current) {
+                    // Ensure volume is between 0 and 1
+                    playerRef.current.volume = Math.min(Math.max(volume, 0), 1);
+                    dispatch({ type: ActionKind.SET_VOLUME, payload: volume });
+                }
+            },
+            isPlaying(song) {
+                return song
+                    ? state.playing &&
+                          playerRef.current?.currentSrc === song.location
+                    : state.playing;
+            },
+        };
+    }, [state.playing]);
+
+    let api = useMemo<PlayerAPI>(
+        () => ({ ...state, ...actions }),
+        [state, actions]
+    );
+
+    return (
+        <>
+            <AudioPlayerContext.Provider value={api}>
+                {children}
+            </AudioPlayerContext.Provider>
+            <audio
+                ref={playerRef} // Ensure ref is correctly passed here
+                onPlay={() => dispatch({ type: ActionKind.PLAY })}
+                onPause={() => dispatch({ type: ActionKind.PAUSE })}
+                onTimeUpdate={(event) => {
+                    dispatch({
+                        type: ActionKind.SET_CURRENT_TIME,
+                        payload: Math.floor(event.currentTarget.currentTime),
+                    });
+                }}
+                onDurationChange={(event) => {
+                    dispatch({
+                        type: ActionKind.SET_DURATION,
+                        payload: Math.floor(event.currentTarget.duration),
+                    });
+                }}
+                muted={state.muted}
+                // Do not pass volume as a prop here
+            />
+        </>
+    );
+}
+
+export function useAudioPlayer(song?: Song) {
+    const player = useContext(AudioPlayerContext);
+
+    if (!player) {
+        console.warn("AudioProvider is not available");
+        return {
+            playing: false,
+            muted: false,
+            volume: 1, // Default volume
+            duration: 0,
+            currentTime: 0,
+            song: null,
+            play: () => {},
+            pause: () => {},
+            toggle: () => {},
+            seekBy: () => {},
+            seek: () => {},
+            playbackRate: () => {},
+            toggleMute: () => {},
+            setVolume: () => {}, // Add setVolume method
+            isPlaying: () => false,
+        } as PlayerAPI;
+    }
+
+    return useMemo<PlayerAPI>(
+        () => ({
+            ...player!,
+            play() {
+                player!.play(song);
+            },
+            toggle() {
+                player!.toggle(song);
+            },
+            get playing() {
+                return player!.isPlaying(song);
+            },
+        }),
+        [player, song]
+    );
+}

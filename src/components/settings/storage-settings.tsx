@@ -40,7 +40,7 @@ export default function StorageSettings() {
 
             try {
                 const downloadFolder = await store.get<{ value: string }>(
-                    "downloadFolder"
+                    "download-folder"
                 );
 
                 const defaultDownloadsPath = await path.downloadDir();
@@ -120,7 +120,7 @@ export default function StorageSettings() {
                             size={"sm"}
                             onClick={async () => {
                                 if (store) {
-                                    await store.set("downloadFolder", {
+                                    await store.set("download-folder", {
                                         value: downloadFolder,
                                     });
                                     await store.save();

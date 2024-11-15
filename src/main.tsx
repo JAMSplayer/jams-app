@@ -4,7 +4,6 @@ import { BrowserRouter } from "react-router-dom";
 import RootLayout from "./components/RootLayout";
 import AppRoutes from "./routes";
 import { Toaster } from "sonner";
-import React from "react";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
