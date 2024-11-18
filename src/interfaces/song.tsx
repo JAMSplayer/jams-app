@@ -1,0 +1,22 @@
+export interface Song {
+  address?: string,
+  index?: number,
+  uuid?: string,
+  title: string,
+  artist: string,
+  album: string,
+  file?: string,
+  art?: string,
+  date_created?: Date,
+  date_updated?: Date,
+  genre: string,
+  year: string,
+  tags: string[],
+  broadcasts?: string[],
+  playlists?: string[],
+  isPublic?: boolean,
+  favorite?: boolean,
+  original_uploader?: boolean,
+  id?: number,
+  localIndex?: number
+}

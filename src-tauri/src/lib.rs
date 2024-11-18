@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 use serde::{Deserialize, Serialize};
 use futures::lock::Mutex;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Manager, State, Emitter};
 use safe::{registers::XorNameBuilder, Safe, SecretKey};
 
 mod server;
@@ -111,7 +111,6 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
 
     let app_root = make_root(&mut app)?;
 
-    // TODO: save sk to app state
     let sk = load_create_key(&app_root)?;
     println!("\n\nSecret Key: {}", &sk.to_hex());
 
@@ -123,13 +122,16 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
     );
 
     Safe::init_logging().map_err(|_| Error {
-        message: format!("Safenet logging error, exiting."),
+        message: format!("Autonomi logging error, exiting."),
     })?;
 
     let connection_result = Safe::connect(peers, Some(sk), app_root.join("wallet")).await;
     if let Err(_) = connection_result {
         main_window.set_title("JAMS (not connected)")?;
     }
+    app.emit("connect", ()).map_err(|_| Error {
+        message: String::from("Event emit error."),
+    })?;
     let safe = connection_result?;
 //    println!("Wallet address: {}", safe.address()?.to_hex());
     println!("ETH wallet address: {}", safe.address()?.to_string());
@@ -141,6 +143,18 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
 
     Ok(())
 }
+
+#[tauri::command]
+async fn disconnect(mut app: AppHandle) -> Result<(), Error> {
+    app.unmanage::<Mutex<Option<Safe>>>().ok_or(Error {
+        message: String::from("Not connected."),
+    })?;
+
+    app.emit("disconnect", ()).map_err(|_| Error {
+        message: String::from("Event emit error."),
+    })
+}
+
 
 fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
     if name.is_empty() {
@@ -293,10 +307,10 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             connect,
+            disconnect,
             create_register,
             read_register,
             write_register,

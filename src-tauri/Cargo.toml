@@ -20,14 +20,12 @@ tauri-build = { version = "2.0.1", features = [] }
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
 futures = "*"
-hex = "*"
 warp = "*"
 tauri = { version = "2.0.1", features = [] }
 tauri-plugin-shell = "2.0.1"
 tauri-plugin-store = "2.0.1"
 tauri-plugin-fs = "2.0.1"
 tauri-plugin-dialog = "2.0.1"
-tauri-plugin-http = "2.0.1"
 lazy_static = "1.4.0"
 tauri-plugin-clipboard-manager = "2.0.1"
 sqlx = { version = "0.8.0", features = ["sqlite", "runtime-tokio"] }
