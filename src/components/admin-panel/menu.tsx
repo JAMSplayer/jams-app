@@ -59,7 +59,7 @@ export function Menu({ isOpen }: MenuProps) {
                                         href,
                                         label,
                                         icon: Icon,
-                                        active,
+                                        // active,
                                         submenus,
                                     },
                                     index
