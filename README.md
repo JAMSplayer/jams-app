@@ -57,8 +57,10 @@ https://github.com/maidsafe/safe_network/blob/main/README.md#Using-a-local-netwo
 
 * Connect to local testnet:
 
-Edit `peers.push [...]` line in `connect()` function in `src-tauri/src/lib.rs` file, and replace node's MultiAddress with one of your local nodes' address, which can be found in node logs. You can see where logs are stored when starting local network, the startup process will output something like "Logging to directory: [...]". In the logfile you search for the line looking like this: `Local node is listening ListenerId(1) on "/ip4/127.0.0.1/udp/11111/quic-v1/p2p/AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaA"`. Address can also be checked running this command:
+Edit `await invoke("connect", [...]` line in `connect()` function in `src/backend/autonomi.tsx` file, and replace `peer` value with one of your local nodes' Multiaddress, which can be found in node logs. You can see where logs are stored when starting local network, the startup process will output something like "Logging to directory: [...]". In the logfile you search for the line looking like this: `Local node is listening ListenerId(1) on "/ip4/127.0.0.1/udp/11111/quic-v1/p2p/AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaAaa11AaaA"`. Address can also be checked running this command:
 
-`cargo run --bin safenode-manager --features local-discovery -- status --details`
+`cargo run --release --bin safenode-manager --features local -- local status --details`
 
-* (alternatively) Connecting to official testnet: https://github.com/maidsafe/safe_network/blob/main/README.md#connecting-to-the-beta-network
+* (alternatively) Connecting to official testnet:
+
+Same as above, but instead local node's Multiaddr in `peer`, just insert something that is not Multiaddr, or leave it empty.

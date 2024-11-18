@@ -2,7 +2,7 @@ use std::{fs, path::PathBuf};
 use serde::{Deserialize, Serialize};
 use futures::lock::Mutex;
 use tauri::{AppHandle, Manager, State};
-use safe::{registers::XorNameBuilder, Safe, SecretKey};
+use safe::{registers::XorNameBuilder, Safe, SecretKey, Multiaddr};
 
 mod server;
 
@@ -92,8 +92,9 @@ fn load_create_key(app_root: &PathBuf) -> Result<SecretKey, Error> {
     Ok(sk)
 }
 
+// leave peer empty or anything other than Multiaddr to connect to official network.
 #[tauri::command]
-async fn connect(mut app: AppHandle) -> Result<(), Error> {
+async fn connect(peer: String, mut app: AppHandle) -> Result<(), Error> {
     let state = app.try_state::<Mutex<Option<Safe>>>();
     if state.is_some() {
         if state.unwrap().lock().await.is_some() {
@@ -116,21 +117,23 @@ async fn connect(mut app: AppHandle) -> Result<(), Error> {
     println!("\n\nSecret Key: {}", &sk.to_hex());
 
     let mut peers = Vec::new();
-    peers.push(
-        "/ip4/127.0.0.1/udp/49619/quic-v1/p2p/12D3KooWRJsoqrDvNsUeQCTUXUqqEddhiAVfR5d7csqmGpxGCymJ"
-            .parse()
-            .unwrap(),
-    );
+
+    let add_network_contacts = (if let Ok(peer) = peer.parse::<Multiaddr>() {
+        println!("Peer: {}", &peer);
+        peers.push(peer);
+        false
+    } else {
+        println!("Connecting to official network.");
+        true
+    });
 
     Safe::init_logging().map_err(|_| Error {
         message: format!("Safenet logging error, exiting."),
     })?;
 
-    let connection_result = Safe::connect(peers, Some(sk), app_root.join("wallet")).await;
-    if let Err(_) = connection_result {
-        main_window.set_title("JAMS (not connected)")?;
-    }
-    let safe = connection_result?;
+    let safe = Safe::connect(peers, add_network_contacts, Some(sk), app_root.join("wallet")).await.inspect_err(|_| {
+        let _ = main_window.set_title("JAMS (not connected)");
+    })?;
 //    println!("Wallet address: {}", safe.address()?.to_hex());
     println!("ETH wallet address: {}", safe.address()?.to_string());
 

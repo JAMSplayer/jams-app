@@ -7791,6 +7791,7 @@ dependencies = [
  "tiny-keccak",
  "tokio",
  "tracing",
+ "url",
  "xor_name",
 ]
 
