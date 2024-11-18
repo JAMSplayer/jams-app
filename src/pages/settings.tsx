@@ -1,5 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HomeIcon } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TopLevelBreadcrumbs from "@/components/navigation/TopLevelBreadcrumbs";

@@ -2,7 +2,6 @@ import {
     Tag,
     Settings,
     Bookmark,
-    SquarePen,
     LayoutGrid,
     LucideIcon,
     Music,

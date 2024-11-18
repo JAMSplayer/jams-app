@@ -35,8 +35,9 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
             confirmPassword: "",
         },
     });
-    const { handleSubmit, control, formState, setValue, register } =
-        createAccountForm;
+
+    // const { handleSubmit, control, formState, setValue, register }
+    const { handleSubmit, control, formState } = createAccountForm;
 
     const [usernameAlreadyExistsError, setUsernameAlreadyExistsError] =
         useState<string | null>(null);
@@ -59,26 +60,25 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     };
 
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
-    const [recentAccountList, setRecentAccountList] = useState<RecentAccount[]>(
-        [
-            {
-                username: "username1",
-                address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
-            },
-            {
-                username: "username2",
-                address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
-            },
-            {
-                username: "username3",
-                address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
-            },
-            {
-                username: "username4",
-                address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
-            },
-        ]
-    );
+    // recentAccountList, setRecentAccountList
+    const [recentAccountList] = useState<RecentAccount[]>([
+        {
+            username: "username1",
+            address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
+        },
+        {
+            username: "username2",
+            address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
+        },
+        {
+            username: "username3",
+            address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
+        },
+        {
+            username: "username4",
+            address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
+        },
+    ]);
 
     const validateUsername = (username: string) => {
         const foundAccount = recentAccountList.find(

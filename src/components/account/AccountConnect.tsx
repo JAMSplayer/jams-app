@@ -11,7 +11,8 @@ export default function AccountConnect() {
     // Visbility Functionality
     // ====================================================================================
 
-    const [account, setAccount] = useState({
+    //  const [account, setAccount]
+    const [account] = useState({
         username: "Dirvine",
         address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
     }); // TODO get signed in account from new hook - make this null to see what signed out looks like

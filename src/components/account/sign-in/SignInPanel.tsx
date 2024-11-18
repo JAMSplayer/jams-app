@@ -1,4 +1,3 @@
-import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -74,26 +73,25 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     };
 
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
-    const [recentAccountList, setRecentAccountList] = useState<RecentAccount[]>(
-        [
-            {
-                username: "username1",
-                address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
-            },
-            {
-                username: "username2",
-                address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
-            },
-            {
-                username: "username3",
-                address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
-            },
-            {
-                username: "username4",
-                address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
-            },
-        ]
-    );
+    // [recentAccountList, setRecentAccountList]
+    const [recentAccountList] = useState<RecentAccount[]>([
+        {
+            username: "username1",
+            address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
+        },
+        {
+            username: "username2",
+            address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
+        },
+        {
+            username: "username3",
+            address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
+        },
+        {
+            username: "username4",
+            address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
+        },
+    ]);
 
     // ====================================================================================
     // Tab Functionality
@@ -115,7 +113,8 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
         setAccountExists(foundAccount || null); // Set accountExists to found account or null
     }, [username, recentAccountList]);
 
-    const signIn = (values: z.infer<typeof signInSchema>) => {
+    // (values: z.infer<typeof signInSchema>)
+    const signIn = (_: z.infer<typeof signInSchema>) => {
         //  TODO
         const usernameExists = recentAccountList.some(
             (account) => account.username === username
