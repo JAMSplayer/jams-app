@@ -21,15 +21,18 @@ export async function balance(): Promise<string | null> {
 }
 
 export async function connect() {
-    console.log("connecting...");
-    try {
-        await invoke("connect");
-    } catch (e) {
-        console.error("connect: ", e);
-    }
-    console.log("connected.");
+  console.log("connecting...");
+  try {
+    await invoke("connect", {
+//      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
+      peer: "OFFICIAL NETWORK"
+    });
+  } catch (e) {
+    console.error("connect: ", e);
+  }
+  console.log("connected.");
 
-    console.log(await balance());
+  console.log(await balance());
 }
 
 export async function disconnect() {

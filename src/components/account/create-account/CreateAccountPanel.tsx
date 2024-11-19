@@ -15,6 +15,7 @@ import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { RecentAccount } from "@/types/recent-account";
+import { connect as autonomiConnect } from "@/backend/autonomi"
 
 interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -94,6 +95,10 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
 
     const handleReturnToSignInPanelClicked = () => {
         onReturnToSignInPanelClicked();
+    };
+
+    const connect = async () => {
+        await autonomiConnect();
     };
 
     return (
@@ -212,6 +217,15 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                             )}
                         />
 
+                        <div className="pt-2">
+                            <Button
+                                type="button"
+                                className="mt-4 w-full"
+                                onClick={async () => connect()}
+                            >
+                                Connect
+                            </Button>
+                        </div>
                         <div className="pt-2">
                             <Button
                                 type="submit"
