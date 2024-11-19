@@ -26,9 +26,6 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
-import { load, Store } from "@tauri-apps/plugin-store";
-import i18next from "i18next";
 import { useLanguage } from "@/providers/language-provider";
 import { languageOptions } from "@/enums/languages";
 
