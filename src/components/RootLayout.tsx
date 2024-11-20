@@ -4,6 +4,8 @@ import "../index.css";
 import { ContentLayout } from "./admin-panel/content-layout";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AudioProvider } from "./player/audio-provider";
+import "@/i18n/config";
+import { LanguageProvider } from "@/providers/language-provider";
 
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
@@ -17,13 +19,15 @@ const RootLayout = ({ children }: RootLayoutProps) => {
                 defaultTheme="system"
                 disableTransitionOnChange
             >
-                <AudioProvider>
-                    <AdminPanelLayout>
-                        <ContentLayout>
-                            <main className="flex-grow">{children}</main>
-                        </ContentLayout>
-                    </AdminPanelLayout>
-                </AudioProvider>
+                <LanguageProvider>
+                    <AudioProvider>
+                        <AdminPanelLayout>
+                            <ContentLayout>
+                                <main className="flex-grow">{children}</main>
+                            </ContentLayout>
+                        </AdminPanelLayout>
+                    </AudioProvider>
+                </LanguageProvider>
             </ThemeProvider>
         </div>
     );
