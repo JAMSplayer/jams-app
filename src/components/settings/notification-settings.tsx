@@ -1,36 +1,19 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
-import { load, Store } from "@tauri-apps/plugin-store";
 import SubDivider from "./sub-divider";
 import SubDividerLayout from "@/enums/sub-divider-layout";
+import { useStorage } from "@/providers/storage-provider";
 
 export default function NotificationSettings() {
     const [alertChecked, setAlertChecked] = useState(false);
     const [infoChecked, setInfoChecked] = useState(false);
-    const [store, setStore] = useState<Store | null>(null);
+    const { store } = useStorage();
     const [isLoading, setIsLoading] = useState<boolean | null>(null);
 
     interface NotificationOptions {
         alert: "enabled" | "disabled";
         info: "enabled" | "disabled";
     }
-
-    // Initialize the store when the component mounts
-    useEffect(() => {
-        const initializeStore = async () => {
-            try {
-                const storeInstance = await load("store.bin", {
-                    autoSave: true,
-                });
-                setStore(storeInstance); // Set the store instance
-            } catch (error) {
-                console.error("Failed to initialize store:", error);
-                setIsLoading(false);
-            }
-        };
-
-        initializeStore();
-    }, []);
 
     // Load the stored values when the store is ready
     useEffect(() => {
