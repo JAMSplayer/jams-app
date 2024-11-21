@@ -1,58 +1,30 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import i18next from "i18next";
-import { load, Store } from "@tauri-apps/plugin-store";
+import { useStorage } from "./storage-provider";
+import useStoreItem from "@/hooks/use-store-item";
 
-// Define the shape of your context state
 interface LanguageContextProps {
     language: string;
     setLanguage: (lang: string) => void;
 }
 
-// Create the LanguageContext
 const LanguageContext = createContext<LanguageContextProps | undefined>(
     undefined
 );
 
-// LanguageProvider component
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const [language, setLanguage] = useState<string>("en");
-    const [store, setStore] = useState<Store | null>(null);
+    const { store } = useStorage();
+    const defaultLanguage = useStoreItem<{ value: string }>(store, "language", {
+        value: "en",
+    });
 
-    // Initialize the store when the component mounts
     useEffect(() => {
-        const initializeStore = async () => {
-            try {
-                const storeInstance = await load("store.bin", {
-                    autoSave: true,
-                });
-                setStore(storeInstance); // Set the store instance
-            } catch (error) {
-                console.error("Failed to initialize store:", error);
-            }
-        };
-
-        initializeStore();
-    }, []);
-
-    // Load the language from storage when the store is ready
-    useEffect(() => {
-        async function loadLanguage() {
-            if (!store) return;
-
-            try {
-                const savedLanguage = await store.get<{ value: string }>(
-                    "language"
-                );
-                const defaultLanguage = savedLanguage?.value || "en";
-                setLanguage(defaultLanguage);
-                i18next.changeLanguage(defaultLanguage);
-            } catch (err) {
-                console.error("Failed to load language", err);
-            }
+        if (defaultLanguage?.value) {
+            setLanguage(defaultLanguage.value);
+            i18next.changeLanguage(defaultLanguage.value);
         }
-
-        loadLanguage();
-    }, [store]);
+    }, [defaultLanguage]);
 
     // Function to change the language and save it in the store
     const changeLanguage = async (lang: string) => {
