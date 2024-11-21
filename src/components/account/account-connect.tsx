@@ -1,10 +1,10 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { PowerIcon } from "lucide-react";
-import Avatar from "./Avatar";
-import SignInPanel from "./sign-in/SignInPanel";
-import SignedInPanel from "./signed-in/SignedInPanel";
-import CreateAccountPanel from "./create-account/CreateAccountPanel";
+import Avatar from "./avatar";
+import SignInPanel from "./sign-in/sign-in-panel";
+import SignedInPanel from "./signed-in/signed-in-panel";
+import CreateAccountPanel from "./create-account/create-account-panel";
 
 export default function AccountConnect() {
     // ====================================================================================

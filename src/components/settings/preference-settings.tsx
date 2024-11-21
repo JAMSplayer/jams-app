@@ -1,7 +1,7 @@
-import { ThemeToggler } from "../ThemeToggler";
+import { ThemeToggler } from "../theme-toggler";
 import SubDividerLayout from "@/enums/sub-divider-layout";
 import SubDivider from "./sub-divider";
-import LanguageSwitcher from "../LanguageSwitcher";
+import LanguageSwitcher from "../language-switcher";
 
 export default function PreferenceSettings() {
     return (
