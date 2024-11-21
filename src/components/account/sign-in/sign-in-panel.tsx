@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import { formatAddress } from "@/lib/utils/address";
 import { Button } from "@/components/ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
-import RecentAccounts from "./RecentAccounts";
+import RecentAccounts from "./recent-accounts";
 
 interface SignInPanelProps {
     onCreateAccountClicked: () => void;

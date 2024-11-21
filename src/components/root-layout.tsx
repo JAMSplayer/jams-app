@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { AudioProvider } from "./player/audio-provider";
 import "@/i18n/config";
 import { LanguageProvider } from "@/providers/language-provider";
-import { AgreementModal } from "@/components/AgreementModal";
 import { useStorage } from "@/providers/storage-provider";
+import { AgreementModal } from "@/components/agreement-modal";
 
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
