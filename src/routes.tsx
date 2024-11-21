@@ -1,12 +1,12 @@
 // Routes.tsx
 import { Routes, Route } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
 // import NotFound from "./components/NotFound"; TODO reimplement
 import Settings from "./pages/settings";
 import StatusSettings from "./components/settings/status-settings";
 import StorageSettings from "./components/settings/storage-settings";
 import NotificationSettings from "./components/settings/notification-settings";
 import PreferenceSettings from "./components/settings/preference-settings";
+import Dashboard from "./components/dashboard";
 
 const AppRoutes = () => {
     return (

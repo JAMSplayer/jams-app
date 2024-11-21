@@ -8,7 +8,7 @@ import "@/i18n/config";
 import { LanguageProvider } from "@/providers/language-provider";
 import { useEffect, useState } from "react";
 import { load, Store } from "@tauri-apps/plugin-store";
-import { AgreementModal } from "@/components/AgreementModal";
+import { AgreementModal } from "@/components/agreement-modal";
 
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
