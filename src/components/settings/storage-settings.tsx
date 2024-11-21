@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Label } from "../ui/label";
-import { load, Store } from "@tauri-apps/plugin-store";
 import * as path from "@tauri-apps/api/path";
 import { Button } from "../ui/button";
 import { FolderSearchIcon } from "lucide-react";
@@ -8,28 +7,12 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { toast } from "sonner";
 import SubDividerLayout from "@/enums/sub-divider-layout";
 import SubDivider from "./sub-divider";
+import { useStorage } from "@/providers/storage-provider";
 
 export default function StorageSettings() {
-    const [store, setStore] = useState<Store | null>(null);
+    const { store } = useStorage();
     const [downloadFolder, setDownloadFolder] = useState("");
     const [isLoading, setIsLoading] = useState<boolean | null>(null);
-
-    // Initialize the store when the component mounts
-    useEffect(() => {
-        const initializeStore = async () => {
-            try {
-                const storeInstance = await load("store.bin", {
-                    autoSave: true,
-                });
-                setStore(storeInstance); // Set the store instance
-            } catch (error) {
-                console.error("Failed to initialize store:", error);
-                setIsLoading(false);
-            }
-        };
-
-        initializeStore();
-    }, []);
 
     useEffect(() => {
         async function loadSettings() {

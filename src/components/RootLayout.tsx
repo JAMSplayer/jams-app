@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
 import "../index.css";
 import { ContentLayout } from "./admin-panel/content-layout";
@@ -6,47 +6,47 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { AudioProvider } from "./player/audio-provider";
 import "@/i18n/config";
 import { LanguageProvider } from "@/providers/language-provider";
-import { useEffect, useState } from "react";
-import { load, Store } from "@tauri-apps/plugin-store";
 import { AgreementModal } from "@/components/AgreementModal";
+import { useStorage } from "@/providers/storage-provider";
 
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
 }
 
 const RootLayout = ({ children }: RootLayoutProps) => {
-    const [store, setStore] = useState<Store | null>(null);
+    const { store } = useStorage();
     const [hasAgreed, setHasAgreed] = useState<boolean | null>(null);
 
-    // Initialize store
-    useEffect(() => {
-        const initializeStore = async () => {
-            const storeInstance = await load("store.bin", { autoSave: true });
-            setStore(storeInstance);
-
-            const agreed = await storeInstance.get<boolean>("userAgreed");
-            setHasAgreed(!!agreed);
-        };
-
-        initializeStore();
-    }, []);
-
-    // Handle user agreement
     const handleAgree = async () => {
         if (!store) return;
-
-        await store.set("userAgreed", true);
-        await store.save();
-        setHasAgreed(true);
+        try {
+            await store.set("userAgreed", true);
+            await store.save();
+            setHasAgreed(true);
+        } catch (error) {
+            console.error("Failed to save user agreement:", error);
+        }
     };
 
-    if (hasAgreed === null) {
-        return;
-    }
+    useEffect(() => {
+        const getSetting = async () => {
+            if (!store) return;
+            try {
+                const agreed = await store.get<boolean>("userAgreed");
+                setHasAgreed(!!agreed);
+            } catch (error) {
+                console.error("Failed to load user agreement status:", error);
+            }
+        };
+
+        getSetting();
+    }, [store]);
 
     return (
-        <div className={`antialiased flex flex-col min-h-screen`}>
-            {hasAgreed ? (
+        <div className={"antialiased flex flex-col min-h-screen"}>
+            {hasAgreed === null ? (
+                <></>
+            ) : hasAgreed ? (
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
