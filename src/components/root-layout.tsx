@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/providers/language-provider";
 import { AgreementModal } from "@/components/agreement-modal";
 import { useStorage } from "@/providers/storage-provider";
 
+
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
 }
