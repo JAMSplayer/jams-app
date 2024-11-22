@@ -45,9 +45,20 @@ export async function disconnect() {
     console.log("disconnected.");
 }
 
+// should just check if connected to network
 export async function checkIsConnected(): Promise<boolean> {
     try {
         await invoke("client_address");
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+// TODO implement - should check if account is connected
+// look at: providers/connection-provider.tsx
+export async function checkIsAccountConnected(): Promise<boolean> {
+    try {
         return true;
     } catch (e) {
         return false;
