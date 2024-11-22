@@ -46,7 +46,7 @@ export async function disconnect() {
     console.log("disconnected.");
 }
 
-// should just check if connected to network
+// TODO implement - should just check if connected to network
 export async function checkIsConnected(): Promise<boolean> {
     try {
         await invoke("client_address");

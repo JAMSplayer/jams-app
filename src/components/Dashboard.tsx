@@ -24,7 +24,17 @@ export default function Dashboard() {
             </div>
             <div className="flex">
                 <Button variant="default" onClick={async () => await connect()}>
-                    Connect
+                    Connect to Network
+                </Button>
+            </div>
+            <div className="flex">
+                <Button
+                    variant="default"
+                    onClick={async () => {
+                        /* TODO implement pass username and password*/
+                    }}
+                >
+                    Sign In Account
                 </Button>
             </div>
             <div className="flex flex-col">
