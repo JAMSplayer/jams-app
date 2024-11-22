@@ -1,11 +1,13 @@
 import { useConnection } from "@/providers/connection-provider";
 import { SongLoadButton } from "./player/song-load-button";
+import { Button } from "./ui/button";
+import { connect } from "@/backend/autonomi";
 
 export default function Dashboard() {
     const { isConnected, account } = useConnection();
 
     return (
-        <div className="p-4 space-x-2">
+        <div className="p-4 space-y-2">
             <div className="flex flex-row">
                 <SongLoadButton
                     song={{
@@ -20,7 +22,12 @@ export default function Dashboard() {
                     }}
                 />
             </div>
-            <div className="flex flex-row">
+            <div className="flex">
+                <Button variant="default" onClick={async () => await connect()}>
+                    Connect
+                </Button>
+            </div>
+            <div className="flex flex-col">
                 <div>
                     <h1>
                         Network Status:{" "}
