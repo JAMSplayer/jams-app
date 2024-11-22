@@ -6,17 +6,18 @@ import React, {
     useState,
 } from "react";
 import { checkIsConnected, checkIsAccountConnected } from "@/backend/autonomi";
+import { AccountUser } from "@/types/account-user";
 
 // Define the shape of the context value
 interface ConnectionContextType {
     isConnected: boolean;
-    isAccountConnected: boolean;
+    account: AccountUser | null;
 }
 
 // Create the context with a default value
 const ConnectionContext = createContext<ConnectionContextType>({
     isConnected: false,
-    isAccountConnected: false,
+    account: null,
 });
 
 interface ConnectionProviderProps {
@@ -27,7 +28,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     children,
 }) => {
     const [isConnected, setIsConnected] = useState(false);
-    const [isAccountConnected, setIsAccountConnected] = useState(false);
+    const [account, setAccount] = useState<AccountUser | null>(null);
 
     // Function to check network connection status
     const checkConnection = async () => {
@@ -42,15 +43,16 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     // Function to check account connection status
     const checkAccountConnection = async () => {
         if (!isConnected) {
-            setIsAccountConnected(false);
+            setAccount(null);
             return;
         }
 
         try {
             const accountConnected = await checkIsAccountConnected();
-            setIsAccountConnected(accountConnected);
+            setAccount(accountConnected || null);
         } catch (error) {
             console.error("Failed to fetch account connection status", error);
+            setAccount(null);
         }
     };
 
@@ -64,14 +66,14 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     // Check account connection when the network connection changes
     useEffect(() => {
         if (isConnected) {
-            checkAccountConnection(); // Check account if network is connected
+            checkAccountConnection();
         } else {
-            setIsAccountConnected(false); // Reset account connection if network is disconnected
+            setAccount(null);
         }
     }, [isConnected]);
 
     return (
-        <ConnectionContext.Provider value={{ isConnected, isAccountConnected }}>
+        <ConnectionContext.Provider value={{ isConnected, account }}>
             {children}
         </ConnectionContext.Provider>
     );

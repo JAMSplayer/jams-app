@@ -1,3 +1,4 @@
+import { AccountUser } from "@/types/account-user";
 import { invoke } from "@tauri-apps/api/core";
 
 const REGISTER_META_PREFIX = "jams";
@@ -55,13 +56,20 @@ export async function checkIsConnected(): Promise<boolean> {
     }
 }
 
-// TODO implement - should check if account is connected
+// TODO implement - should check return user account object if account is connected, null if not.
 // look at: providers/connection-provider.tsx
-export async function checkIsAccountConnected(): Promise<boolean> {
+export async function checkIsAccountConnected(): Promise<AccountUser | null> {
     try {
-        return true;
+        const account: AccountUser = {
+            username: "",
+            password: "",
+            address: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        };
+        return account;
     } catch (e) {
-        return false;
+        return null;
     }
 }
 
