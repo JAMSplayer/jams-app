@@ -1,6 +1,6 @@
 import { SheetMenu } from "@/components/admin-panel/sheet-menu";
-import { ThemeToggler } from "../ThemeToggler";
-import AccountConnect from "../account/AccountConnect";
+import { ThemeToggler } from "../theme-toggler";
+import AccountConnect from "../account/account-connect";
 import { Link } from "react-router-dom";
 import { SettingsIcon } from "lucide-react";
 
