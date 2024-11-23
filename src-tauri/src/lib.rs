@@ -5,15 +5,26 @@ use tauri::{AppHandle, Manager, State, Emitter};
 use safe::{registers::XorNameBuilder, Safe, SecretKey, Multiaddr};
 
 mod server;
+mod secure_sk;
+
+const ACCOUNTS_DIR: &str = "accounts";
+const SK_FILENAME: &str = "sk.key";
+const ADDRESS_FILENAME: &str = "evm_address";
+
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Error {
-    message: String,
+enum Error {
+    Common(String),
+    BadLogin,
+    BadPassword,
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", &self.message)
+        match self {
+            crate::Error::BadLogin | crate::Error::BadPassword => write!(f, "{:?}", &self),
+            crate::Error::Common(msg) => write!(f, "{}", msg),
+        }
     }
 }
 
@@ -21,71 +32,73 @@ impl std::error::Error for Error {}
 
 impl From<tauri::Error> for Error {
     fn from(tauri_error: tauri::Error) -> Self {
-        Error {
-            message: format!("Tauri: {}", tauri_error),
-        }
+        Self::Common(format!("Tauri: {}", tauri_error))
     }
 }
 
 impl From<safe::Error> for Error {
     fn from(safe_error: safe::Error) -> Self {
-        Error {
-            message: format!("Safe: {}", safe_error),
-        }
+        Self::Common(format!("Safe: {}", safe_error))
     }
 }
 
+
 fn make_root(app: &mut AppHandle) -> Result<PathBuf, Error> {
-    let app_data = app.path().app_data_dir().map_err(|_| Error {
-        message: format!("Could not get app data dir, exiting."),
-    })?;
-    fs::create_dir_all(&app_data).map_err(|_| Error {
-        message: format!(
-            "Could not create app data dir: {}, exiting.",
+    let app_data = app.path().app_data_dir().map_err(
+        |_| Error::Common(format!("Could not get app data dir"))
+    )?;
+    fs::create_dir_all(&app_data).map_err(
+        |_| Error::Common(format!(
+            "Could not create app data dir: {}",
             &app_data.display()
-        ),
-    })?;
+        ))
+    )?;
 
     Ok(app_data)
 }
 
-// TODO: store in a safe place, encrypted with password
-fn load_create_key(app_root: &PathBuf) -> Result<SecretKey, Error> {
-    let mut sk_file = app_root.clone();
-    sk_file.push("sk.key");
+fn user_root(app_root: &PathBuf, login: String) -> PathBuf {
+    let mut sk_dir = app_root.clone();
+    sk_dir.push(ACCOUNTS_DIR);
+    sk_dir.push(login);
+
+    sk_dir
+}
+
+fn load_create_key(app_root: &PathBuf, login: String, password: String, register: bool) -> Result<SecretKey, Error> {
+    let sk_dir = user_root(app_root, login);
+    let mut sk_file = sk_dir.clone();
+    sk_file.push(SK_FILENAME);
 
     let not_readable_msg = format!(
-        "Could not read user key file: {}, exiting.",
+        "Could not read user key file: {}",
         &sk_file.display()
     );
-    let sk = if sk_file.try_exists().map_err(|_| Error {
-        message: not_readable_msg.clone(),
-    })? {
-        let bytes = fs::read(&sk_file).map_err(|_| Error {
-            message: not_readable_msg.clone(),
-        })?;
+    let sk = if sk_file.try_exists().map_err(|_| Error::Common(not_readable_msg.clone()))? {
+        if register {
+            return Err(Error::Common(String::from("User already exists")));
+        }
 
-        let wrong_format_msg = format!(
-            "Wrong format of user key file: {}, exiting.",
-            &sk_file.display()
-        );
-        if bytes.len() == 32 {
-            SecretKey::from_bytes(bytes[0..32].try_into().unwrap()).map_err(|_| Error {
-                message: wrong_format_msg,
-            })
-        } else {
-            Err(Error {
-                message: wrong_format_msg,
-            })
-        }?
+        let bytes = fs::read(&sk_file).map_err(
+            |_| Error::Common(not_readable_msg.clone()))?;
+
+        secure_sk::decrypt(&bytes, &password)?
     } else {
+        if !register {
+            return Err(Error::BadLogin);
+        }
+
         let sk = SecretKey::random();
-        std::fs::write(sk_file.clone(), &sk.to_bytes()).map_err(|_| Error {
-            message: format!(
-                "Could not save user key file: {}, exiting.",
-                &sk_file.display()
-            ),
-        })?;
+
+        let file_bytes = secure_sk::encrypt(sk.clone(), &password)?;
+        std::fs::create_dir_all(sk_dir.clone()).map_err(
+            |_| Error::Common(format!(
+                "Could not create user dir: {}", &sk_dir.display()
+            )))?;
+        std::fs::write(&sk_file, file_bytes).map_err(
+            |_| Error::Common(format!(
+                "Could not save user key file: {}", &sk_file.display()
+            )))?;
         sk
     };
 
@@ -94,25 +107,32 @@ fn load_create_key(app_root: &PathBuf) -> Result<SecretKey, Error> {
 
 // leave peer empty or anything other than Multiaddr to connect to official network.
 #[tauri::command]
-async fn connect(peer: String, mut app: AppHandle) -> Result<(), Error> {
+async fn connect(peer: String, login: String, password: String, register: bool, mut app: AppHandle) -> Result<(), Error> {
     let state = app.try_state::<Mutex<Option<Safe>>>();
     if state.is_some() {
-        if state.unwrap().lock().await.is_some() {
+        return if state.unwrap().lock().await.is_some() {
             println!("Already connected.");
+            Ok(())
         } else {
             println!("Already connecting...");
-        }
-        return Ok(());
-    } else {
-        app.manage(Mutex::new(None::<Safe>));
+            Err(Error::Common(String::from("Already connecting.")))
+        };
     }
-
+    app.manage(Mutex::new(None::<Safe>));
     let main_window = app.get_webview_window("main").unwrap();
-    main_window.set_title("JAMS: connecting...")?;
+    main_window.set_title("JAMS: connecting...").unwrap();
 
-    let app_root = make_root(&mut app)?;
+    let app_root = make_root(&mut app)
+        .inspect_err(|_| {
+            main_window.set_title("JAMS (not connected)").unwrap();
+            app.unmanage::<Mutex<Option<Safe>>>();
+        })?;
 
-    let sk = load_create_key(&app_root)?;
+    let sk = load_create_key(&app_root, login.clone(), password, register)
+        .inspect_err(|_| {
+            main_window.set_title("JAMS (not connected)").unwrap();
+            app.unmanage::<Mutex<Option<Safe>>>();
+        })?;
     println!("\n\nSecret Key: {}", &sk.to_hex());
 
     let mut peers = Vec::new();
@@ -126,46 +146,45 @@ async fn connect(peer: String, mut app: AppHandle) -> Result<(), Error> {
         true
     });
 
-    Safe::init_logging().map_err(|_| Error {
-        message: format!("Autonomi logging error, exiting."),
-    })?;
+//    Safe::init_logging().map_err(|_| Error::Common(format!("Autonomi logging error")))?;
+    Safe::init_logging().unwrap();
 
     println!("\n\nConnecting...");
 
     let safe = Safe::connect(peers, add_network_contacts, Some(sk), app_root.join("wallet")).await.inspect_err(|_| {
-        let _ = main_window.set_title("JAMS (not connected)");
+        main_window.set_title("JAMS (not connected)").unwrap();
+        app.unmanage::<Mutex<Option<Safe>>>();
     })?;
-    app.emit("connect", ()).map_err(|_| Error {
-        message: String::from("Event emit error."),
-    })?;
-//    println!("Wallet address: {}", safe.address()?.to_hex());
-    println!("ETH wallet address: {}", safe.address()?.to_string());
+    let _ = app.emit("connect", ()).map_err(|_| Error::Common(String::from("Event emit error.")))
+        .inspect_err(|e| eprintln!("{}", e));
+
+    println!("ETH wallet address: {}", safe.address().to_string());
+    let addr_dir = user_root(&app_root, login.clone());
+    let mut addr_file = addr_dir.clone();
+    addr_file.push(ADDRESS_FILENAME);
+    let _ = std::fs::write(&addr_file, format!("{}", safe.address())).map_err(
+        |_| Error::Common(format!(
+            "Could not save address file: {}", &addr_file.display()
+        ))).inspect_err(|e| eprintln!("{}", e));
 
     println!("\n\nConnected.");
     *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(safe);
-
-    main_window.set_title("JAMS (connected)")?;
+    main_window.set_title("JAMS (connected)").unwrap();
 
     Ok(())
 }
 
 #[tauri::command]
 async fn disconnect(app: AppHandle) -> Result<(), Error> {
-    app.unmanage::<Mutex<Option<Safe>>>().ok_or(Error {
-        message: String::from("Not connected."),
-    })?;
+    app.unmanage::<Mutex<Option<Safe>>>().ok_or(Error::Common(String::from("Not connected.")))?;
 
-    app.emit("disconnect", ()).map_err(|_| Error {
-        message: String::from("Event emit error."),
-    })
+    app.emit("disconnect", ()).map_err(|_| Error::Common(String::from("Event emit error.")))
 }
 
 
 fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
     if name.is_empty() {
-        return Err(Error {
-            message: String::from("Empty register name."),
-        });
+        return Err(Error::Common(String::from("Empty register name.")));
     }
     let mut mb = XorNameBuilder::from_str(&name[0]);
     for n in &name[1..] {
@@ -194,9 +213,7 @@ async fn create_register(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error {
-            message: String::from("Not connected."),
-        })?
+        .ok_or(Error::Common(String::from("Not connected.")))?
         .register_create(&data.as_bytes(), meta, None)
         .await?;
 
@@ -219,9 +236,7 @@ async fn read_register(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error {
-            message: String::from("Not connected."),
-        })?
+        .ok_or(Error::Common(String::from("Not connected.")))?
         .open_register(meta)
         .await?;
 
@@ -229,9 +244,7 @@ async fn read_register(
         .await?
         .unwrap_or(Vec::new());
 
-    Ok(String::from_utf8(data).map_err(|e| Error {
-        message: format!("{e}"),
-    })?)
+    Ok(String::from_utf8(data).map_err(|e| Error::Common(format!("{e}")))?)
 }
 
 #[tauri::command]
@@ -250,9 +263,7 @@ async fn write_register(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error {
-            message: String::from("Not connected."),
-        })?
+        .ok_or(Error::Common(String::from("Not connected.")))?
         .open_register(meta)
         .await?;
 
@@ -264,16 +275,12 @@ async fn write_register(
             .lock()
             .await
             .as_mut()
-            .ok_or(Error {
-                message: String::from("Not connected."),
-            })?
+            .ok_or(Error::Common(String::from("Not connected.")))?
             .register_write(&mut reg, data.as_bytes()).await?;
 
         println!("\n\nRegister updated: {:?}", reg);
     } else {
-        return Err(Error {
-            message: String::from("Empty data object string."),
-        });
+        return Err(Error::Common(String::from("Empty data object string.")));
     }
 
     Ok(())
@@ -285,10 +292,8 @@ async fn client_address(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, 
         .lock()
         .await
         .as_mut()
-        .ok_or(Error {
-            message: String::from("Not connected."),
-        })?
-        .address()?;
+        .ok_or(Error::Common(String::from("Not connected.")))?
+        .address();
     Ok(address.to_string())
 }
 
@@ -298,9 +303,7 @@ async fn balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> 
         .lock()
         .await
         .as_mut()
-        .ok_or(Error {
-            message: String::from("Not connected."),
-        })?
+        .ok_or(Error::Common(String::from("Not connected.")))?
         .balance()
         .await?;
     Ok(format!("{:x}", balance)) // hex string

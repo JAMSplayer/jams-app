@@ -24,25 +24,27 @@ export async function connect() {
   console.log("connecting...");
   try {
     await invoke("connect", {
-//      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
-      peer: "OFFICIAL NETWORK"
+//      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen", // local
+      peer: "OFFICIAL NETWORK",
+      login: "test3",
+      password: "test",
+      register: false,
     });
+    console.log(await balance());
+    console.log("connected.");
   } catch (e) {
     console.error("connect: ", e);
   }
-  console.log("connected.");
-
-  console.log(await balance());
 }
 
 export async function disconnect() {
     console.log("disconnecting...");
     try {
         await invoke("disconnect");
+        console.log("disconnected.");
     } catch (e) {
         console.error("disconnect: ", e);
     }
-    console.log("disconnected.");
 }
 
 export async function isConnected(): Promise<boolean> {

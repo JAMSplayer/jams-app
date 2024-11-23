@@ -741,6 +741,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "argon2"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c3610892ee6e0cbce8ae2700349fcf8f98adb0dbfbee85aec3c9179d29cc072"
+dependencies = [
+ "base64ct",
+ "blake2",
+ "cpufeatures",
+ "password-hash",
+]
+
+[[package]]
 name = "ark-ff"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1197,7 +1209,6 @@ dependencies = [
  "sn_registers",
  "thiserror 1.0.65",
  "tokio",
- "tokio_with_wasm",
  "tracing",
  "tracing-subscriber",
  "tracing-web",
@@ -4343,8 +4354,11 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 name = "jams-desktop"
 version = "0.1.0"
 dependencies = [
+ "aes-gcm",
+ "argon2",
  "futures",
  "lazy_static",
+ "password-hash",
  "safe",
  "serde",
  "serde_json",
@@ -6291,6 +6305,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "password-hash"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "346f04948ba92c43e8469c1ee6736c7563d71012b17d40745260fe106aac2166"
+dependencies = [
+ "base64ct",
+ "rand_core 0.6.4",
+ "subtle",
+]
+
+[[package]]
 name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7652,7 +7677,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "safe"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "alloy-primitives",
  "autonomi",
@@ -7669,6 +7694,7 @@ dependencies = [
  "tiny-keccak",
  "tokio",
  "tracing",
+ "url",
  "xor_name",
 ]
 
@@ -9578,30 +9604,6 @@ dependencies = [
  "futures-sink",
  "pin-project-lite",
  "tokio",
-]
-
-[[package]]
-name = "tokio_with_wasm"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c33ccdd8192685c79013359bf42e1c2649ed6bf11e8fa05f1f7f2acc7c71368"
-dependencies = [
- "js-sys",
- "tokio",
- "tokio_with_wasm_proc",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "tokio_with_wasm_proc"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ff8fa1b71e329058cc97c093972aeb51dd7e658bd5197f294665639194bbc4c"
-dependencies = [
- "quote",
- "syn 2.0.87",
 ]
 
 [[package]]
