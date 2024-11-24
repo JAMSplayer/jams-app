@@ -2,12 +2,14 @@ import { useAudioPlayer } from "@/components/player/audio-provider";
 import { Song } from "@/types/song";
 import { Button } from "../ui/button";
 import { usePlayerStore } from "@/store/player-store";
+import { useTranslation } from "react-i18next";
 
 export function SongLoadButton({
     song,
 }: React.ComponentPropsWithoutRef<"button"> & {
     song: Song;
 }) {
+    const { t } = useTranslation();
     let player = useAudioPlayer(song);
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
 
@@ -21,7 +23,7 @@ export function SongLoadButton({
                 player.play(song);
             }}
         >
-            Load Song
+            {t("loadSong")}
         </Button>
     );
 }

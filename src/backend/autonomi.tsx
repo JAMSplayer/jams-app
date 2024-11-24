@@ -1,3 +1,4 @@
+import { AccountUser } from "@/types/account-user";
 import { invoke } from "@tauri-apps/api/core";
 
 const REGISTER_META_PREFIX = "jams";
@@ -21,20 +22,20 @@ export async function balance(): Promise<string | null> {
 }
 
 export async function connect() {
-  console.log("connecting...");
-  try {
-    await invoke("connect", {
-//      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen", // local
-      peer: "OFFICIAL NETWORK",
-      login: "test3",
-      password: "test",
-      register: false,
-    });
-    console.log(await balance());
-    console.log("connected.");
-  } catch (e) {
-    console.error("connect: ", e);
-  }
+    console.log("connecting...");
+    try {
+        await invoke("connect", {
+            //      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
+            peer: "OFFICIAL NETWORK",
+            login: "test3",
+            password: "test",
+            register: false,
+        });
+	    console.log(await balance());
+        console.log("connected.");
+    } catch (e) {
+        console.error("connect: ", e);
+    }
 }
 
 export async function disconnect() {
@@ -47,12 +48,30 @@ export async function disconnect() {
     }
 }
 
-export async function isConnected(): Promise<boolean> {
+// TODO implement - should just check if connected to network
+export async function checkIsConnected(): Promise<boolean> {
     try {
         await invoke("client_address");
         return true;
     } catch (e) {
         return false;
+    }
+}
+
+// TODO implement - should check return user account object if account is connected, null if not.
+// look at: providers/connection-provider.tsx
+export async function checkIsAccountConnected(): Promise<AccountUser | null> {
+    try {
+        const account: AccountUser = {
+            username: "",
+            password: "",
+            address: "",
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        };
+        return account;
+    } catch (e) {
+        return null;
     }
 }
 

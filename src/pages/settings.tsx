@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
-import TopLevelBreadcrumbs from "@/components/navigation/TopLevelBreadcrumbs";
-import SecondaryLevelBreadcrumbs from "@/components/navigation/SecondaryLevelBreadcrumbs";
+import TopLevelBreadcrumbs from "@/components/navigation/top-level-breadcrumbs";
+import SecondaryLevelBreadcrumbs from "@/components/navigation/secondary-level-breadcrumbs";
 
 const secondaryNavigation = [
     { name: "Status", href: "/settings/status", current: false },
