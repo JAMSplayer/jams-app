@@ -91,11 +91,11 @@ fn load_create_key(app_root: &PathBuf, login: String, password: String, register
         let sk = SecretKey::random();
 
         let file_bytes = secure_sk::encrypt(sk.clone(), &password)?;
-        std::fs::create_dir_all(sk_dir.clone()).map_err(
+        fs::create_dir_all(sk_dir.clone()).map_err(
             |_| Error::Common(format!(
                 "Could not create user dir: {}", &sk_dir.display()
             )))?;
-        std::fs::write(&sk_file, file_bytes).map_err(
+        fs::write(&sk_file, file_bytes).map_err(
             |_| Error::Common(format!(
                 "Could not save user key file: {}", &sk_file.display()
             )))?;
@@ -105,9 +105,39 @@ fn load_create_key(app_root: &PathBuf, login: String, password: String, register
     Ok(sk)
 }
 
+#[tauri::command]
+async fn list_accounts(mut app: AppHandle) -> Result<Vec<(String, String)>, Error> {
+    let mut accounts_dir = make_root(&mut app)
+        .map_err(|_| Error::Common(format!("Cannot access/create application folder.")))?;
+    accounts_dir.push(ACCOUNTS_DIR);
+
+    let default_mod_time = std::time::SystemTime::now();
+
+    let mut entries = fs::read_dir(accounts_dir)
+        .map_err(|err| Error::Common(format!("Error reading accounts. {}", err)))?
+        .filter(Result::is_ok)
+        .map(|res| {
+            let entry = res.unwrap();
+
+            let modified = entry.metadata().map(|m| m.modified().unwrap_or(default_mod_time)).unwrap_or(default_mod_time);
+            let username = entry.file_name().to_string_lossy().to_string();
+            let address = fs::read_to_string(&entry.path())
+                .inspect_err(|err| eprintln!("Error reading address file. {}", err))
+                .unwrap_or(String::from("<error>"));
+            (modified, username, address)
+        })
+        .collect::<Vec<(std::time::SystemTime, String, String)>>();
+
+    entries.sort();
+    Ok(entries.iter()
+        .map(|(_modified, username, address)| (username.clone(), address.clone()))
+        .collect::<Vec<(String, String)>>())
+}
+
 // leave peer empty or anything other than Multiaddr to connect to official network.
 #[tauri::command]
 async fn connect(peer: String, login: String, password: String, register: bool, mut app: AppHandle) -> Result<(), Error> {
+    println!("ACCOUNTS: {:?}", list_accounts(app.clone()).await.unwrap());
     let state = app.try_state::<Mutex<Option<Safe>>>();
     if state.is_some() {
         return if state.unwrap().lock().await.is_some() {
@@ -163,7 +193,7 @@ async fn connect(peer: String, login: String, password: String, register: bool, 
     let addr_dir = user_root(&app_root, login.clone());
     let mut addr_file = addr_dir.clone();
     addr_file.push(ADDRESS_FILENAME);
-    let _ = std::fs::write(&addr_file, format!("{}", safe.address())).map_err(
+    let _ = fs::write(&addr_file, format!("{}", safe.address())).map_err(
         |_| Error::Common(format!(
             "Could not save address file: {}", &addr_file.display()
         ))).inspect_err(|e| eprintln!("{}", e));
@@ -171,6 +201,8 @@ async fn connect(peer: String, login: String, password: String, register: bool, 
     println!("\n\nConnected.");
     *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(safe);
     main_window.set_title("JAMS (connected)").unwrap();
+
+    println!("ACCOUNTS: {:?}", list_accounts(app.clone()).await.unwrap());
 
     Ok(())
 }
@@ -318,6 +350,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
+            list_accounts,
             connect,
             disconnect,
             create_register,

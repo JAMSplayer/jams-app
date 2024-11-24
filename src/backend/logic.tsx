@@ -4,8 +4,10 @@ import {
     createRegister,
     readRegister,
     writeRegister,
+    listAccounts,
 } from "@/backend/autonomi";
 import { AccountUser, RegisterAccountUser } from "@/types/account-user";
+import { RecentAccount } from "@/types/recent-account";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
@@ -75,5 +77,11 @@ export async function checkIsAccountConnected(): Promise<AccountUser | null> {
     }
 
     return null;
+}
+
+// Return all registered accounts with addresses, sorted from most recently used.
+export async function registeredAccounts(): Promise<Array<RecentAccount>> {
+    // TODO
+    console.log(listAccounts());
 }
 

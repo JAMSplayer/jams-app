@@ -51,10 +51,10 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
         console.log(data);
 
         registerUser({
-            username: data.username;
-            password: data.password;
-            dateCreated: new Date();
-            dateUpdated: new Date();
+            username: data.username,
+            password: data.password,
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
         });
     };
 

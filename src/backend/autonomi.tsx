@@ -8,7 +8,16 @@ import { invoke } from "@tauri-apps/api/core";
 
 const REGISTER_META_PREFIX = "jams";
 
-async function connect_inner(login: string, password: string, newAccount: boolean) {
+async function listAccounts(): Promise<Array | null> {
+    try {
+        return await invoke<Array>("list_accounts");
+    } catch (e) {
+        console.error("listAccounts: ", e);
+        return null;
+    }
+}
+
+async function connectInner(login: string, password: string, newAccount: boolean) {
     console.log("connecting...");
     await invoke("connect", {
         //      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
@@ -27,7 +36,7 @@ async function connect_inner(login: string, password: string, newAccount: boolea
 export async function loginAndConnect(login: string, password: string) {
     console.log("logging in...");
     try {
-        await connect_inner(login, password, false);
+        await connectInner(login, password, false);
         console.log("logged in.");
     } catch (e) {
         console.error("login: ", e);
@@ -40,7 +49,7 @@ export async function loginAndConnect(login: string, password: string) {
 export async function registerAndConnect(login: string, password: string) {
     console.log("registering...");
     try {
-        await connect_inner(login, password, true);
+        await connectInner(login, password, true);
         console.log("registered.");
     } catch (e) {
         console.error("register: ", e);
