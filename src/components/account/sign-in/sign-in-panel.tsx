@@ -20,6 +20,7 @@ import { formatAddress } from "@/lib/utils/address";
 import { Button } from "@/components/ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./recent-accounts";
+import { loginAndConnect } from "@/backend/autonomi";
 
 interface SignInPanelProps {
     onCreateAccountClicked: () => void;
@@ -75,22 +76,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
     // [recentAccountList, setRecentAccountList]
     const [recentAccountList] = useState<RecentAccount[]>([
-        {
-            username: "username1",
-            address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
-        },
-        {
-            username: "username2",
-            address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
-        },
-        {
-            username: "username3",
-            address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
-        },
-        {
-            username: "username4",
-            address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
-        },
+        // TODO: get from backend
     ]);
 
     // ====================================================================================
@@ -124,6 +110,8 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
             toast("Register Warning", {
                 description: "This username does not exist.",
             });
+        } else {
+            loginAndConnect(username, password);
         }
     };
 

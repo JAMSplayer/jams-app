@@ -1,7 +1,62 @@
-import { AccountUser } from "@/types/account-user";
 import { invoke } from "@tauri-apps/api/core";
 
+// =======
+// This file contains low-level backend code, mostly interacting with Rust layer by commands.
+// Just basic types allowed and types, that correspond to Rust types.
+// =======
+
+
 const REGISTER_META_PREFIX = "jams";
+
+async function connect_inner(login: string, password: string, newAccount: boolean) {
+    console.log("connecting...");
+    await invoke("connect", {
+        //      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
+        peer: "OFFICIAL NETWORK",
+        login: login,
+        password: password,
+        register: newAccount,
+    });
+    console.log(await balance());
+    console.log("connected.");
+}
+
+// Finds user folder in storage by login,
+// decrypts SecretKey with the password
+// and connects to the network.
+export async function loginAndConnect(login: string, password: string) {
+    console.log("logging in...");
+    try {
+        await connect_inner(login, password, false);
+        console.log("logged in.");
+    } catch (e) {
+        console.error("login: ", e);
+    }
+}
+
+// Creates user folder in storage,
+// encrypts SecretKey with the password and stores in the folder
+// and connects to the network.
+export async function registerAndConnect(login: string, password: string) {
+    console.log("registering...");
+    try {
+        await connect_inner(login, password, true);
+        console.log("registered.");
+    } catch (e) {
+        console.error("register: ", e);
+    }
+}
+
+
+export async function disconnect() {
+    console.log("disconnecting...");
+    try {
+        await invoke("disconnect");
+        console.log("disconnected.");
+    } catch (e) {
+        console.error("disconnect: ", e);
+    }
+}
 
 export async function clientAddress(): Promise<string | null> {
     try {
@@ -21,59 +76,7 @@ export async function balance(): Promise<string | null> {
     }
 }
 
-export async function connect() {
-    console.log("connecting...");
-    try {
-        await invoke("connect", {
-            //      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
-            peer: "OFFICIAL NETWORK",
-            login: "test3",
-            password: "test",
-            register: false,
-        });
-	    console.log(await balance());
-        console.log("connected.");
-    } catch (e) {
-        console.error("connect: ", e);
-    }
-}
 
-export async function disconnect() {
-    console.log("disconnecting...");
-    try {
-        await invoke("disconnect");
-        console.log("disconnected.");
-    } catch (e) {
-        console.error("disconnect: ", e);
-    }
-}
-
-// TODO implement - should just check if connected to network
-export async function checkIsConnected(): Promise<boolean> {
-    try {
-        await invoke("client_address");
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
-
-// TODO implement - should check return user account object if account is connected, null if not.
-// look at: providers/connection-provider.tsx
-export async function checkIsAccountConnected(): Promise<AccountUser | null> {
-    try {
-        const account: AccountUser = {
-            username: "",
-            password: "",
-            address: "",
-            dateCreated: new Date(),
-            dateUpdated: new Date(),
-        };
-        return account;
-    } catch (e) {
-        return null;
-    }
-}
 
 function prepareMeta(name: string[]): string[] {
     name.unshift(REGISTER_META_PREFIX);
@@ -105,6 +108,7 @@ export async function createRegister(
     }
 }
 
+// TODO: deprecated, there is no faucet in current network.
 export async function receive(transfer: string) {
     try {
         await invoke("receive", { transfer: transfer });

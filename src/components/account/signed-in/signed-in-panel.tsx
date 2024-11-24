@@ -2,6 +2,7 @@ import { formatAddress } from "@/lib/utils/address";
 import { formatBalance } from "@/lib/utils/balance";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import { Copy } from "lucide-react";
+import { balance as autonomiBalance } from "@/backend/autonomi";
 
 interface SignedInPanelProps {
     account: {
@@ -15,10 +16,9 @@ const SignedInPanel: React.FC<SignedInPanelProps> = ({ account }) => {
     // Account / Balance Functionality
     // ====================================================================================
 
-    // TODO get this from the to be created hook by loziniak
     const addressData = {
         symbol: "ANT",
-        value: 0.0,
+        value: autonomiBalance(),
         decimals: 18,
     };
 

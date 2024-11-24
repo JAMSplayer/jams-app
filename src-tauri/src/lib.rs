@@ -155,7 +155,8 @@ async fn connect(peer: String, login: String, password: String, register: bool, 
         main_window.set_title("JAMS (not connected)").unwrap();
         app.unmanage::<Mutex<Option<Safe>>>();
     })?;
-    let _ = app.emit("connect", ()).map_err(|_| Error::Common(String::from("Event emit error.")))
+    let _ = app.emit("connect", (login.clone(), safe.address().to_string())) // event with username and address
+        .map_err(|_| Error::Common(String::from("Event emit error.")))
         .inspect_err(|e| eprintln!("{}", e));
 
     println!("ETH wallet address: {}", safe.address().to_string());
@@ -178,7 +179,7 @@ async fn connect(peer: String, login: String, password: String, register: bool, 
 async fn disconnect(app: AppHandle) -> Result<(), Error> {
     app.unmanage::<Mutex<Option<Safe>>>().ok_or(Error::Common(String::from("Not connected.")))?;
 
-    app.emit("disconnect", ()).map_err(|_| Error::Common(String::from("Event emit error.")))
+    app.emit("disconnect", ()).map_err(|_| Error::Common(String::from("Event emit error."))) // event
 }
 
 

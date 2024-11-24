@@ -5,6 +5,7 @@ import Avatar from "./avatar";
 import SignInPanel from "./sign-in/sign-in-panel";
 import SignedInPanel from "./signed-in/signed-in-panel";
 import CreateAccountPanel from "./create-account/create-account-panel";
+import { disconnect as autonomiDisconnect } from "@/backend/autonomi";
 
 
 export default function AccountConnect() {
@@ -46,13 +47,14 @@ export default function AccountConnect() {
     };
 
     const disconnect = () => {
-        //  TODO functionality to disconnect - this can be created via tauri commands to the backend.
+        autonomiDisconnect();
         setIsConnected(false);
         setIsConnectedPanelOpen(false);
     };
 
     const connect = () => {
         //  TODO functionality to connect - this can be created via tauri commands to the backend.
+        //  NOTE: connecting is an integral part of login and register functionalities, so it probably should be moved there.
         //setIsSignInPanelOpen(!isSignInPanelOpen);
         toggleSignInPanel();
     };

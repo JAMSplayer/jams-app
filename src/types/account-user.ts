@@ -9,7 +9,6 @@ export type RegisterAccountUser = {
 
 export type AccountUser = {
     username: string;
-    password: string;
     address: string;
     dateCreated: Date;
     dateUpdated: Date;

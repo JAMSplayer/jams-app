@@ -5,8 +5,11 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { checkIsConnected, checkIsAccountConnected } from "@/backend/autonomi";
+import { checkIsConnected, checkIsAccountConnected } from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
+
+// TODO:
+// * handle connect (username, address) / disconnect events from Rust.
 
 // Define the shape of the context value
 interface ConnectionContextType {
