@@ -8,7 +8,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 const REGISTER_META_PREFIX = "jams";
 
-async function listAccounts(): Promise<Array | null> {
+export async function listAccounts(): Promise<Array | null> {
     try {
         return await invoke<Array>("list_accounts");
     } catch (e) {

@@ -1,6 +1,6 @@
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { RecentAccount } from "@/types/recent-account";
-import Avatar from "../avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { formatAddress } from "@/lib/utils/address";
 import { Label } from "@/components/ui/label";
 

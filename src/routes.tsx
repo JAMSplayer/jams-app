@@ -1,6 +1,6 @@
 // Routes.tsx
 import { Routes, Route } from "react-router-dom";
-import Dashboard from "./components/dashboard";
+import Dashboard from "./components/Dashboard";
 // import NotFound from "./components/NotFound"; TODO reimplement
 import Settings from "./pages/settings";
 import StatusSettings from "./components/settings/status-settings";

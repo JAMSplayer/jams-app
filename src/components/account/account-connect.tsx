@@ -1,7 +1,7 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { PowerIcon } from "lucide-react";
-import Avatar from "./avatar";
+import { Avatar } from "@/components/ui/avatar";
 import SignInPanel from "./sign-in/sign-in-panel";
 import SignedInPanel from "./signed-in/signed-in-panel";
 import CreateAccountPanel from "./create-account/create-account-panel";
