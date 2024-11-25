@@ -68,10 +68,13 @@ export async function saveUser(user: AccountUser) {
 // This implies, that user is also logged to the application: login
 // and password were OK, and SecretKey has been decrypted from storage.
 export async function checkIsConnected(): Promise<boolean> {
+    console.log("Attempting to check if network is connected");
     try {
         let address = await clientAddress();
+        console.log("network is connected");
         return address !== null;
     } catch (e) {
+        console.log("network is not connected");
         return false;
     }
 }
