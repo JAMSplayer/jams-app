@@ -77,7 +77,7 @@ export async function checkIsConnected(): Promise<boolean> {
 }
 
 // Returns user account object if account is connected, null if not.
-export async function checkIsAccountConnected(): Promise<AccountUser | null> {
+export async function getConnectedUserAccount(): Promise<AccountUser | null> {
     try {
         let connected = await checkIsConnected();
 
@@ -93,7 +93,7 @@ export async function checkIsAccountConnected(): Promise<AccountUser | null> {
             console.error("User not found.");
         }
     } catch (e) {
-        console.error("Unexpected error in checkIsAccountConnected: ", e);
+        console.error("Unexpected error in getConnectedUserAccount: ", e);
     }
 
     return null;

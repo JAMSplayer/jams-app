@@ -5,7 +5,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { checkIsConnected, checkIsAccountConnected } from "@/backend/logic";
+import { checkIsConnected, getConnectedUserAccount } from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
 
 // TODO:
@@ -44,14 +44,14 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     };
 
     // Function to check account connection status
-    const getConnectedUserAccount = async () => {
+    const getAccount = async () => {
         if (!isConnected) {
             setAccount(null);
             return;
         }
 
         try {
-            const accountConnected = await checkIsAccountConnected();
+            const accountConnected = await getConnectedUserAccount();
             setAccount(accountConnected || null);
         } catch (error) {
             console.error("Failed to fetch account connection status", error);
@@ -65,7 +65,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
         const intervalId = setInterval(() => {
             checkConnection(); // Regular network check every 5 seconds
             if (isConnected) {
-                getConnectedUserAccount(); // If connected, fetch the connected user account
+                getAccount(); // If connected, fetch the connected user account
             }
         }, 5000);
 
