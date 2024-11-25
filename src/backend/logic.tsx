@@ -6,8 +6,11 @@ import {
     writeRegister,
     listAccounts,
 } from "@/backend/autonomi";
-import { AccountUser, RegisterAccountUser } from "@/types/account-user";
-import { RecentAccount } from "@/types/recent-account";
+import {
+    AccountUser,
+    RegisterAccountUser,
+    SimpleAccountUser,
+} from "@/types/account-user";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
@@ -96,11 +99,15 @@ export async function checkIsAccountConnected(): Promise<AccountUser | null> {
 }
 
 // Return all registered accounts with addresses, sorted from most recently used.
-export async function registeredAccounts(): Promise<RecentAccount[]> {
-    // TODO
-    const accounts = await listAccounts();
+export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
+    // List accounts and check if it is null
+    const accounts: SimpleAccountUser[] | null = await listAccounts();
+
+    // If accounts is null, return an empty array
     if (accounts === null) {
         return [];
     }
+
+    // Map the accounts (which is an array of tuples) to an array of SimpleAccountUser objects
     return accounts;
 }

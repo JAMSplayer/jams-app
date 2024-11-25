@@ -14,8 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { RecentAccount } from "@/types/recent-account";
-import { RegisterAccountUser } from "@/types/account-user";
+import { RegisterAccountUser, SimpleAccountUser } from "@/types/account-user";
 import { registerUser } from "@/backend/logic";
 
 interface CreateAccountPanelProps {
@@ -71,7 +70,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
 
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
     // recentAccountList, setRecentAccountList
-    const [recentAccountList] = useState<RecentAccount[]>([]);
+    const [recentAccountList] = useState<SimpleAccountUser[]>([]);
 
     const validateUsername = (username: string) => {
         const foundAccount = recentAccountList.find(

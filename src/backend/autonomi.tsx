@@ -1,3 +1,4 @@
+import { SimpleAccountUser } from "@/types/account-user";
 import { invoke } from "@tauri-apps/api/core";
 
 // =======
@@ -7,11 +8,21 @@ import { invoke } from "@tauri-apps/api/core";
 
 const REGISTER_META_PREFIX = "jams";
 
-type AccountListItem = { username: string; address: string };
-
-export async function listAccounts(): Promise<AccountListItem[] | null> {
+export async function listAccounts(): Promise<SimpleAccountUser[] | null> {
     try {
-        return await invoke<AccountListItem[]>("list_accounts");
+        // Fetch the accounts as an array of [username, address] tuples
+        const accounts = await invoke<[string, string][]>("list_accounts");
+
+        // If the accounts are not null, map the tuples to SimpleAccountUser objects
+        if (accounts) {
+            return accounts.map(([username, address]) => ({
+                username,
+                address,
+            }));
+        }
+
+        // If accounts is null, return an empty array
+        return [];
     } catch (e) {
         console.error("listAccounts: ", e);
         return null;

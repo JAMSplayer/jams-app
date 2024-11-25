@@ -14,3 +14,8 @@ export type AccountUser = {
     dateUpdated: Date;
     songs?: Song[];
 };
+
+export type SimpleAccountUser = {
+    username: string;
+    address: string;
+};
