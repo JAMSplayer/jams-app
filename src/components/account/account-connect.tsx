@@ -1,12 +1,11 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { PowerIcon } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
 import SignInPanel from "./sign-in/sign-in-panel";
 import SignedInPanel from "./signed-in/signed-in-panel";
 import CreateAccountPanel from "./create-account/create-account-panel";
 import { disconnect as autonomiDisconnect } from "@/backend/autonomi";
-
+import Avatar from "./avatar";
 
 export default function AccountConnect() {
     // ====================================================================================

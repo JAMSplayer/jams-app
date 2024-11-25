@@ -5,29 +5,38 @@ import { invoke } from "@tauri-apps/api/core";
 // Just basic types allowed and types, that correspond to Rust types.
 // =======
 
-
 const REGISTER_META_PREFIX = "jams";
 
-export async function listAccounts(): Promise<Array | null> {
+type AccountListItem = { username: string; address: string };
+
+export async function listAccounts(): Promise<AccountListItem[] | null> {
     try {
-        return await invoke<Array>("list_accounts");
+        return await invoke<AccountListItem[]>("list_accounts");
     } catch (e) {
         console.error("listAccounts: ", e);
         return null;
     }
 }
 
-async function connectInner(login: string, password: string, newAccount: boolean) {
+async function connectInner(
+    login: string,
+    password: string,
+    newAccount: boolean
+) {
     console.log("connecting...");
-    await invoke("connect", {
-        //      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
-        peer: "OFFICIAL NETWORK",
-        login: login,
-        password: password,
-        register: newAccount,
-    });
-    console.log(await balance());
-    console.log("connected.");
+    try {
+        await invoke("connect", {
+            //      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
+            peer: "OFFICIAL NETWORK",
+            login: login,
+            password: password,
+            register: newAccount,
+        });
+        console.log(await balance());
+        console.log("connected.");
+    } catch (ex) {
+        console.log(ex);
+    }
 }
 
 // Finds user folder in storage by login,
@@ -56,7 +65,6 @@ export async function registerAndConnect(login: string, password: string) {
     }
 }
 
-
 export async function disconnect() {
     console.log("disconnecting...");
     try {
@@ -84,8 +92,6 @@ export async function balance(): Promise<string | null> {
         return null;
     }
 }
-
-
 
 function prepareMeta(name: string[]): string[] {
     name.unshift(REGISTER_META_PREFIX);

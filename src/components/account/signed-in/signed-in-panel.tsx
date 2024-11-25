@@ -3,6 +3,7 @@ import { formatBalance } from "@/lib/utils/balance";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import { Copy } from "lucide-react";
 import { balance as autonomiBalance } from "@/backend/autonomi";
+import { useEffect, useState } from "react";
 
 interface SignedInPanelProps {
     account: {
@@ -16,20 +17,39 @@ const SignedInPanel: React.FC<SignedInPanelProps> = ({ account }) => {
     // Account / Balance Functionality
     // ====================================================================================
 
+    const [balanceValue, setBalanceValue] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Fetch the balance asynchronously and update state
+        const fetchBalance = async () => {
+            try {
+                const value = await autonomiBalance();
+                setBalanceValue(value);
+            } catch (error) {
+                console.error("Error fetching balance:", error);
+            }
+        };
+
+        fetchBalance();
+    }, []);
+
+    // Prepare address data once balanceValue is available
     const addressData = {
         symbol: "ANT",
-        value: autonomiBalance(),
+        value: balanceValue,
         decimals: 18,
     };
 
-    const balance = addressData ? (
-        `${addressData.symbol}: ${formatBalance(
-            addressData.value,
-            addressData.decimals
-        )}`
-    ) : (
-        <></>
-    );
+    // Render the balance once it's available and properly formatted
+    const balance =
+        addressData.value !== null ? (
+            `${addressData.symbol}: ${formatBalance(
+                Number(addressData.value), // Convert value to a number for formatting
+                addressData.decimals
+            )}`
+        ) : (
+            <></>
+        );
 
     return (
         <div className="border-b border-dashed px-4 py-5 border-secondary">

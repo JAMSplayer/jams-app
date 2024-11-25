@@ -16,27 +16,43 @@ import { RecentAccount } from "@/types/recent-account";
 export async function registerUser(
     newUser: RegisterAccountUser
 ): Promise<AccountUser | null> {
-    console.log("creating new user: ", newUser);
+    console.log(`Attempting to create a new user: ${newUser.username}`);
 
-    registerAndConnect(newUser.username, newUser.password);
-    newUser.password = "";
     try {
-        let address = await clientAddress();
-        createdUser = { ...newUser, address: address };
+        // Register and connect the user
+        await registerAndConnect(newUser.username, newUser.password);
 
-        // Attempt to create a new register for the user
-        const success = await createRegister(["user"], createdUser);
-        if (success) {
-            console.log("New user created successfully.");
-            return createdUser;
+        // Retrieve the client address
+        const address = await clientAddress();
+
+        // Check if address is null and handle it if needed
+        if (address === null) {
+            console.error(
+                `Failed to retrieve address for user: ${newUser.username}`
+            );
+            return null;
         }
 
-        console.error("Failed to create a new user.");
-    } catch (e) {
-        console.error("Unexpected error in registerUser: ", e);
+        const registeredUser = { ...newUser, address };
+
+        // Create a new register for the user
+        const success = await createRegister(["user"], registeredUser);
+        if (!success) {
+            console.error(
+                `Failed to create a new user register for: ${newUser.username}`
+            );
+            return null;
+        }
+
+        console.log(`User ${newUser.username} created successfully.`);
+        return registeredUser;
+    } catch (error) {
+        console.error(
+            `Error during user registration for ${newUser.username}:`,
+            error
+        );
+        return null;
     }
-    
-    return null;
 }
 
 export async function saveUser(user: AccountUser) {
@@ -63,13 +79,13 @@ export async function checkIsAccountConnected(): Promise<AccountUser | null> {
 
         if (connected) {
             console.log("getting user...");
-        
+
             const user = await readRegister(["user"]);
             if (user) {
                 console.log("user: ", user);
                 return user as AccountUser;
             }
-    
+
             console.error("User not found.");
         }
     } catch (e) {
@@ -85,4 +101,3 @@ export async function registeredAccounts(): Promise<Array<RecentAccount>> {
     console.log(await listAccounts());
     return [];
 }
-

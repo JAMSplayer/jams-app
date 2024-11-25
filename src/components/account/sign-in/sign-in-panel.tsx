@@ -100,7 +100,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     }, [username, recentAccountList]);
 
     // (values: z.infer<typeof signInSchema>)
-    const signIn = (_: z.infer<typeof signInSchema>) => {
+    const signIn = (values: z.infer<typeof signInSchema>) => {
         //  TODO
         const usernameExists = recentAccountList.some(
             (account) => account.username === username
@@ -111,7 +111,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                 description: "This username does not exist.",
             });
         } else {
-            loginAndConnect(username, password);
+            loginAndConnect(values.username, values.password);
         }
     };
 

@@ -1,7 +1,5 @@
 import { useConnection } from "@/providers/connection-provider";
 import { SongLoadButton } from "./player/song-load-button";
-import { Button } from "./ui/button";
-import { loginAndConnect } from "@/backend/autonomi";
 
 export default function Dashboard() {
     const { isConnected, account } = useConnection();
@@ -21,16 +19,6 @@ export default function Dashboard() {
                         tags: ["undefined"],
                     }}
                 />
-            </div>
-            <div className="flex">
-                <Button
-                    variant="default"
-                    onClick={async () => {
-                        /* TODO implement pass username and password*/
-                    }}
-                >
-                    Sign In Account
-                </Button>
             </div>
             <div className="flex flex-col">
                 <div>
