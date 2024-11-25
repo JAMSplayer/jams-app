@@ -44,7 +44,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     };
 
     // Function to check account connection status
-    const checkAccountConnection = async () => {
+    const getConnectedUserAccount = async () => {
         if (!isConnected) {
             setAccount(null);
             return;
@@ -62,18 +62,15 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     // Check connection on mount and set interval to poll
     useEffect(() => {
         checkConnection(); // Initial network check
-        const intervalId = setInterval(checkConnection, 5000);
-        return () => clearInterval(intervalId); // Clear interval on unmount
-    }, []);
+        const intervalId = setInterval(() => {
+            checkConnection(); // Regular network check every 5 seconds
+            if (isConnected) {
+                getConnectedUserAccount(); // If connected, fetch the connected user account
+            }
+        }, 5000);
 
-    // Check account connection when the network connection changes
-    useEffect(() => {
-        if (isConnected) {
-            checkAccountConnection();
-        } else {
-            setAccount(null);
-        }
-    }, [isConnected]);
+        return () => clearInterval(intervalId); // Clear interval on unmount
+    }, [isConnected]); // Add isConnected as a dependency
 
     return (
         <ConnectionContext.Provider value={{ isConnected, account }}>
