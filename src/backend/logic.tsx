@@ -96,8 +96,11 @@ export async function checkIsAccountConnected(): Promise<AccountUser | null> {
 }
 
 // Return all registered accounts with addresses, sorted from most recently used.
-export async function registeredAccounts(): Promise<Array<RecentAccount>> {
+export async function registeredAccounts(): Promise<RecentAccount[]> {
     // TODO
-    console.log(await listAccounts());
-    return [];
+    const accounts = await listAccounts();
+    if (accounts === null) {
+        return [];
+    }
+    return accounts;
 }

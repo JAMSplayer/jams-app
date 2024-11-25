@@ -1,5 +1,7 @@
 import { useConnection } from "@/providers/connection-provider";
 import { SongLoadButton } from "./player/song-load-button";
+import { Button } from "./ui/button";
+import { registeredAccounts } from "@/backend/logic";
 
 export default function Dashboard() {
     const { isConnected, account } = useConnection();
@@ -20,6 +22,15 @@ export default function Dashboard() {
                     }}
                 />
             </div>
+            <Button
+                onClick={async () => {
+                    // get recent accounts
+                    const accounts = await registeredAccounts();
+                    console.log("ACCOUNTS: ", accounts);
+                }}
+            >
+                Get Accounts
+            </Button>
             <div className="flex flex-col">
                 <div>
                     <h1>

@@ -62,7 +62,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
 
         // Check if foundAccount exists instead of accountExists
         if (!foundAccount) {
-            toast("Register Warning", {
+            toast("Sign In Warning", {
                 description: "This username does not exist.",
             });
         } else {
