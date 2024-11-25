@@ -61,12 +61,11 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
         // Proceed with account creation
         registerUser(newUser);
     };
-
     const validatePasswords = (password: string, confirmPassword: string) => {
         if (password !== confirmPassword) {
             setConfirmPasswordError("Passwords do not match");
         } else {
-            setConfirmPasswordError(null); // Clear error if they match
+            setConfirmPasswordError(null); // Clear error if passwords match
         }
     };
 
@@ -211,8 +210,8 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                 type="submit"
                                 className="mt-4 w-full"
                                 disabled={
-                                    !formState.isValid &&
-                                    confirmPasswordError != ""
+                                    !formState.isValid ||
+                                    confirmPasswordError != null
                                 }
                             >
                                 Create Account
