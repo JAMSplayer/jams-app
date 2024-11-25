@@ -15,6 +15,7 @@ import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { RecentAccount } from "@/types/recent-account";
+import { RegisterAccountUser } from "@/types/account-user";
 import { registerUser } from "@/backend/logic";
 
 interface CreateAccountPanelProps {
@@ -50,12 +51,15 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     const onSubmit = (data: CreateAccountFormData) => {
         console.log(data);
 
-        registerUser({
+        const newUser: RegisterAccountUser = {
             username: data.username,
             password: data.password,
             dateCreated: new Date(),
             dateUpdated: new Date(),
-        });
+        };
+
+        // Proceed with account creation
+        registerUser(newUser);
     };
 
     const validatePasswords = (password: string, confirmPassword: string) => {
@@ -68,9 +72,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
 
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
     // recentAccountList, setRecentAccountList
-    const [recentAccountList] = useState<RecentAccount[]>([
-        // TODO: get from backend
-    ]);
+    const [recentAccountList] = useState<RecentAccount[]>([]);
 
     const validateUsername = (username: string) => {
         const foundAccount = recentAccountList.find(
