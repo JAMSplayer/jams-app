@@ -37,10 +37,11 @@ export async function registerUser(
         }
 
         const registeredUser = { ...newUser, address };
+        registeredUser.password = ""; // we cannot save passwords
 
         // Create a new register for the user
-        const success = await createRegister(["user"], registeredUser);
-        if (!success) {
+        const registerAddress = await createRegister(["user"], registeredUser);
+        if (!registerAddress) {
             console.error(
                 `Failed to create a new user register for: ${newUser.username}`
             );
@@ -100,14 +101,16 @@ export async function checkIsAccountConnected(): Promise<AccountUser | null> {
 
 // Return all registered accounts with addresses, sorted from most recently used.
 export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
-    // List accounts and check if it is null
-    const accounts: SimpleAccountUser[] | null = await listAccounts();
+    // Fetch the accounts as an array of [username, address] tuples
+    const accounts = await listAccounts();
 
-    // If accounts is null, return an empty array
-    if (accounts === null) {
+    // If the accounts are not null, map the tuples to SimpleAccountUser objects
+    if (accounts) {
+        return accounts.map(([username, address]) => ({
+            username,
+            address,
+        }));
+    } else {
         return [];
     }
-
-    // Map the accounts (which is an array of tuples) to an array of SimpleAccountUser objects
-    return accounts;
 }

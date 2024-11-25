@@ -208,13 +208,7 @@ async fn connect(
         app.unmanage::<Mutex<Option<Safe>>>();
     })?;
 
-    let address = match safe.address() {
-        Ok(addr) => addr.to_string(),
-        Err(e) => {
-            eprintln!("Failed to get EvmAddress: {}", e);
-            return Err(Error::Common(String::from("Could not retrieve address.")));
-        }
-    };
+    let address = safe.address().to_string();
 
     // Emit the connect event with the extracted address
     let _ = app
@@ -365,20 +359,13 @@ async fn write_register(
 
 #[tauri::command]
 async fn client_address(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> {
-    let address_result = safe
+    let address = safe
         .lock()
         .await
         .as_mut()
         .ok_or(Error::Common(String::from("Not connected.")))?
         .address();
-
-    match address_result {
-        Ok(address) => Ok(address.to_string()),
-        Err(e) => {
-            eprintln!("Error retrieving address: {}", e);
-            Err(Error::Common(String::from("Failed to retrieve address.")))
-        }
-    }
+    Ok(address.to_string())
 }
 
 #[tauri::command]

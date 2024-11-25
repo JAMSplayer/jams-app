@@ -1,4 +1,3 @@
-import { SimpleAccountUser } from "@/types/account-user";
 import { invoke } from "@tauri-apps/api/core";
 
 // =======
@@ -8,21 +7,9 @@ import { invoke } from "@tauri-apps/api/core";
 
 const REGISTER_META_PREFIX = "jams";
 
-export async function listAccounts(): Promise<SimpleAccountUser[] | null> {
+export async function listAccounts(): Promise<[string, string][] | null> {
     try {
-        // Fetch the accounts as an array of [username, address] tuples
-        const accounts = await invoke<[string, string][]>("list_accounts");
-
-        // If the accounts are not null, map the tuples to SimpleAccountUser objects
-        if (accounts) {
-            return accounts.map(([username, address]) => ({
-                username,
-                address,
-            }));
-        }
-
-        // If accounts is null, return an empty array
-        return [];
+        return await invoke<[string, string][]>("list_accounts");
     } catch (e) {
         console.error("listAccounts: ", e);
         return null;
@@ -34,20 +21,20 @@ async function connectInner(
     password: string,
     newAccount: boolean
 ) {
+    // not using try-catch, because this function is not exported and errors are caught outside.
     console.log("connecting...");
-    try {
-        await invoke("connect", {
-            //      peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen" // local
-            peer: "OFFICIAL NETWORK",
-            login: login,
-            password: password,
-            register: newAccount,
-        });
-        console.log(await balance());
-        console.log("connected.");
-    } catch (ex) {
-        console.log(ex);
-    }
+
+    // if peer is a Multiaddr, it will connect to local network.
+    // leave peer empty or anything other than Multiaddr to connect to official network.
+    await invoke("connect", {
+        // peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen", // local
+        peer: "OFFICIAL NETWORK",
+        login: login,
+        password: password,
+        register: newAccount,
+    });
+    console.log(await balance());
+    console.log("connected.");
 }
 
 // Finds user folder in storage by login,

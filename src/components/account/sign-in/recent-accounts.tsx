@@ -1,7 +1,7 @@
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { formatAddress } from "@/lib/utils/address";
 import { Label } from "@/components/ui/label";
-import Avatar from "../avatar";
+import Avatar from "../Avatar";
 import { SimpleAccountUser } from "@/types/account-user";
 
 type RecentAccountsProps = {
