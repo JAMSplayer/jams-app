@@ -8,7 +8,8 @@ import "@/i18n/config";
 import { LanguageProvider } from "@/providers/language-provider";
 import { AgreementModal } from "@/components/agreement-modal";
 import { useStorage } from "@/providers/storage-provider";
-
+import { useConnection } from "@/providers/connection-provider";
+import DisconnectedPanel from "./disconnected-panel";
 
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
@@ -17,6 +18,7 @@ interface RootLayoutProps {
 const RootLayout = ({ children }: RootLayoutProps) => {
     const { store } = useStorage();
     const [hasAgreed, setHasAgreed] = useState<boolean | null>(null);
+    const { isConnected } = useConnection();
 
     const handleAgree = async () => {
         if (!store) return;
@@ -48,23 +50,28 @@ const RootLayout = ({ children }: RootLayoutProps) => {
             {hasAgreed === null ? (
                 <></>
             ) : hasAgreed ? (
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    disableTransitionOnChange
-                >
-                    <LanguageProvider>
-                        <AudioProvider>
-                            <AdminPanelLayout>
-                                <ContentLayout>
-                                    <main className="flex-grow">
-                                        {children}
-                                    </main>
-                                </ContentLayout>
-                            </AdminPanelLayout>
-                        </AudioProvider>
-                    </LanguageProvider>
-                </ThemeProvider>
+                isConnected ? (
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        disableTransitionOnChange
+                    >
+                        <LanguageProvider>
+                            <AudioProvider>
+                                <AdminPanelLayout>
+                                    <ContentLayout>
+                                        <main className="flex-grow">
+                                            {children}
+                                        </main>
+                                    </ContentLayout>
+                                </AdminPanelLayout>
+                            </AudioProvider>
+                        </LanguageProvider>
+                    </ThemeProvider>
+                ) : (
+                    // Show DisconnectedPanel if user has agreed but network is not connected
+                    <DisconnectedPanel />
+                )
             ) : (
                 <AgreementModal onAgree={handleAgree} />
             )}

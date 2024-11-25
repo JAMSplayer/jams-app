@@ -79,6 +79,16 @@ export async function checkIsConnected(): Promise<boolean> {
     }
 }
 
+// this should connect to the network and return a boolean if connected successfully.
+// export async function connect(): Promise<boolean> {
+//     try {
+
+//     }  catch (e) {
+
+//     }
+
+// }
+
 // Returns user account object if account is connected, null if not.
 export async function getConnectedUserAccount(): Promise<AccountUser | null> {
     try {
