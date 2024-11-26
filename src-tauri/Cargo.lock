@@ -7686,8 +7686,8 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "safe"
-version = "0.1.2"
-source = "git+ssh://git@github.com/JAMSplayer/safe.git#02064a93a99a8b00f95f3512594aebd05f2127c6"
+version = "0.1.3"
+source = "git+ssh://git@github.com/JAMSplayer/safe.git#06a730e646764755d8ecfa2e00b93de756b424b6"
 dependencies = [
  "alloy-primitives",
  "autonomi",

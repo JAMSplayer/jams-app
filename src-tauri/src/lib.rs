@@ -16,13 +16,14 @@ enum Error {
     Common(String),
     BadLogin,
     BadPassword,
+    NotConnected,
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            crate::Error::BadLogin | crate::Error::BadPassword => write!(f, "{:?}", &self),
-            crate::Error::Common(msg) => write!(f, "{}", msg),
+            crate::Error::Common(msg) => f.write_str(&msg),
+            _ => write!(f, "{:?}", self),
         }
     }
 }
@@ -148,13 +149,7 @@ async fn list_accounts(mut app: AppHandle) -> Result<Vec<(String, String)>, Erro
 
 // leave peer empty or anything other than Multiaddr to connect to official network.
 #[tauri::command]
-async fn connect(
-    peer: String,
-    login: String,
-    password: String,
-    register: bool,
-    mut app: AppHandle,
-) -> Result<(), Error> {
+async fn connect(peer: String, app: AppHandle) -> Result<(), Error> {
     let state = app.try_state::<Mutex<Option<Safe>>>();
     if state.is_some() {
         return if state.unwrap().lock().await.is_some() {
@@ -166,19 +161,6 @@ async fn connect(
         };
     }
     app.manage(Mutex::new(None::<Safe>));
-    let main_window = app.get_webview_window("main").unwrap();
-    main_window.set_title("JAMS: connecting...").unwrap();
-
-    let app_root = make_root(&mut app).inspect_err(|_| {
-        main_window.set_title("JAMS (not connected)").unwrap();
-        app.unmanage::<Mutex<Option<Safe>>>();
-    })?;
-
-    let sk = load_create_key(&app_root, login.clone(), password, register).inspect_err(|_| {
-        main_window.set_title("JAMS (not connected)").unwrap();
-        app.unmanage::<Mutex<Option<Safe>>>();
-    })?;
-    println!("\n\nSecret Key: {}", &sk.to_hex());
 
     let mut peers = Vec::new();
 
@@ -196,27 +178,51 @@ async fn connect(
 
     println!("\n\nConnecting...");
 
-    let safe = Safe::connect(
-        peers,
-        add_network_contacts,
-        Some(sk),
-        app_root.join("wallet"),
-    )
-    .await
-    .inspect_err(|_| {
-        main_window.set_title("JAMS (not connected)").unwrap();
-        app.unmanage::<Mutex<Option<Safe>>>();
-    })?;
+    let safe = Safe::connect(peers, add_network_contacts, None)
+        .await
+        .inspect_err(|_| {
+            app.unmanage::<Mutex<Option<Safe>>>();
+        })?;
 
-    let address = safe.address().to_string();
+    println!("\n\nConnected.");
 
     // Emit the connect event with the extracted address
     let _ = app
-        .emit("connect", (login.clone(), address.clone()))
+        .emit("connect", ())
         .map_err(|_| Error::Common(String::from("Event emit error.")))
         .inspect_err(|e| eprintln!("{}", e));
 
+    // Store the `safe` object in the application's state
+    *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(safe);
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn log_in(
+    login: String,
+    password: String,
+    register: bool,
+    mut app: AppHandle,
+) -> Result<(), Error> {
+    let app_root = make_root(&mut app)?;
+    let sk = load_create_key(&app_root, login.clone(), password, register)?;
+    println!("\n\nSecret Key: {}", sk.to_hex());
+
+    let logged_safe = app
+        .try_state::<Mutex<Option<Safe>>>()
+        .ok_or(Error::NotConnected)?
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error::NotConnected)?
+        .login(Some(sk))?;
+
+    let address = logged_safe.address()?.to_string();
     println!("ETH wallet address: {}", address);
+
+    // Store new `safe` object in the application's state
+    *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(logged_safe);
 
     // Prepare the address directory and file
     let addr_dir = user_root(&app_root, login.clone());
@@ -224,22 +230,12 @@ async fn connect(
     addr_file.push(ADDRESS_FILENAME);
 
     // Write the address to a file
-    let _ = fs::write(&addr_file, &address)
-        .map_err(|_| {
-            Error::Common(format!(
-                "Could not save address file: {}",
-                &addr_file.display()
-            ))
-        })
-        .inspect_err(|e| eprintln!("{}", e));
-
-    println!("\n\nConnected.");
-
-    // Store the `safe` object in the application's state
-    *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(safe);
-
-    // Update the window title to indicate a successful connection
-    main_window.set_title("JAMS (connected)").unwrap();
+    fs::write(&addr_file, &address).map_err(|_| {
+        Error::Common(format!(
+            "Could not save address file: {}",
+            &addr_file.display()
+        ))
+    })?;
 
     Ok(())
 }
@@ -254,7 +250,7 @@ async fn is_connected(app: AppHandle) -> bool {
 #[tauri::command]
 async fn disconnect(app: AppHandle) -> Result<(), Error> {
     app.unmanage::<Mutex<Option<Safe>>>()
-        .ok_or(Error::Common(String::from("Not connected.")))?;
+        .ok_or(Error::NotConnected)?;
 
     app.emit("disconnect", ())
         .map_err(|_| Error::Common(String::from("Event emit error."))) // event
@@ -291,7 +287,7 @@ async fn create_register(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error::Common(String::from("Not connected.")))?
+        .ok_or(Error::NotConnected)?
         .register_create(&data.as_bytes(), meta, None)
         .await?;
 
@@ -313,8 +309,8 @@ async fn read_register(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error::Common(String::from("Not connected.")))?
-        .open_register(meta)
+        .ok_or(Error::NotConnected)?
+        .open_own_register(meta)
         .await?;
 
     let data = Safe::read_register(&mut reg, 0)
@@ -340,8 +336,8 @@ async fn write_register(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error::Common(String::from("Not connected.")))?
-        .open_register(meta)
+        .ok_or(Error::NotConnected)?
+        .open_own_register(meta)
         .await?;
 
     println!("\n\nRegister found: {:?}", reg);
@@ -352,7 +348,7 @@ async fn write_register(
             .lock()
             .await
             .as_mut()
-            .ok_or(Error::Common(String::from("Not connected.")))?
+            .ok_or(Error::NotConnected)?
             .register_write(&mut reg, data.as_bytes())
             .await?;
 
@@ -370,8 +366,8 @@ async fn client_address(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, 
         .lock()
         .await
         .as_mut()
-        .ok_or(Error::Common(String::from("Not connected.")))?
-        .address();
+        .ok_or(Error::NotConnected)?
+        .address()?;
     Ok(address.to_string())
 }
 
@@ -381,7 +377,7 @@ async fn balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> 
         .lock()
         .await
         .as_mut()
-        .ok_or(Error::Common(String::from("Not connected.")))?
+        .ok_or(Error::NotConnected)?
         .balance()
         .await?;
     Ok(format!("{:x}", balance)) // hex string
@@ -397,6 +393,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_accounts,
             connect,
+            log_in,
             is_connected,
             disconnect,
             create_register,

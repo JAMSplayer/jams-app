@@ -1,5 +1,5 @@
 import {
-    registerAndConnect,
+    register,
     clientAddress,
     createRegister,
     isConnected,
@@ -24,7 +24,10 @@ export async function registerUser(
 
     try {
         // Register and connect the user
-        await registerAndConnect(newUser.username, newUser.password);
+        const success = await register(newUser.username, newUser.password);
+        if (!success) {
+            return null;
+        }
 
         // Retrieve the client address
         const address = await clientAddress();

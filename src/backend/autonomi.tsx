@@ -12,55 +12,59 @@ export async function listAccounts(): Promise<[string, string][] | null> {
         return await invoke<[string, string][]>("list_accounts");
     } catch (e) {
         console.error("listAccounts: ", e);
-        return null;
     }
+    return null;
 }
 
-async function connectInner(
-    login: string,
-    password: string,
-    newAccount: boolean
-) {
+export async function connect(peer: string): Promise<boolean> {
     // not using try-catch, because this function is not exported and errors are caught outside.
     console.log("connecting...");
-
-    // if peer is a Multiaddr, it will connect to local network.
-    // leave peer empty or anything other than Multiaddr to connect to official network.
-    await invoke("connect", {
-        // peer: "/ip4/127.0.0.1/udp/33383/quic-v1/p2p/12D3KooW9stXvTrU7FRWXoBSvHaoLaJmdBMYRdtd8DsYbK2jZJen", // local
-        peer: "OFFICIAL NETWORK",
-        login: login,
-        password: password,
-        register: newAccount,
-    });
-    console.log(await balance());
-    console.log("connected.");
+    try {
+        // if peer is a Multiaddr, it will connect to local network.
+        // leave peer empty or anything other than Multiaddr to connect to official network.
+        await invoke("connect", { peer: peer });
+        console.log("connected.");
+        return true;
+    } catch(e) {
+        console.error("connect: ", e);
+    }
+    return false;
 }
 
 // Finds user folder in storage by login,
-// decrypts SecretKey with the password
-// and connects to the network.
-export async function loginAndConnect(login: string, password: string) {
+// and decrypts SecretKey with the password
+export async function login(login: string, password: string): Promise<boolean> {
     console.log("logging in...");
     try {
-        await connectInner(login, password, false);
+        await invoke("log_in", {
+            login: login,
+            password: password,
+            register: false,
+        });
         console.log("logged in.");
+        return true;
     } catch (e) {
         console.error("login: ", e);
     }
+    return false;
 }
 
-// Creates user folder in storage,
-// encrypts SecretKey with the password and stores in the folder
-// and connects to the network.
-export async function registerAndConnect(login: string, password: string) {
+// Creates user folder in storage
+// and encrypts SecretKey with the password and stores in the folder
+export async function register(login: string, password: string): Promise<boolean> {
     console.log("registering...");
     try {
-        await connectInner(login, password, true);
+        await invoke("log_in", {
+            login: login,
+            password: password,
+            register: true,
+        });
         console.log("registered.");
+        return true;
     } catch (e) {
         console.error("register: ", e);
     }
+    return false;
 }
 
 // Checks if user is connected to the network.
@@ -81,14 +85,16 @@ export async function isConnected(): Promise<boolean> {
     return false;
 }
 
-export async function disconnect() {
+export async function disconnect(): Promise<boolean> {
     console.log("disconnecting...");
     try {
         await invoke("disconnect");
         console.log("disconnected.");
+        return true;
     } catch (e) {
         console.error("disconnect: ", e);
     }
+    return false;
 }
 
 export async function clientAddress(): Promise<string | null> {
@@ -96,8 +102,8 @@ export async function clientAddress(): Promise<string | null> {
         return await invoke<string>("client_address");
     } catch (e) {
         console.error("clientAddress: ", e);
-        return null;
     }
+    return null;
 }
 
 export async function balance(): Promise<string | null> {
@@ -105,8 +111,8 @@ export async function balance(): Promise<string | null> {
         return await invoke("balance");
     } catch (e) {
         console.error("balance: ", e);
-        return null;
     }
+    return null;
 }
 
 function prepareMeta(name: string[]): string[] {
@@ -135,18 +141,8 @@ export async function createRegister(
         return address;
     } catch (e) {
         console.error("createRegister: ", e);
-        return null;
     }
-}
-
-// TODO: deprecated, there is no faucet in current network.
-export async function receive(transfer: string) {
-    try {
-        await invoke("receive", { transfer: transfer });
-        console.log("received.");
-    } catch (e) {
-        console.error("receive: ", e);
-    }
+    return null;
 }
 
 export async function readRegister(name: string[]): Promise<object | null> {
@@ -157,11 +153,11 @@ export async function readRegister(name: string[]): Promise<object | null> {
         return JSON.parse(await invoke("read_register", { name: name }));
     } catch (e) {
         console.error("readRegister: ", e);
-        return null;
     }
+    return null;
 }
 
-export async function writeRegister(name: string[], data: object) {
+export async function writeRegister(name: string[], data: object): Promise<boolean> {
     prepareMeta(name);
     console.log("writing register: " + name + "...");
 
@@ -170,7 +166,9 @@ export async function writeRegister(name: string[], data: object) {
             name: name,
             data: JSON.stringify(data),
         });
+        return true;
     } catch (e) {
         console.error("writeRegister: ", e);
     }
+    return false;
 }

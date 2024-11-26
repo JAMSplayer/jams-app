@@ -14,7 +14,7 @@
 git clone git@github.com:JAMSplayer/safe.git
 ```
 
-Edit `src-tauri/Cargo.toml` and provide path to *safe* lib in `[dependencies]` section. Please, do not commit this change back to the repo.
+Edit `src-tauri/Cargo.toml` and provide path to *safe* lib in `[dependencies]` section. Please, do not commit this change back to the repo. Refer to *safe*'s documentation on what are the further prerequisites.
 
 ### Frontend
 
