@@ -180,7 +180,7 @@ export default function StorageSettings() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Submit</Button>
+                        <Button type="submit">Update</Button>
                     </form>
                 </Form>
             </div>
