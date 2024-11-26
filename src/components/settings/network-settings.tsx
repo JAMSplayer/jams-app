@@ -130,6 +130,45 @@ export default function StorageSettings() {
         loadSavedNetwork();
     }, [store, networkSelectionForm]);
 
+    const testnetSettingsArea = (
+        <>
+            <SubDivider
+                title="Testnet Settings"
+                layout={SubDividerLayout.DEFAULT}
+            />
+            <div className="p-4">
+                <Label>Testnet Peer Address</Label>
+                <div className="flex-col space-y-4 mt-2">
+                    <input
+                        id="input"
+                        type="text"
+                        className="block w-full rounded-r-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Enter testnet peer address"
+                        value={testnetPeerAddress || ""}
+                        onChange={(e) => setTestnetPeerAddress(e.target.value)}
+                    />
+                    <Button
+                        disabled={!isSaveTestnetPeerAddressEnabled} // Disable based on validation
+                        onClick={async () => {
+                            if (store && isSaveTestnetPeerAddressEnabled) {
+                                await store.set("testnet-peer-address", {
+                                    value: testnetPeerAddress,
+                                });
+                                await store.save();
+                                toast("Testnet Peer Address Updated", {
+                                    description:
+                                        "Your testnet peer address has been updated.",
+                                });
+                            }
+                        }}
+                    >
+                        Save
+                    </Button>
+                </div>
+            </div>
+        </>
+    );
+
     return (
         <div className="items-center">
             <SubDivider
@@ -185,8 +224,7 @@ export default function StorageSettings() {
                 </Form>
             </div>
 
-            {hasNetworkSelectionSubmitted &&
-            selectedNetwork === Networks.TESTNET ? (
+            {hasNetworkSelectionSubmitted ? (
                 <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{
@@ -204,95 +242,14 @@ export default function StorageSettings() {
                     transition={{ duration: 1 }}
                     style={{ overflow: "hidden" }}
                 >
-                    <SubDivider
-                        title="Testnet Settings"
-                        layout={SubDividerLayout.DEFAULT}
-                    />
-
-                    <div className="p-4">
-                        <Label>Testnet Peer Address</Label>
-                        <div className="flex-col space-y-4 mt-2">
-                            <input
-                                id="input"
-                                type="text"
-                                className="block w-full rounded-r-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="Enter testnet peer address"
-                                value={testnetPeerAddress || ""}
-                                onChange={(e) =>
-                                    setTestnetPeerAddress(e.target.value)
-                                }
-                            />
-                            <Button
-                                disabled={!isSaveTestnetPeerAddressEnabled} // Disable based on validation
-                                onClick={async () => {
-                                    if (
-                                        store &&
-                                        isSaveTestnetPeerAddressEnabled
-                                    ) {
-                                        await store.set(
-                                            "testnet-peer-address",
-                                            { value: testnetPeerAddress }
-                                        );
-                                        await store.save();
-                                        toast("Testnet Peer Address Updated", {
-                                            description:
-                                                "Your testnet peer address has been updated.",
-                                        });
-                                    }
-                                }}
-                            >
-                                Save
-                            </Button>
-                        </div>
-                    </div>
+                    {testnetSettingsArea}
                 </motion.div>
             ) : null}
 
             {/* When hasNetworkSelectionSubmitted is false, show the static Testnet Settings section */}
             {!hasNetworkSelectionSubmitted &&
             selectedNetwork === Networks.TESTNET ? (
-                <>
-                    <SubDivider
-                        title="Testnet Settings"
-                        layout={SubDividerLayout.DEFAULT}
-                    />
-                    <div className="p-4">
-                        <Label>Testnet Peer Address</Label>
-                        <div className="flex-col space-y-4 mt-2">
-                            <input
-                                id="input"
-                                type="text"
-                                className="block w-full rounded-r-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="Enter testnet peer address"
-                                value={testnetPeerAddress || ""}
-                                onChange={(e) =>
-                                    setTestnetPeerAddress(e.target.value)
-                                }
-                            />
-                            <Button
-                                disabled={!isSaveTestnetPeerAddressEnabled} // Disable based on validation
-                                onClick={async () => {
-                                    if (
-                                        store &&
-                                        isSaveTestnetPeerAddressEnabled
-                                    ) {
-                                        await store.set(
-                                            "testnet-peer-address",
-                                            { value: testnetPeerAddress }
-                                        );
-                                        await store.save();
-                                        toast("Testnet Peer Address Updated", {
-                                            description:
-                                                "Your testnet peer address has been updated.",
-                                        });
-                                    }
-                                }}
-                            >
-                                Save
-                            </Button>
-                        </div>
-                    </div>
-                </>
+                <>{testnetSettingsArea}</>
             ) : null}
         </div>
     );
