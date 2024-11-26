@@ -245,6 +245,13 @@ async fn connect(
 }
 
 #[tauri::command]
+async fn is_connected(app: AppHandle) -> bool {
+    let safe = app.try_state::<Mutex<Option<Safe>>>();
+    safe.is_some() // state is managed
+        && safe.unwrap().lock().await.as_ref().is_some() // option<safe> is some
+}
+
+#[tauri::command]
 async fn disconnect(app: AppHandle) -> Result<(), Error> {
     app.unmanage::<Mutex<Option<Safe>>>()
         .ok_or(Error::Common(String::from("Not connected.")))?;
@@ -390,6 +397,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_accounts,
             connect,
+            is_connected,
             disconnect,
             create_register,
             read_register,

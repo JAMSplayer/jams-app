@@ -5,7 +5,8 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { checkIsConnected, getConnectedUserAccount } from "@/backend/logic";
+import { isConnected as checkIsConnected } from "@/backend/autonomi";
+import { getConnectedUserAccount } from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
 
 // TODO:

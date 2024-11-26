@@ -63,6 +63,24 @@ export async function registerAndConnect(login: string, password: string) {
     }
 }
 
+// Checks if user is connected to the network.
+// This implies, that user is also logged to the application: login
+// and password were OK, and SecretKey has been decrypted from storage.
+export async function isConnected(): Promise<boolean> {
+    console.log("Attempting to check if network is connected");
+    try {
+        if (await invoke<boolean>("is_connected")) {
+            console.log("network is connected");
+            return true;
+        } else {
+            console.log("network is not connected");
+        }
+    } catch (e) {
+        console.error("isConnected: ", e);
+    }
+    return false;
+}
+
 export async function disconnect() {
     console.log("disconnecting...");
     try {

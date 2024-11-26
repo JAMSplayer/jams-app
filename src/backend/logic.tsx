@@ -2,6 +2,7 @@ import {
     registerAndConnect,
     clientAddress,
     createRegister,
+    isConnected,
     readRegister,
     writeRegister,
     listAccounts,
@@ -64,35 +65,10 @@ export async function saveUser(user: AccountUser) {
     await writeRegister(["user"], user);
 }
 
-// Checks if user is connected to the network.
-// This implies, that user is also logged to the application: login
-// and password were OK, and SecretKey has been decrypted from storage.
-export async function checkIsConnected(): Promise<boolean> {
-    console.log("Attempting to check if network is connected");
-    try {
-        let address = await clientAddress();
-        console.log("network is connected");
-        return address !== null;
-    } catch (e) {
-        console.log("network is not connected");
-        return false;
-    }
-}
-
-// this should connect to the network and return a boolean if connected successfully.
-// export async function connect(): Promise<boolean> {
-//     try {
-
-//     }  catch (e) {
-
-//     }
-
-// }
-
 // Returns user account object if account is connected, null if not.
 export async function getConnectedUserAccount(): Promise<AccountUser | null> {
     try {
-        let connected = await checkIsConnected();
+        let connected = await isConnected();
 
         if (connected) {
             console.log("getting user...");
