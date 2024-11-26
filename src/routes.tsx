@@ -7,6 +7,7 @@ import StatusSettings from "./components/settings/status-settings";
 import StorageSettings from "./components/settings/storage-settings";
 import NotificationSettings from "./components/settings/notification-settings";
 import PreferenceSettings from "./components/settings/preference-settings";
+import NetworkSettings from "./components/settings/network-settings";
 
 const AppRoutes = () => {
     return (
@@ -21,6 +22,7 @@ const AppRoutes = () => {
                     element={<NotificationSettings />}
                 />
                 <Route path="preference" element={<PreferenceSettings />} />
+                <Route path="network" element={<NetworkSettings />} />
             </Route>
         </Routes>
     );
