@@ -28,9 +28,14 @@ export async function connect(override?: {
         if (override && override.network) {
             if (override.network == Networks.MAINNET) {
                 await invoke("connect", { peer: "" });
+                console.log("connected.");
+                return true;
             } else if (override.network == Networks.TESTNET && override.peer) {
                 await invoke("connect", { peer: override.peer });
+                console.log("connected.");
+                return true;
             }
+            console.log("cannot connect via override");
             return false;
         }
 
