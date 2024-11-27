@@ -13,7 +13,10 @@ import {
     RegisterAccountUser,
     SimpleAccountUser,
 } from "@/types/account-user";
-import { getSelectedNetwork, getTestnetPeerAddress } from "@/backend/backend-store";
+import {
+    getSelectedNetwork,
+    getTestnetPeerAddress,
+} from "@/backend/backend-store";
 import Networks from "@/enums/networks";
 
 // =======
@@ -28,7 +31,7 @@ export async function connect(override?: {
     try {
         let peer = undefined;
         let network = undefined;
-        
+
         // this is used if connecting from the disconnected-panel component
         if (override && override.network) {
             network = override.network;
@@ -47,7 +50,7 @@ export async function connect(override?: {
             return false;
         }
 
-        await connectInner(peer);
+        await connectInner(peer ?? undefined);
 
         console.log("connected.");
         return true;
