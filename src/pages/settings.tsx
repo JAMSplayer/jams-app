@@ -9,6 +9,7 @@ const secondaryNavigation = [
     { name: "Storage", href: "/settings/storage", current: false },
     { name: "Notifications", href: "/settings/notifications", current: false },
     { name: "Preferences", href: "/settings/preference", current: false },
+    { name: "Network", href: "/settings/network", current: false },
 ];
 
 export default function Settings() {
