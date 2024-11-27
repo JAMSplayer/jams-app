@@ -10,7 +10,7 @@ export default function DisconnectedPanel() {
                 You are disconnected
             </p>
 
-            <div className="mt-6">
+            <div className="mt-4">
                 <Button
                     onClick={() => {
                         connect();
