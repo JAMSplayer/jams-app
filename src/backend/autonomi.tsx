@@ -18,15 +18,22 @@ export async function listAccounts(): Promise<[string, string][] | null> {
     return null;
 }
 
-export async function connect(): Promise<boolean> {
-    // not using try-catch, because this function is not exported and errors are caught outside.
+export async function connect(override?: {
+    network: Networks;
+    peer?: string;
+}): Promise<boolean> {
     console.log("connecting...");
     try {
-        // if peer is a Multiaddr, it will connect to local network.
-        // leave peer empty or anything other than Multiaddr to connect to official network.
+        // this is used if connecting from the disconnected-panel component
+        if (override && override.network) {
+            if (override.network == Networks.MAINNET) {
+                await invoke("connect", { peer: "" });
+            } else if (override.network == Networks.TESTNET && override.peer) {
+                await invoke("connect", { peer: override.peer });
+            }
+            return false;
+        }
 
-        // TODO implement checking if mainnet vs testnet using useStorage here when main is merged
-        // for now just:
         const network = await getSelectedNetwork();
 
         if (network == Networks.MAINNET) {
