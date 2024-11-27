@@ -20,7 +20,7 @@ export default function DisconnectedPanel() {
             </div>
 
             {/* Bottom section */}
-            <div className="mt-12 w-full max-w-4xl flex items-stretch justify-between border-t border-gray-200 pt-8">
+            <div className="mt-12 w-full max-w-4xl flex flex-col sm:flex-row items-stretch justify-between border-t border-gray-200 pt-8">
                 {/* Mainnet Section */}
                 <div className="flex-1 flex flex-col items-center p-4">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -39,7 +39,7 @@ export default function DisconnectedPanel() {
                 </div>
 
                 {/* Divider */}
-                <div className="mx-4 w-px bg-gray-300" />
+                <div className="mx-4 w-px bg-gray-300 hidden sm:block" />
 
                 {/* Testnet Section */}
                 <div className="flex-1 flex flex-col items-center p-4">
