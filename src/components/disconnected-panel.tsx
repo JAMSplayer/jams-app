@@ -10,42 +10,46 @@ export default function DisconnectedPanel() {
     const [inputValue, setInputValue] = useState("");
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
             {/* Top section */}
-            <ZapOffIcon size={50} />
-            <p className="mt-8 text-pretty text-lg font-medium sm:text-xl/8 text-center flex items-center justify-center gap-2">
-                You are disconnected
-            </p>
+            <div className="flex flex-col items-center">
+                <ZapOffIcon size={50} />
+                <p className="mt-6 text-gray-700 text-lg font-medium sm:text-xl/8 text-center flex items-center gap-2">
+                    You are disconnected
+                </p>
+            </div>
 
             {/* Bottom section */}
-            <div className="mt-12 w-3/4 flex items-center justify-between border-t pt-8">
+            <div className="mt-12 w-full max-w-4xl flex items-stretch justify-between border-t border-gray-200 pt-8">
                 {/* Mainnet Section */}
-                <div className="flex-1 flex flex-col items-center">
-                    <h3 className="text-lg font-semibold mb-4">Mainnet</h3>
+                <div className="flex-1 flex flex-col items-center p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                        Mainnet
+                    </h3>
                     <Button
                         onClick={() => {
-                            const override = {
-                                network: Networks.MAINNET,
-                            };
+                            const override = { network: Networks.MAINNET };
                             connect(override);
                         }}
+                        className="w-full max-w-sm"
                     >
-                        Connect to Mainnet
-                        <GlobeLockIcon />
+                        <span>Connect to Mainnet</span>
+                        <GlobeLockIcon className="ml-2" />
                     </Button>
                 </div>
 
                 {/* Divider */}
-                <div className="mx-4 h-full border-l border-gray-300" />
+                <div className="mx-4 w-px bg-gray-300" />
 
                 {/* Testnet Section */}
-                <div className="flex-1 flex flex-col items-center">
-                    <h3 className="text-lg font-semibold mb-4">Testnet</h3>
-
+                <div className="flex-1 flex flex-col items-center p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                        Testnet
+                    </h3>
                     <Input
                         type="text"
                         placeholder="Enter Testnet Peer Address"
-                        className=" px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
+                        className="w-full max-w-sm px-4 py-2 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                     />
@@ -58,10 +62,10 @@ export default function DisconnectedPanel() {
                             connect(override);
                         }}
                         disabled={!isValidPeerAddress(inputValue)}
-                        className="mt-4"
+                        className="w-full max-w-sm mt-4"
                     >
-                        Connect to Testnet
-                        <CableIcon />
+                        <span>Connect to Testnet</span>
+                        <CableIcon className="ml-2" />
                     </Button>
                 </div>
             </div>
