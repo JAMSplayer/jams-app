@@ -1,6 +1,4 @@
 import { invoke } from "@tauri-apps/api/core";
-import { getSelectedNetwork, getTestnetPeerAddress } from "./backend-store";
-import Networks from "@/enums/networks";
 
 // =======
 // This file contains low-level backend code, mostly interacting with Rust layer by commands.
@@ -18,47 +16,30 @@ export async function listAccounts(): Promise<[string, string][] | null> {
     return null;
 }
 
-export async function connect(override?: {
-    network: Networks;
-    peer?: string;
-}): Promise<boolean> {
+// if peer is a Multiaddr, it will connect to local network.
+// leave peer empty or anything other than Multiaddr to connect to official network.
+export async function connectInner(peer?: string): Promise<boolean> {
     console.log("connecting...");
     try {
-        // this is used if connecting from the disconnected-panel component
-        if (override && override.network) {
-            if (override.network == Networks.MAINNET) {
-                await invoke("connect", { peer: "" });
-                console.log("connected.");
-                return true;
-            } else if (override.network == Networks.TESTNET && override.peer) {
-                await invoke("connect", { peer: override.peer });
-                console.log("connected.");
-                return true;
-            }
-            console.log("cannot connect via override");
-            return false;
+        if (peer) {
+            await invoke("connect", { peer: peer });
+        } else {
+            await invoke("connect");
         }
-
-        const network = await getSelectedNetwork();
-
-        if (network == Networks.MAINNET) {
-            await invoke("connect", { peer: "" });
-        } else if (network == Networks.TESTNET) {
-            const peer = await getTestnetPeerAddress();
-            await invoke("connect", { peer });
-        }
-
         console.log("connected.");
         return true;
-    } catch (e) {
-        console.error("connect: ", e);
+    } catch(e) {
+        console.error("connectInner: ", e);
     }
     return false;
 }
 
 // Finds user folder in storage by login,
 // and decrypts SecretKey with the password
-export async function login(login: string, password: string): Promise<boolean> {
+export async function login(
+    login: string,
+    password: string
+): Promise<boolean> {
     console.log("logging in...");
     try {
         await invoke("log_in", {

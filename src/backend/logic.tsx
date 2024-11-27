@@ -1,4 +1,5 @@
 import {
+    connectInner,
     register,
     clientAddress,
     createRegister,
@@ -12,10 +13,49 @@ import {
     RegisterAccountUser,
     SimpleAccountUser,
 } from "@/types/account-user";
+import { getSelectedNetwork, getTestnetPeerAddress } from "@/backend/backend-store";
+import Networks from "@/enums/networks";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
 // =======
+
+export async function connect(override?: {
+    network: Networks;
+    peer?: string;
+}): Promise<boolean> {
+    console.log("connecting...");
+    try {
+        let peer = undefined;
+        let network = undefined;
+        
+        // this is used if connecting from the disconnected-panel component
+        if (override && override.network) {
+            network = override.network;
+            if (network == Networks.TESTNET) {
+                peer = override.peer;
+            }
+        } else {
+            network = await getSelectedNetwork();
+            if (network == Networks.TESTNET) {
+                peer = await getTestnetPeerAddress();
+            }
+        }
+
+        if (network == Networks.TESTNET && !peer) {
+            console.error("Peer not supplied for TESTNET.");
+            return false;
+        }
+
+        await connectInner(peer);
+
+        console.log("connected.");
+        return true;
+    } catch (e) {
+        console.error("connect: ", e);
+    }
+    return false;
+}
 
 export async function registerUser(
     newUser: RegisterAccountUser

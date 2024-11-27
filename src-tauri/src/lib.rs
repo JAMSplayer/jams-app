@@ -149,7 +149,7 @@ async fn list_accounts(mut app: AppHandle) -> Result<Vec<(String, String)>, Erro
 
 // leave peer empty or anything other than Multiaddr to connect to official network.
 #[tauri::command]
-async fn connect(peer: String, app: AppHandle) -> Result<(), Error> {
+async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
     let state = app.try_state::<Mutex<Option<Safe>>>();
     if state.is_some() {
         return if state.unwrap().lock().await.is_some() {
@@ -162,16 +162,16 @@ async fn connect(peer: String, app: AppHandle) -> Result<(), Error> {
     }
     app.manage(Mutex::new(None::<Safe>));
 
-    let mut peers = Vec::new();
+    let mut peers: Vec<Multiaddr> = Vec::new();
 
-    let add_network_contacts = (if let Ok(peer) = peer.parse::<Multiaddr>() {
-        println!("Peer: {}", &peer);
-        peers.push(peer);
-        false
-    } else {
+    let add_network_contacts = peer.map(|p_str| p_str.parse::<Multiaddr>().inspect(|multi_addr| {
+        println!("Peer: {}", &multi_addr);
+        peers.push(multi_addr.clone());
+    }).map(|_| false).unwrap_or(true)).unwrap_or(true);
+
+    if add_network_contacts {
         println!("Connecting to official network.");
-        true
-    });
+    }
 
     //    Safe::init_logging().map_err(|_| Error::Common(format!("Autonomi logging error")))?;
     Safe::init_logging().unwrap();

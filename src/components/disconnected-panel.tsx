@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { connect } from "@/backend/autonomi";
+import { connect } from "@/backend/logic";
 import { Button } from "./ui/button";
 import { CableIcon, GlobeLockIcon, ZapOffIcon } from "lucide-react";
 import { Input } from "./ui/input";
