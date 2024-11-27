@@ -1,3 +1,4 @@
+import { connect } from "@/backend/autonomi";
 import { Button } from "./ui/button";
 
 export default function DisconnectedPanel() {
@@ -9,8 +10,7 @@ export default function DisconnectedPanel() {
             <div className="mt-4">
                 <Button
                     onClick={() => {
-                        // TODO connect to network
-                        // This page will be shown if the network is not connected automatically on app load
+                        connect();
                     }}
                 >
                     Connect to network

@@ -16,16 +16,24 @@ export async function listAccounts(): Promise<[string, string][] | null> {
     return null;
 }
 
-export async function connect(peer: string): Promise<boolean> {
+export async function connect(peer?: string): Promise<boolean> {
     // not using try-catch, because this function is not exported and errors are caught outside.
     console.log("connecting...");
     try {
         // if peer is a Multiaddr, it will connect to local network.
         // leave peer empty or anything other than Multiaddr to connect to official network.
-        await invoke("connect", { peer: peer });
+
+        // TODO implement checking if mainnet vs testnet using useStorage here when main is merged
+        // for now just:
+        if (peer) {
+            await invoke("connect", { peer: peer });
+        } else {
+            await invoke("connect", { peer: "" });
+        }
+
         console.log("connected.");
         return true;
-    } catch(e) {
+    } catch (e) {
         console.error("connect: ", e);
     }
     return false;
@@ -51,7 +59,10 @@ export async function login(login: string, password: string): Promise<boolean> {
 
 // Creates user folder in storage
 // and encrypts SecretKey with the password and stores in the folder
-export async function register(login: string, password: string): Promise<boolean> {
+export async function register(
+    login: string,
+    password: string
+): Promise<boolean> {
     console.log("registering...");
     try {
         await invoke("log_in", {
@@ -157,7 +168,10 @@ export async function readRegister(name: string[]): Promise<object | null> {
     return null;
 }
 
-export async function writeRegister(name: string[], data: object): Promise<boolean> {
+export async function writeRegister(
+    name: string[],
+    data: object
+): Promise<boolean> {
     prepareMeta(name);
     console.log("writing register: " + name + "...");
 

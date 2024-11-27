@@ -5,12 +5,9 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { isConnected as checkIsConnected } from "@/backend/autonomi";
+import { listen } from "@tauri-apps/api/event";
 import { getConnectedUserAccount } from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
-
-// TODO:
-// * handle connect (username, address) / disconnect events from Rust.
 
 // Define the shape of the context value
 interface ConnectionContextType {
@@ -34,23 +31,8 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     const [isConnected, setIsConnected] = useState(false);
     const [account, setAccount] = useState<AccountUser | null>(null);
 
-    // Function to check network connection status
-    const checkConnection = async () => {
-        try {
-            const networkConnected = await checkIsConnected();
-            setIsConnected(networkConnected);
-        } catch (error) {
-            console.error("Failed to fetch network connection status", error);
-        }
-    };
-
-    // Function to check account connection status
-    const getAccount = async () => {
-        if (!isConnected) {
-            setAccount(null);
-            return;
-        }
-
+    // Fetch account information when connected
+    const fetchAccount = async () => {
         try {
             const accountConnected = await getConnectedUserAccount();
             setAccount(accountConnected || null);
@@ -60,18 +42,26 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
         }
     };
 
-    // Check connection on mount and set interval to poll
+    // Set up event listeners for connection updates
     useEffect(() => {
-        checkConnection(); // Initial network check
-        const intervalId = setInterval(() => {
-            checkConnection(); // Regular network check every 5 seconds
-            if (isConnected) {
-                getAccount(); // If connected, fetch the connected user account
-            }
-        }, 5000);
+        const unlistenConnect = listen("connect", () => {
+            console.log("Connected event received");
+            setIsConnected(true);
+            fetchAccount(); // Fetch account on connection
+        });
 
-        return () => clearInterval(intervalId); // Clear interval on unmount
-    }, [isConnected]); // Add isConnected as a dependency
+        const unlistenDisconnect = listen("disconnect", () => {
+            console.log("Disconnected event received");
+            setIsConnected(false);
+            setAccount(null); // Clear account on disconnection
+        });
+
+        // Clean up listeners on unmount
+        return () => {
+            unlistenConnect.then((unlisten) => unlisten());
+            unlistenDisconnect.then((unlisten) => unlisten());
+        };
+    }, []);
 
     return (
         <ConnectionContext.Provider value={{ isConnected, account }}>
