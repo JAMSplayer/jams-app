@@ -1,4 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
+import { getSelectedNetwork, getTestnetPeerAddress } from "./backend-store";
+import Networks from "@/enums/networks";
 
 // =======
 // This file contains low-level backend code, mostly interacting with Rust layer by commands.
@@ -16,7 +18,7 @@ export async function listAccounts(): Promise<[string, string][] | null> {
     return null;
 }
 
-export async function connect(peer?: string): Promise<boolean> {
+export async function connect(): Promise<boolean> {
     // not using try-catch, because this function is not exported and errors are caught outside.
     console.log("connecting...");
     try {
@@ -25,10 +27,13 @@ export async function connect(peer?: string): Promise<boolean> {
 
         // TODO implement checking if mainnet vs testnet using useStorage here when main is merged
         // for now just:
-        if (peer) {
-            await invoke("connect", { peer: peer });
-        } else {
+        const network = await getSelectedNetwork();
+
+        if (network == Networks.MAINNET) {
             await invoke("connect", { peer: "" });
+        } else if (network == Networks.TESTNET) {
+            const peer = await getTestnetPeerAddress();
+            await invoke("connect", { peer });
         }
 
         console.log("connected.");
