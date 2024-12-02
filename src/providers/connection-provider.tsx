@@ -44,6 +44,11 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
 
     // Set up event listeners for connection updates
     useEffect(() => {
+        const unlistenLogIn = listen("log_in", () => {
+            console.log("Log In event received");
+            fetchAccount(); // Fetch account on connection
+        });
+
         const unlistenConnect = listen("connect", () => {
             console.log("Connected event received");
             setIsConnected(true);
@@ -58,6 +63,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
 
         // Clean up listeners on unmount
         return () => {
+            unlistenLogIn.then((unlisten) => unlisten());
             unlistenConnect.then((unlisten) => unlisten());
             unlistenDisconnect.then((unlisten) => unlisten());
         };
