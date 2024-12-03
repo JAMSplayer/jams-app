@@ -10,7 +10,7 @@ export function SongLoadButton({
     song: Song;
 }) {
     const { t } = useTranslation();
-    let player = useAudioPlayer(song);
+    let player = useAudioPlayer();
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
 
     return (
