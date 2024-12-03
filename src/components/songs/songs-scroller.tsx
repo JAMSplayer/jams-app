@@ -337,22 +337,21 @@ const SongScroller = () => {
                     filteredAndSortedSongs.map((song) => (
                         <div
                             key={song.id}
-                            className="relative flex items-center p-4 bg-background hover:bg-secondary rounded-lg shadow-lg transition-all duration-200 group cursor-pointer"
+                            className="relative flex items-stretch bg-background hover:bg-secondary rounded-lg shadow-lg transition-all duration-200 group cursor-pointer overflow-hidden"
                             onClick={() => {
                                 handlePlaySong(song);
-                            }} // Handle the click event for the entire item
+                            }}
                         >
                             {/* Album art on the left */}
-                            <div className="relative flex-shrink-0 w-16 h-16 bg-background rounded-md mr-4 overflow-hidden">
-                                {/* Only render the image if albumArtUrl exists */}
+                            <div className="relative flex-shrink-0 w-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.artUrl ? (
                                     <img
                                         src={song.artUrl}
                                         alt="Album Art"
-                                        className="w-full h-full object-cover rounded-md transition-all duration-300"
+                                        className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gray-300 rounded-md"></div> // Placeholder when no albumArtUrl
+                                    <div className="w-full h-full bg-gray-300"></div> // Placeholder when no albumArtUrl
                                 )}
 
                                 {/* Play button on hover */}
@@ -364,14 +363,14 @@ const SongScroller = () => {
                                             handlePlaySong(song);
                                         }}
                                     >
-                                        <PlayIcon className="" />{" "}
-                                        {/* Your play icon component */}
+                                        <PlayIcon className="w-6 h-6" />{" "}
+                                        {/* Adjust the size if needed */}
                                     </button>
                                 </div>
                             </div>
 
                             {/* Song details on the right */}
-                            <div className="flex-grow">
+                            <div className="flex-grow p-4 flex flex-col justify-center">
                                 <h2 className="text-foreground font-semibold text-lg truncate">
                                     {song.title}
                                 </h2>
