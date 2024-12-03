@@ -25,7 +25,7 @@ function formatHumanTime(seconds: number) {
 
 const Player = () => {
     const player = useAudioPlayer();
-    const { setPlayerVisibility } = usePlayerStore();
+    const { setPlayerVisibility, isPlayerVisible } = usePlayerStore();
     const wasPlayingRef = useRef(false);
 
     let [currentTime, setCurrentTime] = useState<number | null>(
@@ -51,17 +51,34 @@ const Player = () => {
             >
                 <ChevronDown className="h-4 w-4 text-primary" />
             </button>
+
+            {/* Artwork on Medium and Above */}
+            {player.song.artUrl && (
+                <div
+                    className={`hidden md:block absolute left-0 flex-shrink-0 overflow-hidden transition-all duration-500 ease-in-out ${
+                        !isPlayerVisible ? "translate-y-5" : "translate-y-0"
+                    }`}
+                    style={{ height: "6.95rem", width: "6.75rem" }}
+                >
+                    <img
+                        src={player.song.artUrl}
+                        alt={player.song.title || "Album Art"}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            )}
+
             <div className="hidden md:block">
                 <PlayButton player={player} />
             </div>
-            <div className="mb-[env(safe-area-inset-bottom)] flex flex-1 flex-col gap-3 overflow-hidden p-1">
+            <div className="mb-[env(safe-area-inset-bottom)] flex flex-1 flex-col gap-3  px-1">
                 <div
-                    className="truncate text-center text-sm font-bold leading-6 md:text-left"
+                    className="truncate text-center text-sm font-bold leading-6 md:text-left pl-4"
                     title={player.song?.title}
                 >
                     {player.song?.title}
                 </div>
-                <div className="flex justify-between gap-6">
+                <div className="flex justify-between gap-6 pl-4">
                     <div className="flex items-center md:hidden">
                         <SoundButton player={player} />
                     </div>
