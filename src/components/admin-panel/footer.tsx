@@ -12,10 +12,7 @@ export function Footer() {
         usePlayerStore();
 
     return (
-        <div
-            className="relative w-full bg-background h-16"
-            style={{ boxShadow: "0 -4px 6px rgba(0, 0, 0, 0.1)" }}
-        >
+        <div className="relative w-full bg-background h-16">
             <div className="mx-4 md:mx-8 flex h-full items-center justify-between relative">
                 <div className="text-xs md:text-sm leading-loose text-muted-foreground">
                     Powered by{" "}
