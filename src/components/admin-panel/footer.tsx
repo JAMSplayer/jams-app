@@ -7,61 +7,45 @@ const accordionVariants = {
     visible: { height: "auto", opacity: 1 },
 };
 
-const showPlayerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-};
-
 export function Footer() {
     const { isPlayerVisible, hasLoaded, setPlayerVisibility } =
         usePlayerStore();
 
     return (
-        <div className="relative w-full bg-background/95  backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="mx-4 md:mx-8 flex h-14 items-center justify-between">
-                <div className="text-xs md:text-sm leading-loose text-muted-foreground text-left">
-                    <AnimatePresence>
-                        {!isPlayerVisible && hasLoaded && (
-                            <motion.div
-                                className="fixed top-0 right-4 z-10"
-                                initial="hidden"
-                                animate="visible"
-                                exit="hidden"
-                                variants={showPlayerVariants}
-                                transition={{
-                                    duration: 0.5,
-                                    ease: "easeInOut",
-                                }}
-                            >
-                                <button
-                                    onClick={() => {
-                                        setPlayerVisibility(true);
-                                    }}
-                                    className="flex items-center justify-center w-10 h-5 bg-background rounded-b-lg border-x border-b hover:bg-primary-foreground"
-                                >
-                                    <span className="text-sm text-primary">
-                                        ▲
-                                    </span>
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+        <div
+            className="relative w-full bg-background h-16"
+            style={{ boxShadow: "0 -4px 6px rgba(0, 0, 0, 0.1)" }}
+        >
+            <div className="mx-4 md:mx-8 flex h-full items-center justify-between relative">
+                <div className="text-xs md:text-sm leading-loose text-muted-foreground">
                     Powered by{" "}
                     <a
-                        href="https://github.com/JAMSplayer"
+                        href="https://autonomi.com"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-medium underline underline-offset-4"
                     >
-                        JAMS
+                        Autonomi
                     </a>
                     .
                 </div>
+
+                {!isPlayerVisible && hasLoaded && (
+                    <button
+                        onClick={() => {
+                            setPlayerVisibility(true);
+                        }}
+                        className="absolute top-0 right-0 translate-y-[0%] flex items-center justify-center w-10 h-5 bg-background rounded-b-lg border-x border-b hover:bg-primary-foreground"
+                    >
+                        <span className="text-sm text-primary">▲</span>
+                    </button>
+                )}
             </div>
+
             <AnimatePresence>
-                {isPlayerVisible && (
+                {isPlayerVisible && hasLoaded && (
                     <motion.div
-                        className="overflow-hidden absolute bottom-14 w-full left-0 z-10"
+                        className="overflow-hidden absolute bottom-16 w-full left-0 z-10"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"

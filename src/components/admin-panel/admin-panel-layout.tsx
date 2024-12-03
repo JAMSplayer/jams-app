@@ -26,9 +26,12 @@ export default function AdminPanelLayout({
             </main>
             <footer
                 className={cn(
-                    "transition-[margin-left] ease-in-out duration-300",
+                    "transition-[margin-left] ease-in-out duration-300 fixed bottom-0 left-0 w-full", // Always take full width on smaller screens
                     !settings.disabled &&
-                        (!getOpenState() ? "lg:ml-[90px]" : "lg:ml-72")
+                        (getOpenState()
+                            ? "lg:ml-72" // When sidebar is open on large screens
+                            : "lg:ml-[90px]"), // When sidebar is closed on large screens
+                    "lg:w-[calc(100vw_-_300px)]" // Adjust width only on large screens when sidebar is open
                 )}
             >
                 <Footer />

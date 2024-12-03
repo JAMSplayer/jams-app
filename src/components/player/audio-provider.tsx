@@ -63,18 +63,16 @@ function audioReducer(state: PlayerState, action: Action): PlayerState {
             return { ...state, volume: action.payload };
     }
 }
-
 export function AudioProvider({ children }: { children: React.ReactNode }) {
     let [state, dispatch] = useReducer(audioReducer, {
         playing: false,
         muted: false,
-        volume: 1, // Default volume is 1 (max)
+        volume: 1,
         duration: 0,
         currentTime: 0,
         song: null,
     });
 
-    // UseRef with explicit type for the audio element
     let playerRef = useRef<HTMLAudioElement | null>(null);
 
     let actions = useMemo<PublicPlayerActions>(() => {
@@ -83,24 +81,33 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 if (song) {
                     dispatch({ type: ActionKind.SET_META, payload: song });
 
+                    // If the song location changes, load the new song
                     if (
                         playerRef.current &&
                         playerRef.current.currentSrc !== song.location
                     ) {
                         playerRef.current.src = song.location;
                         playerRef.current.load();
-                        playerRef.current.pause();
-                        playerRef.current.playbackRate = 1;
                         playerRef.current.currentTime = 0;
                     }
                 }
+
                 playerRef.current?.play();
             },
             pause() {
                 playerRef.current?.pause();
             },
             toggle(song) {
-                this.isPlaying(song) ? actions.pause() : actions.play(song);
+                const isPlaying = song
+                    ? state.playing &&
+                      playerRef.current?.currentSrc === song.location
+                    : state.playing;
+
+                if (isPlaying) {
+                    this.pause();
+                } else {
+                    this.play(song);
+                }
             },
             seekBy(amount) {
                 if (playerRef.current) {
@@ -122,7 +129,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
             },
             setVolume(volume) {
                 if (playerRef.current) {
-                    // Ensure volume is between 0 and 1
                     playerRef.current.volume = Math.min(Math.max(volume, 0), 1);
                     dispatch({ type: ActionKind.SET_VOLUME, payload: volume });
                 }
@@ -134,7 +140,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                     : state.playing;
             },
         };
-    }, [state.playing]);
+    }, [state.playing, state.song]);
 
     let api = useMemo<PlayerAPI>(
         () => ({ ...state, ...actions }),
@@ -147,7 +153,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 {children}
             </AudioPlayerContext.Provider>
             <audio
-                ref={playerRef} // Ensure ref is correctly passed here
+                ref={playerRef}
                 onPlay={() => dispatch({ type: ActionKind.PLAY })}
                 onPause={() => dispatch({ type: ActionKind.PAUSE })}
                 onTimeUpdate={(event) => {
@@ -163,13 +169,11 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                     });
                 }}
                 muted={state.muted}
-                // Do not pass volume as a prop here
             />
         </>
     );
 }
-
-export function useAudioPlayer(song?: Song) {
+export function useAudioPlayer() {
     const player = useContext(AudioPlayerContext);
 
     if (!player) {
@@ -177,7 +181,7 @@ export function useAudioPlayer(song?: Song) {
         return {
             playing: false,
             muted: false,
-            volume: 1, // Default volume
+            volume: 1,
             duration: 0,
             currentTime: 0,
             song: null,
@@ -188,24 +192,10 @@ export function useAudioPlayer(song?: Song) {
             seek: () => {},
             playbackRate: () => {},
             toggleMute: () => {},
-            setVolume: () => {}, // Add setVolume method
+            setVolume: () => {},
             isPlaying: () => false,
         } as PlayerAPI;
     }
 
-    return useMemo<PlayerAPI>(
-        () => ({
-            ...player!,
-            play() {
-                player!.play(song);
-            },
-            toggle() {
-                player!.toggle(song);
-            },
-            get playing() {
-                return player!.isPlaying(song);
-            },
-        }),
-        [player, song]
-    );
+    return player;
 }
