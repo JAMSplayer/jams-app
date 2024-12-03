@@ -343,7 +343,7 @@ const SongScroller = () => {
                             }}
                         >
                             {/* Album art on the left */}
-                            <div className="relative flex-shrink-0 w-20 bg-background rounded-l-lg overflow-hidden">
+                            <div className="relative flex-shrink-0 w-20 md:w-24 bg-background rounded-l-lg overflow-hidden">
                                 {song.artUrl ? (
                                     <img
                                         src={song.artUrl}
