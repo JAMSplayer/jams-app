@@ -208,33 +208,32 @@ export default function SongsPanel() {
     }, []);
 
     return (
-        <div className="items-center">
+        <div className="w-full">
             {/* Filters */}
-            <div
-                className="md:w-1/3 fixed right-4 z-50 bg-background border border-secondary p-4 shadow-lg rounded-lg w-full max-w-xs md:max-w-fit space-y-2"
-                style={{ top: "4.5rem" }}
-            >
-                <Input
-                    type="text"
-                    placeholder="Search"
-                    value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
-                    className="border px-2 py-1 w-full"
-                />
-                <Select
-                    value={sortOrder}
-                    onValueChange={(value) =>
-                        setSortOrder(value as "asc" | "desc")
-                    }
-                >
-                    <SelectTrigger className="border px-2 py-1 w-full">
-                        <SelectValue placeholder="Select Sort Order" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="asc">Ascending</SelectItem>
-                        <SelectItem value="desc">Descending</SelectItem>
-                    </SelectContent>
-                </Select>
+            <div className="w-full sticky top-[3.5rem] bg-background z-50 border-b border-t border-secondary p-4 mb-4 ml-[0.1rem]">
+                <div className="flex items-center space-x-2">
+                    <Input
+                        type="text"
+                        placeholder="Search"
+                        value={filterValue}
+                        onChange={(e) => setFilterValue(e.target.value)}
+                        className="border px-2 py-1 w-full md:w-1/3"
+                    />
+                    <Select
+                        value={sortOrder}
+                        onValueChange={(value) =>
+                            setSortOrder(value as "asc" | "desc")
+                        }
+                    >
+                        <SelectTrigger className="border px-2 py-1 w-full md:w-1/4">
+                            <SelectValue placeholder="Select Sort Order" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="asc">Ascending</SelectItem>
+                            <SelectItem value="desc">Descending</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             {/* Song Scroller */}
