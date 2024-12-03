@@ -332,7 +332,7 @@ const SongScroller = () => {
     return (
         <div className="p-4 flex flex-col md:flex-row">
             {/* Left Column: Scrollable Song List */}
-            <div className="flex-grow md:w-2/3 space-y-4 pb-20 overflow-y-auto pr-4">
+            <div className="flex-grow md:w-2/3 space-y-4 pb-20 overflow-y-auto">
                 {filteredAndSortedSongs.length > 0 ? (
                     filteredAndSortedSongs.map((song) => (
                         <div
@@ -396,7 +396,7 @@ const SongScroller = () => {
             </div>
 
             {/* Right Column: Fixed Filter Panel */}
-            <div className="md:w-1/3 fixed top-18 right-8 z-50 bg-background border border-secondary p-4 shadow-lg rounded-lg w-full max-w-xs md:max-w-fit">
+            <div className="md:w-1/3 fixed top-18 right-4 z-50 bg-background border border-secondary p-4 shadow-lg rounded-lg w-full max-w-xs md:max-w-fit">
                 {/* Filters */}
                 <div className="flex flex-col space-y-4">
                     <Input
