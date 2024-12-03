@@ -64,7 +64,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
 
     return (
         <div className="p-4 flex flex-col md:flex-row">
-            <div className="flex-grow md:w-2/3 space-y-4 pb-10 overflow-y-auto">
+            <div className="flex-grow md:w-2/3 space-y-4 pb-16 overflow-y-auto">
                 {filteredAndSortedSongs.length > 0 ? (
                     filteredAndSortedSongs.map((song) => (
                         <div
