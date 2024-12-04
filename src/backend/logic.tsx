@@ -50,10 +50,11 @@ export async function connect(override?: {
             return false;
         }
 
-        await connectInner(peer ?? undefined);
-
-        console.log("connected.");
-        return true;
+        const success = await connectInner(peer ?? undefined);
+        if (success) {
+            console.log("connected.");
+            return true;
+        }
     } catch (e) {
         console.error("connect: ", e);
     }
