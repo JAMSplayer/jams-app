@@ -36,13 +36,13 @@ export async function connectInner(peer?: string): Promise<boolean> {
 
 // Finds user folder in storage by login,
 // and decrypts SecretKey with the password
-export async function login(
+export async function signIn(
     login: string,
     password: string
 ): Promise<boolean> {
     console.log("logging in...");
     try {
-        await invoke("log_in", {
+        await invoke("sign_in", {
             login: login,
             password: password,
             register: false,
@@ -63,7 +63,7 @@ export async function register(
 ): Promise<boolean> {
     console.log("registering...");
     try {
-        await invoke("log_in", {
+        await invoke("sign_in", {
             login: login,
             password: password,
             register: true,

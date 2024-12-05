@@ -44,15 +44,14 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
 
     // Set up event listeners for connection updates
     useEffect(() => {
-        const unlistenLogIn = listen("log_in", () => {
-            console.log("Log In event received");
+        const unlistenLogIn = listen("sign_in", () => {
+            console.log("Sign In event received");
             fetchAccount(); // Fetch account on connection
         });
 
         const unlistenConnect = listen("connect", () => {
             console.log("Connected event received");
             setIsConnected(true);
-            fetchAccount(); // Fetch account on connection
         });
 
         const unlistenDisconnect = listen("disconnect", () => {

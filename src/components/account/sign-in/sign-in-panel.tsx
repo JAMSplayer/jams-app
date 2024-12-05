@@ -19,7 +19,7 @@ import { formatAddress } from "@/lib/utils/address";
 import { Button } from "@/components/ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./recent-accounts";
-import { login } from "@/backend/autonomi";
+import { signIn as autonomiSignIn } from "@/backend/autonomi";
 import { registeredAccounts } from "@/backend/logic";
 import { SimpleAccountUser } from "@/types/account-user";
 
@@ -124,7 +124,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                 description: "This username does not exist.",
             });
         } else {
-            login(values.username, values.password);
+            autonomiSignIn(values.username, values.password);
         }
     };
 

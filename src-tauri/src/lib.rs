@@ -187,9 +187,7 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
     println!("\n\nConnected.");
 
     // Emit the connect event with the extracted address
-    let _ = app
-        .emit("connect", ())
-        .map_err(|_| Error::Common(String::from("Event emit error.")))
+    let _ = app.emit("connect", ())
         .inspect_err(|e| eprintln!("{}", e));
 
     // Store the `safe` object in the application's state
@@ -199,7 +197,7 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 }
 
 #[tauri::command]
-async fn log_in(
+async fn sign_in(
     login: String,
     password: String,
     register: bool,
@@ -209,7 +207,7 @@ async fn log_in(
     let sk = load_create_key(&app_root, login.clone(), password, register)?;
     println!("\n\nSecret Key: {}", sk.to_hex());
 
-    let logged_safe = app
+    let signed_in_safe = app
         .try_state::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?
         .lock()
@@ -218,11 +216,11 @@ async fn log_in(
         .ok_or(Error::NotConnected)?
         .login(Some(sk))?;
 
-    let address = logged_safe.address()?.to_string();
+    let address = signed_in_safe.address()?.to_string();
     println!("ETH wallet address: {}", address);
 
     // Store new `safe` object in the application's state
-    *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(logged_safe);
+    *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(signed_in_safe);
 
     // Prepare the address directory and file
     let addr_dir = user_root(&app_root, login.clone());
@@ -236,6 +234,9 @@ async fn log_in(
             &addr_file.display()
         ))
     })?;
+
+    let _ = app.emit("sign_in", ())
+        .inspect_err(|e| eprintln!("{}", e));
 
     Ok(())
 }
@@ -252,8 +253,10 @@ async fn disconnect(app: AppHandle) -> Result<(), Error> {
     app.unmanage::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?;
 
-    app.emit("disconnect", ())
-        .map_err(|_| Error::Common(String::from("Event emit error."))) // event
+    let _ = app.emit("disconnect", ())
+        .inspect_err(|e| eprintln!("{}", e));
+
+    Ok(())
 }
 
 fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
@@ -393,7 +396,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_accounts,
             connect,
-            log_in,
+            sign_in,
             is_connected,
             disconnect,
             create_register,
