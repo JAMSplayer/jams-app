@@ -52,8 +52,8 @@ export function getMenuList(_pathname: string): Group[] {
                             label: "All Songs",
                         },
                         {
-                            href: "/songs/upload",
-                            label: "Upload Song",
+                            href: "/upload-songs",
+                            label: "Upload Songs",
                         },
                     ],
                 },
