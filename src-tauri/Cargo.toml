@@ -36,4 +36,4 @@ tokio = { version = "1", features = ["full"] }
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 # needs to have Git command installed and be able to authenticate the GitHub repository
 # configuration in .cargo/config.toml
-safe = { version = "0.1.3", git = "ssh://git@github.com/JAMSplayer/safe.git" }
+safe = { version = "0.1.4", git = "ssh://git@github.com/JAMSplayer/safe.git" }
