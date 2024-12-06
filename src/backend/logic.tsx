@@ -142,6 +142,7 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
 
     // If the accounts are not null, map the tuples to SimpleAccountUser objects
     if (accounts) {
+        accounts.reverse();
         return accounts.map(([username, address]) => ({
             username,
             address,
