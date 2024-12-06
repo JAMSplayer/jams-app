@@ -65,10 +65,11 @@ fn user_root(app_root: &PathBuf, login: String) -> PathBuf {
     sk_dir
 }
 
-fn load_create_key(
+fn load_create_import_key(
     app_root: &PathBuf,
     login: String,
     password: String,
+    sk: Option<SecretKey>, // if you want to import secret key during registration
     register: bool,
 ) -> Result<SecretKey, Error> {
     let sk_dir = user_root(app_root, login);
@@ -92,7 +93,7 @@ fn load_create_key(
             return Err(Error::BadLogin);
         }
 
-        let sk = SecretKey::random();
+        let sk = sk.unwrap_or(SecretKey::random());
 
         let file_bytes = secure_sk::encrypt(sk.clone(), &password)?;
         fs::create_dir_all(sk_dir.clone()).map_err(|_| {
@@ -200,11 +201,22 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 async fn sign_in(
     login: String,
     password: String,
+    secret_key_import: Option<String>,
     register: bool,
     mut app: AppHandle,
 ) -> Result<(), Error> {
     let app_root = make_root(&mut app)?;
-    let sk = load_create_key(&app_root, login.clone(), password, register)?;
+
+    let secret_key_import = if let Some(ski) = secret_key_import {
+        if !register {
+            return Err(Error::Common(String::from("Only can import secret key when registering")));
+        }
+        Some(SecretKey::from_hex(&ski).map_err(|e| Error::Common(format!("Secret key: {}", e)))?)
+    } else {
+        None
+    };
+
+    let sk = load_create_import_key(&app_root, login.clone(), password, secret_key_import, register)?;
     println!("\n\nSecret Key: {}", sk.to_hex());
 
     let signed_in_safe = app

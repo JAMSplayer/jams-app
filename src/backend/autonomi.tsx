@@ -59,7 +59,8 @@ export async function signIn(
 // and encrypts SecretKey with the password and stores in the folder
 export async function register(
     login: string,
-    password: string
+    password: string,
+    secretKeyImport?: string // if you want to register an account with particular SK
 ): Promise<boolean> {
     console.log("registering...");
     try {
@@ -67,6 +68,7 @@ export async function register(
             login: login,
             password: password,
             register: true,
+            secret_key_import: secretKeyImport,
         });
         console.log("registered.");
         return true;
