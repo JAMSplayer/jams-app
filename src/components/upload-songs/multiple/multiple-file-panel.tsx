@@ -8,21 +8,21 @@ import {
     UploadIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { FileMeta } from "@/types/file-meta"; // Replace with the actual path for FileMeta type
+import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
 import { formatBytes } from "@/lib/utils/formatting";
 
 interface MultipleFilePanelProps {
     onBack: () => void;
-    fileMetas: FileMeta[]; // List of file metadata
+    fileDetails: FileDetail[]; // List of file details
 }
 
 export default function MultipleFilePanel({
     onBack,
-    fileMetas,
+    fileDetails,
 }: MultipleFilePanelProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [minimizedStates, setMinimizedStates] = useState(
-        fileMetas.map(() => false) // Initialize all as not minimized
+        fileDetails.map(() => false) // Initialize all as not minimized
     );
 
     // Handlers for pagination
@@ -31,7 +31,7 @@ export default function MultipleFilePanel({
             setCurrentIndex((prevIndex) => prevIndex - 1);
         } else if (
             direction === "next" &&
-            currentIndex < fileMetas.length - 1
+            currentIndex < fileDetails.length - 1
         ) {
             setCurrentIndex((prevIndex) => prevIndex + 1);
         }
@@ -58,7 +58,7 @@ export default function MultipleFilePanel({
                         <ArrowLeftIcon size={20} />
                     </Button>
                 </div>
-                {fileMetas.length > 1 && (
+                {fileDetails.length > 1 && (
                     <div className="flex items-center space-x-2">
                         {/* Pagination Controls */}
                         <Button
@@ -66,27 +66,27 @@ export default function MultipleFilePanel({
                             onClick={() => handleNavigate("prev")}
                             disabled={currentIndex === 0}
                         >
-                            <ChevronLeftIcon size={20} />
+                            <ChevronLeftIcon />
                         </Button>
                         <span className="text-sm text-primary">
-                            {currentIndex + 1} / {fileMetas.length}
+                            {currentIndex + 1} / {fileDetails.length}
                         </span>
                         <Button
                             variant="ghost"
                             onClick={() => handleNavigate("next")}
-                            disabled={currentIndex === fileMetas.length - 1}
+                            disabled={currentIndex === fileDetails.length - 1}
                         >
-                            <ChevronRightIcon size={20} />
+                            <ChevronRightIcon />
                         </Button>
                     </div>
                 )}
-                <Button>
-                    Upload <UploadIcon size={20} />
+                <Button size={"sm"} className="mr-3">
+                    Upload All <UploadIcon />
                 </Button>
             </div>
 
             {/* Information Card */}
-            <div className="p-4">
+            <div className="px-4 pt-4">
                 <div
                     className={`bg-background text-primary px-4 py-2 ${
                         isMinimized ? "rounded-lg" : "rounded-t-lg"
@@ -108,37 +108,44 @@ export default function MultipleFilePanel({
                 </div>
                 {!isMinimized && (
                     <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                        <p className="text-sm text-gray-500 mb-1">
-                            Name: {fileMetas[currentIndex].name}
-                        </p>
-                        <p className="text-sm text-gray-500 mb-1">
-                            Location: {fileMetas[currentIndex].location}
-                        </p>
-                        <p className="text-sm text-gray-500 mb-1">
-                            Size:{" "}
-                            {fileMetas.length > 0 &&
-                            fileMetas[currentIndex]?.size !== null
-                                ? formatBytes(fileMetas[currentIndex].size)
-                                : "Unknown"}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                            Extension: {fileMetas[currentIndex].extension}
-                        </p>
+                        {fileDetails[currentIndex].name && (
+                            <p className="text-sm text-gray-500 mb-1">
+                                Name: {fileDetails[currentIndex].name}
+                            </p>
+                        )}
+                        {fileDetails[currentIndex].location && (
+                            <p className="text-sm text-gray-500 mb-1">
+                                Location: {fileDetails[currentIndex].location}
+                            </p>
+                        )}
+                        {fileDetails[currentIndex].size && (
+                            <p className="text-sm text-gray-500 mb-1">
+                                Size:{" "}
+                                {fileDetails.length > 0 &&
+                                    fileDetails[currentIndex]?.size !== null &&
+                                    fileDetails[currentIndex]?.size !==
+                                        undefined &&
+                                    formatBytes(fileDetails[currentIndex].size)}
+                            </p>
+                        )}
+                        {fileDetails[currentIndex].extension && (
+                            <p className="text-sm text-gray-500">
+                                Extension: {fileDetails[currentIndex].extension}
+                            </p>
+                        )}
                     </div>
                 )}
             </div>
 
-            {/* Meta Card */}
+            {/* Customize Card */}
             <div className="p-4">
                 <div
                     className={`bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center`}
                 >
-                    <h1 className="text-lg font-bold">File Meta</h1>
+                    <h1 className="text-lg font-bold">Customize</h1>
                 </div>
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                    <p className="text-sm text-gray-500 mb-1">
-                        Name: {fileMetas[currentIndex].name}
-                    </p>
+                    <p className="text-sm text-gray-500 mb-1">Coming Soon</p>
                 </div>
             </div>
         </div>

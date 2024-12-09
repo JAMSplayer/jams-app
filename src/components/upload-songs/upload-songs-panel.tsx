@@ -1,14 +1,16 @@
 import { useState } from "react";
 import Dropzone from "../dropzone";
-import { FileMeta } from "@/types/file-meta";
+import { FileDetail } from "@/types/file-detail";
 import { BaseDirectory, stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
+import { invoke } from "@tauri-apps/api/core";
+import { Buffer } from "buffer";
 
 export default function UploadSongsPanel() {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
     const [isMultiFile, setIsMultiFile] = useState(false);
-    const [fileMetas, setFileMetas] = useState<FileMeta[]>([]);
+    const [fileDetails, setFileDetails] = useState<FileDetail[]>([]);
     const [fileKey, setFileKey] = useState(0); // A key to force re-render
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -35,22 +37,20 @@ export default function UploadSongsPanel() {
             if (validFiles.length > 0) {
                 setIsMultiFile(validFiles.length > 1);
 
-                const newFileMetas: FileMeta[] = [];
+                const newFileDetails: FileDetail[] = [];
                 for (const filePath of validFiles) {
-                    const alreadyExists = fileMetas.some(
-                        (meta) => meta.fullPath === filePath
+                    const alreadyExists = fileDetails.some(
+                        (details) => details.fullPath === filePath
                     );
 
                     if (!alreadyExists) {
-                        const fileMeta = await createFileMetaFromString(
-                            filePath
-                        );
-                        if (fileMeta) newFileMetas.push(fileMeta);
+                        const fileDetail = await createFileDetails(filePath);
+                        if (fileDetail) newFileDetails.push(fileDetail);
                     }
                 }
 
-                if (newFileMetas.length > 0) {
-                    setFileMetas([...newFileMetas]); // Replace existing files
+                if (newFileDetails.length > 0) {
+                    setFileDetails((prev) => [...prev, ...newFileDetails]); // Add new details to existing
                     setFileKey((prevKey) => prevKey + 1); // Update key
                     setIsDropzoneVisible(false); // Hide dropzone
                 }
@@ -58,41 +58,98 @@ export default function UploadSongsPanel() {
         }
     };
 
-    async function createFileMetaFromString(
+    async function createFileDetails(
         filePath: string
-    ): Promise<FileMeta | null> {
+    ): Promise<FileDetail | null> {
         try {
+            // Fetch file information
             const location = filePath.substring(0, filePath.lastIndexOf("/"));
             const fileNameWithExtension = filePath.split("/").pop();
             if (!fileNameWithExtension) return null;
 
             const [name, ...extParts] = fileNameWithExtension.split(".");
             const extension = extParts.join(".");
-            const metadata = await stat(filePath, {
+            const information = await stat(filePath, {
                 baseDir: BaseDirectory.Download,
             });
 
+            // Fetch metadata for the file
+            const metadata = await fetchMetadata([filePath]);
+
+            // Check if metadata is available
+            const meta = metadata.length > 0 ? metadata[0] : null;
+
+            if (meta?.picture) {
+                console.log("data", Buffer.from(meta.picture.data));
+                console.log("mime", meta.picture.mime_type);
+            }
+            console.log("test: ", meta?.year);
+            // Proceed with whatever information is available
             return {
                 fullPath: filePath,
                 name,
                 extension,
                 location,
-                size: metadata.size,
+                size: information.size,
+                title: meta?.title === "unknown" ? undefined : meta?.title,
+                artist: meta?.artist === "unknown" ? undefined : meta?.artist,
+                album: meta?.album === "unknown" ? undefined : meta?.album,
+                genre:
+                    meta?.genre === "unknown"
+                        ? undefined
+                        : meta?.genre?.toLocaleLowerCase(),
+                year:
+                    meta?.year === undefined || null
+                        ? undefined
+                        : meta?.year || undefined,
+                trackNumber:
+                    meta?.trackNumber === undefined || null
+                        ? undefined
+                        : meta?.trackNumber || undefined,
+                duration: meta?.duration || undefined,
+                channels: meta?.channels || undefined,
+                sampleRate: meta?.sampleRate || undefined,
+                picture: meta?.picture
+                    ? {
+                          data: Buffer.from(meta.picture.data),
+                          mime_type: meta.picture.mime_type,
+                      }
+                    : undefined,
             };
         } catch (error) {
-            console.error("Error creating file meta:", error);
+            console.error(
+                `Error creating file details for ${filePath}:`,
+                error
+            );
             return null;
+        }
+    }
+
+    async function fetchMetadata(filePaths: string[]): Promise<FileDetail[]> {
+        try {
+            // Fetch metadata for all files
+            const metadata: FileDetail[] = await invoke("get_file_metadata", {
+                filePaths,
+            });
+            return metadata;
+        } catch (error) {
+            console.error(
+                "Failed to fetch metadata for files:",
+                filePaths,
+                error
+            );
+            return []; // Return an empty array to avoid breaking the flow
         }
     }
 
     const handleBackToDropzone = () => {
         setIsDropzoneVisible(true);
         setErrorMessage(""); // Clear error
-        setFileMetas([]); // Clear selected files
+        setFileDetails([]); // Clear selected file details
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full pb-16">
             {isDropzoneVisible ? (
                 <div>
                     <Dropzone onFilesAdded={handleFilesAdded} key={fileKey} />
@@ -104,16 +161,17 @@ export default function UploadSongsPanel() {
                 </div>
             ) : (
                 <div>
-                    {fileMetas.length > 0 && (
+                    {fileDetails.length > 0 && (
                         <>
                             {isMultiFile ? (
                                 <MultipleFilePanel
                                     onBack={handleBackToDropzone}
-                                    fileMetas={fileMetas}
+                                    fileDetails={fileDetails}
                                 />
                             ) : (
                                 <SingleFilePanel
                                     onBack={handleBackToDropzone}
+                                    fileDetail={fileDetails[0]}
                                 />
                             )}
                         </>

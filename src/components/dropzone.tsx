@@ -3,8 +3,6 @@ import { UploadIcon } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Window } from "@tauri-apps/api/window";
 
-// This dropzone component will return an array of filepaths depending on a drag/drop, or browse dialog.
-
 interface DropzoneProps {
     onFilesAdded: (filePaths: string[]) => void;
 }
@@ -107,7 +105,7 @@ function Dropzone({ onFilesAdded }: DropzoneProps) {
                     aria-hidden="true"
                 />
                 <p className="text-foreground">
-                    Drag and drop a file or{" "}
+                    Drag and drop files or{" "}
                     <span
                         className="text-blue-500 underline cursor-pointer"
                         onClick={handleBrowseClick}
