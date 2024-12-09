@@ -126,6 +126,21 @@ export async function balance(): Promise<string | null> {
     return null;
 }
 
+export async function secretKey(
+    login: string,              // which user SK to get
+    password: string,           // user password to decrypt the key
+): Promise<string | null> {     // if password is bad or other error occured, null will be returned
+    try {
+        return await invoke("check_key", {
+            login: login,
+            password: password,
+        });
+    } catch (e) {
+        console.error("secretKey: ", e);
+    }
+    return null;
+}
+
 function prepareMeta(name: string[]): string[] {
     name.unshift(REGISTER_META_PREFIX);
     return name;
