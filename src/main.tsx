@@ -5,18 +5,21 @@ import RootLayout from "./components/root-layout";
 import AppRoutes from "./routes";
 import { Toaster } from "sonner";
 import { StorageProvider } from "./providers/storage-provider";
+import { ConnectionProvider } from "./providers/connection-provider";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <BrowserRouter>
-            <StorageProvider>
-                <RootLayout>
-                    <main>
-                        <AppRoutes />
-                    </main>
-                    <Toaster />
-                </RootLayout>
-            </StorageProvider>
+            <ConnectionProvider>
+                <StorageProvider>
+                    <RootLayout>
+                        <main>
+                            <AppRoutes />
+                        </main>
+                        <Toaster />
+                    </RootLayout>
+                </StorageProvider>
+            </ConnectionProvider>
         </BrowserRouter>
     </StrictMode>
 );

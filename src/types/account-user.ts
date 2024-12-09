@@ -9,9 +9,13 @@ export type RegisterAccountUser = {
 
 export type AccountUser = {
     username: string;
-    password: string;
     address: string;
     dateCreated: Date;
     dateUpdated: Date;
     songs?: Song[];
+};
+
+export type SimpleAccountUser = {
+    username: string;
+    address: string;
 };

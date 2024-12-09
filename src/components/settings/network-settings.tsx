@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import Networks from "@/enums/networks";
 import { motion } from "framer-motion";
+import { isValidPeerAddress } from "@/lib/utils/network";
 
 export default function StorageSettings() {
     const { store } = useStorage();
@@ -31,16 +32,9 @@ export default function StorageSettings() {
     const [hasNetworkSelectionSubmitted, setHasNetworkSelectionSubmitted] =
         useState<boolean>(false);
 
-    // Validation function for network address
-    const isValidNetworkAddress = (address: string): boolean => {
-        const pattern =
-            /^\/?ip4\/(\d{1,3}\.){3}\d{1,3}\/udp\/\d{1,5}\/quic-v1\/p2p\/[A-Za-z0-9]{52}\/?$/;
-        return pattern.test(address);
-    };
-
     // Determine if the save button should be enabled based on validation
     const isSaveTestnetPeerAddressEnabled =
-        testnetPeerAddress && isValidNetworkAddress(testnetPeerAddress);
+        testnetPeerAddress && isValidPeerAddress(testnetPeerAddress);
 
     useEffect(() => {
         async function loadSettings() {

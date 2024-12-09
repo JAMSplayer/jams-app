@@ -14,7 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { RecentAccount } from "@/types/recent-account";
+import { RegisterAccountUser, SimpleAccountUser } from "@/types/account-user";
+import { registerUser } from "@/backend/logic";
 
 interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -48,37 +49,28 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     type CreateAccountFormData = z.infer<typeof createAccountSchema>;
     const onSubmit = (data: CreateAccountFormData) => {
         console.log(data);
-        // Proceed with account creation
-    };
 
+        const newUser: RegisterAccountUser = {
+            username: data.username,
+            password: data.password,
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+        };
+
+        // Proceed with account creation
+        registerUser(newUser);
+    };
     const validatePasswords = (password: string, confirmPassword: string) => {
         if (password !== confirmPassword) {
             setConfirmPasswordError("Passwords do not match");
         } else {
-            setConfirmPasswordError(null); // Clear error if they match
+            setConfirmPasswordError(null); // Clear error if passwords match
         }
     };
 
     // TODO currently we are using this as a way to store all existing accounts - get from the hook
     // recentAccountList, setRecentAccountList
-    const [recentAccountList] = useState<RecentAccount[]>([
-        {
-            username: "username1",
-            address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
-        },
-        {
-            username: "username2",
-            address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
-        },
-        {
-            username: "username3",
-            address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
-        },
-        {
-            username: "username4",
-            address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
-        },
-    ]);
+    const [recentAccountList] = useState<SimpleAccountUser[]>([]);
 
     const validateUsername = (username: string) => {
         const foundAccount = recentAccountList.find(
@@ -217,8 +209,8 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                 type="submit"
                                 className="mt-4 w-full"
                                 disabled={
-                                    !formState.isValid &&
-                                    confirmPasswordError != ""
+                                    !formState.isValid ||
+                                    confirmPasswordError != null
                                 }
                             >
                                 Create Account
