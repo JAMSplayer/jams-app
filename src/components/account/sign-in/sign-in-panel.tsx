@@ -14,12 +14,14 @@ import {
     FormLabel,
     FormMessage,
 } from "../../ui/form";
-import { RecentAccount } from "@/types/recent-account";
 import { useEffect, useState } from "react";
 import { formatAddress } from "@/lib/utils/address";
 import { Button } from "@/components/ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./recent-accounts";
+import { signIn as autonomiSignIn } from "@/backend/autonomi";
+import { registeredAccounts } from "@/backend/logic";
+import { SimpleAccountUser } from "@/types/account-user";
 
 interface SignInPanelProps {
     onCreateAccountClicked: () => void;
@@ -41,16 +43,15 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     });
     const { watch, handleSubmit, control, formState, setValue } = signInForm;
     const username = watch("username");
-    const [accountExists, setAccountExists] = useState<RecentAccount | null>(
-        null
-    );
+    const [accountExists, setAccountExists] =
+        useState<SimpleAccountUser | null>(null);
 
     // ====================================================================================
     // Recent Accounts Functionality
     // ====================================================================================
 
     // Callback function to update the currently selected account from the RecentAccounts tab
-    const handleSelectAccount = (recentAccount: RecentAccount) => {
+    const handleSelectAccount = (recentAccount: SimpleAccountUser) => {
         // Find the account based on the selected recent account
         const foundAccount = recentAccountList.find(
             (account) => account.username === recentAccount.username
@@ -61,7 +62,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
 
         // Check if foundAccount exists instead of accountExists
         if (!foundAccount) {
-            toast("Register Warning", {
+            toast("Sign In Warning", {
                 description: "This username does not exist.",
             });
         } else {
@@ -72,26 +73,9 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
         }
     };
 
-    // TODO currently we are using this as a way to store all existing accounts - get from the hook
-    // [recentAccountList, setRecentAccountList]
-    const [recentAccountList] = useState<RecentAccount[]>([
-        {
-            username: "username1",
-            address: "0x3153176c72100b45bdA3A312E5d2fe12a1806a7A",
-        },
-        {
-            username: "username2",
-            address: "0x9153176c72100b25bdA3A113E5d2fe12a1806a9B",
-        },
-        {
-            username: "username3",
-            address: "0x9153176c72100b25bdA2A312E5d2fe12a1806a9B",
-        },
-        {
-            username: "username4",
-            address: "0x9153176c72100b25bdA3D312E5d2fe12a1806a9B",
-        },
-    ]);
+    const [recentAccountList, setRecentAccountList] = useState<
+        SimpleAccountUser[]
+    >([]);
 
     // ====================================================================================
     // Tab Functionality
@@ -113,8 +97,23 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
         setAccountExists(foundAccount || null); // Set accountExists to found account or null
     }, [username, recentAccountList]);
 
+    useEffect(() => {
+        const fetchRecentAccounts = async () => {
+            try {
+                const accounts: SimpleAccountUser[] =
+                    await registeredAccounts(); // Fetch accounts
+
+                setRecentAccountList(accounts); // Set state with fetched accounts
+            } catch (err) {
+                console.log("Failed to fetch recent accounts");
+            }
+        };
+
+        fetchRecentAccounts();
+    }, []);
+
     // (values: z.infer<typeof signInSchema>)
-    const signIn = (_: z.infer<typeof signInSchema>) => {
+    const signIn = (values: z.infer<typeof signInSchema>) => {
         //  TODO
         const usernameExists = recentAccountList.some(
             (account) => account.username === username
@@ -124,6 +123,8 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
             toast("Register Warning", {
                 description: "This username does not exist.",
             });
+        } else {
+            autonomiSignIn(values.username, values.password);
         }
     };
 
