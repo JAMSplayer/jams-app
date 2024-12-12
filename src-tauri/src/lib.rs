@@ -452,8 +452,8 @@ fn truncate_number(value: u32, max_length: usize) -> u32 {
 
 #[derive(Debug, serde::Serialize)]
 struct FilePicture {
-    data: Vec<u8>,     // Image data
-    mime_type: String, // MIME type of the image (e.g., image/jpeg)
+    data: Vec<u8>,             // Image data
+    mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
 }
 
 #[tauri::command]
@@ -476,26 +476,22 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
                 let title = tagged_file
                     .primary_tag()
                     .and_then(|tag| tag.get_string(&ItemKey::TrackTitle).map(String::from))
-                    .unwrap_or_else(|| "unknown".to_string());
-                let title = truncate_to_max_length(title, MAX_TITLE_LENGTH);
+                    .map(|t| truncate_to_max_length(t, MAX_TITLE_LENGTH));
 
                 let artist = tagged_file
                     .primary_tag()
                     .and_then(|tag| tag.get_string(&ItemKey::TrackArtist).map(String::from))
-                    .unwrap_or_else(|| "unknown".to_string());
-                let artist = truncate_to_max_length(artist, MAX_ARTIST_LENGTH);
+                    .map(|a| truncate_to_max_length(a, MAX_ARTIST_LENGTH));
 
                 let album = tagged_file
                     .primary_tag()
                     .and_then(|tag| tag.get_string(&ItemKey::AlbumTitle).map(String::from))
-                    .unwrap_or_else(|| "unknown".to_string());
-                let album = truncate_to_max_length(album, MAX_ALBUM_LENGTH);
+                    .map(|a| truncate_to_max_length(a, MAX_ALBUM_LENGTH));
 
                 let genre = tagged_file
                     .primary_tag()
                     .and_then(|tag| tag.get_string(&ItemKey::Genre).map(String::from))
-                    .unwrap_or_else(|| "unknown".to_string());
-                let genre = truncate_to_max_length(genre, MAX_GENRE_LENGTH);
+                    .map(|g| truncate_to_max_length(g, MAX_GENRE_LENGTH));
 
                 let year = tagged_file
                     .primary_tag()
@@ -518,20 +514,18 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
                     .and_then(|tag| tag.pictures().first()) // Get the first picture
                     .map(|pic| {
                         (
-                            pic.data().to_vec(), // Access the picture data using the `data()` method
-                            pic.mime_type()
-                                .map(|mime| mime.to_string())
-                                .unwrap_or_else(|| "unknown".to_string()), // Safely handle Option<&MimeType>
+                            pic.data().to_vec(),                          // Access the picture data
+                            pic.mime_type().map(|mime| mime.to_string()), // Map the MIME type to an Option<String>
                         )
                     });
 
                 // Add file metadata to the list
                 metadata_list.push(FileMetadata {
                     file_path,
-                    title: Some(title),
-                    artist: Some(artist),
-                    album: Some(album),
-                    genre: Some(genre),
+                    title,
+                    artist,
+                    album,
+                    genre,
                     year,
                     track_number,
                     duration,

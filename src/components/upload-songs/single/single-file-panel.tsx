@@ -301,50 +301,43 @@ export default function SingleFilePanel({
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                    {fileDetail.name && fileDetail.name !== undefined && (
+                    {fileDetail.name && (
                         <p className="text-sm text-gray-500">
                             File Name: {fileDetail.name}
                         </p>
                     )}
-                    {fileDetail.location &&
-                        fileDetail.location !== undefined && (
-                            <p className="text-sm text-gray-500">
-                                Location: {fileDetail.location}
-                            </p>
-                        )}
-                    {fileDetail.size && fileDetail.size !== undefined && (
+                    {fileDetail.location && (
+                        <p className="text-sm text-gray-500">
+                            Location: {fileDetail.location}
+                        </p>
+                    )}
+                    {fileDetail.size && (
                         <p className="text-sm text-gray-500">
                             Size: {formatBytes(fileDetail.size)}
                         </p>
                     )}
-                    {fileDetail.extension &&
-                        fileDetail.extension !== undefined && (
-                            <p className="text-sm text-gray-500">
-                                Extension: {fileDetail.extension}
-                            </p>
-                        )}
-                    {fileDetail.duration &&
-                        fileDetail.duration !== undefined &&
-                        fileDetail.duration > 0 && (
-                            <p className="text-sm text-gray-500">
-                                Duration:{" "}
-                                {formatDurationFromSeconds(fileDetail.duration)}
-                            </p>
-                        )}
-                    {fileDetail.sampleRate !== undefined &&
-                        fileDetail.sampleRate > 0 && (
-                            <p className="text-sm text-gray-500">
-                                Sample Rate: {fileDetail.sampleRate}
-                            </p>
-                        )}
+                    {fileDetail.extension && (
+                        <p className="text-sm text-gray-500">
+                            Extension: {fileDetail.extension}
+                        </p>
+                    )}
+                    {fileDetail.duration && fileDetail.duration > 0 && (
+                        <p className="text-sm text-gray-500">
+                            Duration:{" "}
+                            {formatDurationFromSeconds(fileDetail.duration)}
+                        </p>
+                    )}
+                    {fileDetail.sampleRate && fileDetail.sampleRate > 0 && (
+                        <p className="text-sm text-gray-500">
+                            Sample Rate: {fileDetail.sampleRate}
+                        </p>
+                    )}
 
-                    {fileDetail.channels &&
-                        fileDetail.channels !== undefined &&
-                        fileDetail.channels > 0 && (
-                            <p className="text-sm text-gray-500">
-                                Channels: {fileDetail.channels}
-                            </p>
-                        )}
+                    {fileDetail.channels && fileDetail.channels > 0 && (
+                        <p className="text-sm text-gray-500">
+                            Channels: {fileDetail.channels}
+                        </p>
+                    )}
                 </div>
             </div>
 

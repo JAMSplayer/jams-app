@@ -91,25 +91,16 @@ export default function UploadSongsPanel() {
                 extension,
                 location,
                 size: information.size,
-                title: meta?.title === "unknown" ? undefined : meta?.title,
-                artist: meta?.artist === "unknown" ? undefined : meta?.artist,
-                album: meta?.album === "unknown" ? undefined : meta?.album,
-                genre:
-                    meta?.genre === "unknown"
-                        ? undefined
-                        : meta?.genre?.toLocaleLowerCase(),
-                year:
-                    meta?.year === undefined || null
-                        ? undefined
-                        : meta?.year || undefined,
-                trackNumber:
-                    meta?.trackNumber === undefined || null
-                        ? undefined
-                        : meta?.trackNumber || undefined,
-                duration: meta?.duration || undefined,
-                channels: meta?.channels || undefined,
-                sampleRate: meta?.sampleRate || undefined,
-                picture: meta?.picture
+                title: meta?.title,
+                artist: meta?.artist,
+                album: meta?.album,
+                genre: meta?.genre?.toLocaleLowerCase(),
+                year: meta?.year,
+                trackNumber: meta?.trackNumber,
+                duration: meta?.duration,
+                channels: meta?.channels,
+                sampleRate: meta?.sampleRate,
+                picture: meta?.picture // test if either data or mime_type is undefined that picture is set to undefined
                     ? {
                           data: Buffer.from(meta.picture.data),
                           mime_type: meta.picture.mime_type,
