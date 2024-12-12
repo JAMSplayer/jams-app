@@ -4,8 +4,8 @@ import { FileDetail } from "@/types/file-detail";
 import { BaseDirectory, stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
-import { invoke } from "@tauri-apps/api/core";
 import { Buffer } from "buffer";
+import { fetchMetadata } from "@/backend/metadata";
 
 export default function UploadSongsPanel() {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
@@ -113,23 +113,6 @@ export default function UploadSongsPanel() {
                 error
             );
             return null;
-        }
-    }
-
-    async function fetchMetadata(filePaths: string[]): Promise<FileDetail[]> {
-        try {
-            // Fetch metadata for all files
-            const metadata: FileDetail[] = await invoke("get_file_metadata", {
-                filePaths,
-            });
-            return metadata;
-        } catch (error) {
-            console.error(
-                "Failed to fetch metadata for files:",
-                filePaths,
-                error
-            );
-            return []; // Return an empty array to avoid breaking the flow
         }
     }
 
