@@ -1,5 +1,13 @@
 import { Song } from "@/types/song";
 
+export type RecoverAccountUser = {
+    secretKey: string;
+    username: string;
+    password: string;
+    dateCreated: Date;
+    dateUpdated: Date;
+};
+
 export type RegisterAccountUser = {
     username: string;
     password: string;

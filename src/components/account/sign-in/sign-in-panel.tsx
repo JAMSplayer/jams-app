@@ -1,6 +1,6 @@
 import { Input } from "../../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -16,7 +16,6 @@ import {
 } from "../../ui/form";
 import { useEffect, useState } from "react";
 import { formatAddress } from "@/lib/utils/address";
-import { Button } from "@/components/ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./recent-accounts";
 import { signIn as autonomiSignIn } from "@/backend/autonomi";
@@ -25,10 +24,12 @@ import { SimpleAccountUser } from "@/types/account-user";
 
 interface SignInPanelProps {
     onCreateAccountClicked: () => void;
+    onRecoverAccountClicked: () => void;
 }
 
 const SignInPanel: React.FC<SignInPanelProps> = ({
     onCreateAccountClicked,
+    onRecoverAccountClicked,
 }) => {
     // ====================================================================================
     // Sign In Form Functionality
@@ -132,6 +133,10 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
         onCreateAccountClicked();
     };
 
+    const handleRecoverAccountClicked = () => {
+        onRecoverAccountClicked();
+    };
+
     return (
         <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="flex w-full">
@@ -217,9 +222,16 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                         </form>
                     </Form>
 
+                    {/* Divider */}
+                    <div className="flex items-center justify-center mt-4">
+                        <div className="w-full border-t border-gray-300"></div>
+                        <span className="px-3 text-sm text-gray-500">or</span>
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+
                     <div className="pt-3 flex justify-center">
-                        <div
-                            className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
+                        <Button
+                            className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-sidebar-foreground w-full"
                             onClick={handleCreateAccountClicked}
                         >
                             <div className="flex items-center justify-center">
@@ -228,7 +240,16 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                             <span className="uppercase text-center">
                                 Create Account
                             </span>
-                        </div>
+                        </Button>
+                    </div>
+
+                    <div className="flex justify-center mt-3">
+                        <a
+                            className="text-sm font-medium text-primary hover:underline hover:cursor-pointer"
+                            onClick={handleRecoverAccountClicked}
+                        >
+                            Recover Existing Account
+                        </a>
                     </div>
                 </div>
             </TabsContent>

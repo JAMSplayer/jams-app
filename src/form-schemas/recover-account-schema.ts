@@ -1,7 +1,13 @@
 import { z } from "zod";
 
-export const createAccountSchema = z
+export const recoverAccountSchema = z
     .object({
+        secretKey: z
+            .string()
+            .min(2, {
+                message: "Secret key must be at least 2 characters.",
+            })
+            .max(64),
         username: z
             .string()
             .min(2, {
@@ -25,5 +31,5 @@ export const createAccountSchema = z
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords must match.",
-        path: ["confirmPassword"],
+        path: ["confirmPassword"], // Attach error to confirmPassword field
     });

@@ -11,27 +11,27 @@ import { ArrowLeft } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createAccountSchema } from "@/form-schemas/create-account-schema";
+import { recoverAccountSchema } from "@/form-schemas/recover-account-schema";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { RegisterAccountUser, SimpleAccountUser } from "@/types/account-user";
+import { RecoverAccountUser } from "@/types/account-user";
 import { registerUser } from "@/backend/logic";
 
-interface CreateAccountPanelProps {
+interface RecoverAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
 }
 
-const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
+const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
     onReturnToSignInPanelClicked,
 }) => {
     // ====================================================================================
-    // Create Account Form Functionality
+    // Recover Account Form Functionality
     // ====================================================================================
 
-    const createAccountForm = useForm<z.infer<typeof createAccountSchema>>({
-        resolver: zodResolver(createAccountSchema),
+    const recoverAccountForm = useForm<z.infer<typeof recoverAccountSchema>>({
+        resolver: zodResolver(recoverAccountSchema),
         mode: "onChange",
         defaultValues: {
+            secretKey: "",
             username: "",
             password: "",
             confirmPassword: "",
@@ -43,17 +43,14 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
         register,
         control,
         formState: { isValid },
-    } = createAccountForm;
+    } = recoverAccountForm;
 
-    const [usernameAlreadyExistsError, setUsernameAlreadyExistsError] =
-        useState<string | null>(null);
-
-    type CreateAccountFormData = z.infer<typeof createAccountSchema>;
-
-    const onSubmit = (data: CreateAccountFormData) => {
+    type RecoverAccountFormData = z.infer<typeof recoverAccountSchema>;
+    const onSubmit = (data: RecoverAccountFormData) => {
         console.log(data);
 
-        const newUser: RegisterAccountUser = {
+        const newUser: RecoverAccountUser = {
+            secretKey: data.secretKey,
             username: data.username,
             password: data.password,
             dateCreated: new Date(),
@@ -62,22 +59,6 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
 
         // Proceed with account creation
         registerUser(newUser);
-    };
-
-    // TODO currently we are using this as a way to store all existing accounts - get from the hook
-    // recentAccountList, setRecentAccountList
-    const [recentAccountList] = useState<SimpleAccountUser[]>([]);
-
-    const validateUsername = (username: string) => {
-        const foundAccount = recentAccountList.find(
-            (account) => account.username === username
-        );
-
-        if (foundAccount) {
-            setUsernameAlreadyExistsError("This username already exists");
-        } else {
-            setUsernameAlreadyExistsError(null);
-        }
     };
 
     const handleReturnToSignInPanelClicked = () => {
@@ -93,48 +74,57 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
             />{" "}
             <div className="px-4">
                 <div className="flex justify-center items-center">
-                    <div className="text-md">Create Account</div>
+                    <div className="text-md">Recover Account</div>
                 </div>
-                <Form {...createAccountForm}>
+                <Form {...recoverAccountForm}>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="space-y-2 pt-4"
                     >
                         <FormField
                             control={control}
-                            name="username"
-                            render={({ field }) => (
+                            name="secretKey"
+                            render={() => (
                                 <FormItem>
-                                    <FormLabel>Username</FormLabel>
-                                    <>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Enter your username"
-                                                autoCapitalize="off"
-                                                autoComplete="off"
-                                                autoCorrect="off"
-                                                {...field} // Spread field instead of using register directly
-                                                onChange={(e) => {
-                                                    field.onChange(e); // Update field value
-                                                    validateUsername(
-                                                        e.target.value
-                                                    ); // Validate on change
-                                                }}
-                                            />
-                                        </FormControl>
-                                        {usernameAlreadyExistsError && (
-                                            <p className="text-destructive text-sm text-left">
-                                                {usernameAlreadyExistsError}
-                                            </p>
-                                        )}
-                                    </>
+                                    <FormLabel>Secret Key</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Enter your secret key"
+                                            autoCapitalize="off"
+                                            autoComplete="off"
+                                            autoCorrect="off"
+                                            {...register("secretKey")}
+                                        />
+                                    </FormControl>
+
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
                         <FormField
-                            control={createAccountForm.control}
+                            control={control}
+                            name="username"
+                            render={() => (
+                                <FormItem>
+                                    <FormLabel>Username</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Enter your username"
+                                            autoCapitalize="off"
+                                            autoComplete="off"
+                                            autoCorrect="off"
+                                            {...register("username")}
+                                        />
+                                    </FormControl>
+
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={control}
                             name="password"
                             render={() => (
                                 <FormItem>
@@ -149,29 +139,29 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                             {...register("password")}
                                         />
                                     </FormControl>
+
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
                         <FormField
-                            control={createAccountForm.control}
+                            control={control}
                             name="confirmPassword"
                             render={() => (
                                 <FormItem>
                                     <FormLabel>Confirm Password</FormLabel>
-                                    <>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Confirm your password"
-                                                type="password"
-                                                autoCapitalize="off"
-                                                autoComplete="off"
-                                                autoCorrect="off"
-                                                {...register("confirmPassword")}
-                                            />
-                                        </FormControl>
-                                    </>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Confirm your password"
+                                            type="password"
+                                            autoCapitalize="off"
+                                            autoComplete="off"
+                                            autoCorrect="off"
+                                            {...register("confirmPassword")}
+                                        />
+                                    </FormControl>
+
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -183,7 +173,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                 className="mt-4 w-full"
                                 disabled={!isValid}
                             >
-                                Create Account
+                                Recover Account
                             </Button>
                         </div>
                     </form>
@@ -193,4 +183,4 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     );
 };
 
-export default CreateAccountPanel;
+export default RecoverAccountPanel;
