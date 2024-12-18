@@ -4,7 +4,6 @@ import { FileDetail } from "@/types/file-detail";
 import { BaseDirectory, stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
-import { Buffer } from "buffer";
 import { fetchMetadata } from "@/backend/metadata";
 
 export default function UploadSongsPanel() {
@@ -102,7 +101,7 @@ export default function UploadSongsPanel() {
                 sampleRate: meta?.sampleRate,
                 picture: meta?.picture // test if either data or mime_type is undefined that picture is set to undefined
                     ? {
-                          data: Buffer.from(meta.picture.data),
+                          data: new Uint8Array(meta.picture.data),
                           mime_type: meta.picture.mime_type,
                       }
                     : undefined,
