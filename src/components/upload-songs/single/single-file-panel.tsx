@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SelectYear from "@/components/select-year";
 import { toast } from "sonner";
+import { uploadFile } from "@/backend/autonomi";
+
 
 // TODO
 // when the file is uploaded successfully, show dialog to allow the user to put it into a playlist.
@@ -266,8 +268,10 @@ export default function SingleFilePanel({
     // end track number ------------------------------------------------------------
 
     const onSubmit = (data: FormSchema) => {
-        // TODO implment upload single file rust
         console.log("Submitted Values:", { ...data, tags });
+        // let songXorname = uploadFile(path); // TODO: handle await, null
+        // let artXorname = putData(artBytes); // TODO: handle await, null
+        // TODO: update song object with songXorname and artXorname, update playlist data, sync with network
     };
 
     return (

@@ -536,6 +536,35 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
     Ok(metadata_list)
 }
 
+#[tauri::command]
+async fn upload(
+    file: String, // file path
+    app: AppHandle,
+) -> Result<String, Error> { // hex-encoded xorname
+    let path = PathBuf::from(file);
+    let data = fs::read(&path)
+        .map_err(|e| Error::Common(format!("File {} is not readable: {}", path.display(), e)))?;
+    put_data(data, app).await
+}
+
+#[tauri::command]
+async fn put_data(
+    data: Vec<u8>,
+    app: AppHandle
+) -> Result<String, Error> { // hex-encoded xorname
+    let data_address = app
+        .try_state::<Mutex<Option<Safe>>>()
+        .ok_or(Error::NotConnected)?
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error::NotConnected)? // safe
+        .upload(data)
+        .await?;
+
+    Ok(hex::encode(data_address))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -550,9 +579,13 @@ pub fn run() {
             is_connected,
             disconnect,
             create_register,
+            read_register,
+            write_register,
             client_address,
             balance,
             get_file_metadata,
+            upload,
+            put_data,
         ])
         .setup(|app| {
             server::run(app.handle().clone());

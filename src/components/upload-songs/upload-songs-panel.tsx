@@ -69,9 +69,7 @@ export default function UploadSongsPanel() {
 
             const [name, ...extParts] = fileNameWithExtension.split(".");
             const extension = extParts.join(".");
-            const information = await stat(filePath, {
-                baseDir: BaseDirectory.Download,
-            });
+            const information = await stat(filePath);
 
             // Fetch metadata for the file
             const metadata = await fetchMetadata([filePath]);
