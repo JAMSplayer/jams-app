@@ -20,6 +20,7 @@ tauri-build = { version = "2.0.1", features = [] }
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
 futures = "*"
+hex = "*"
 argon2 = "0.5"
 password-hash = "0.5"
 aes-gcm = "*"
@@ -37,4 +38,4 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 lofty = "0.21.1"
 # needs to have Git command installed and be able to authenticate the GitHub repository
 # configuration in .cargo/config.toml
-safe = { version = "0.1.4", git = "ssh://git@github.com/JAMSplayer/safe.git" }
+safe = { version = "0.1.5", git = "ssh://git@github.com/JAMSplayer/safe.git" }

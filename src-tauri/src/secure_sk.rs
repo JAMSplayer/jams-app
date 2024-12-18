@@ -32,7 +32,34 @@ struct SecretKeyFile {
     encrypted_sk: Vec<u8>,
 }
 
+pub fn encrypt_eth(privkey: String, password: &str) -> Result<Vec<u8>, Error> {
+    let pk_bytes: &[u8] = privkey.as_bytes();
+    common_encrypt(pk_bytes, password)
+}
+
 pub fn encrypt(sk: SecretKey, password: &str) -> Result<Vec<u8>, Error> {
+    let sk_bytes: &[u8] = &sk.to_bytes();
+    common_encrypt(sk_bytes, password)
+}
+
+pub fn decrypt_eth(file_bytes: &[u8], password: &str) -> Result<String, Error> {
+    let pk_bytes = common_decrypt(file_bytes, password)?;
+    String::from_utf8(pk_bytes)
+        .map_err(|e| Error::Common(format!("Could not create private key. {}", e)))
+}
+
+pub fn decrypt(file_bytes: &[u8], password: &str) -> Result<SecretKey, Error> {
+    let sk_bytes = common_decrypt(file_bytes, password)?;
+
+    Ok(SecretKey::from_bytes(
+        sk_bytes.try_into().map_err(|_| {
+            Error::Common(String::from("Could not transform bytes representation."))
+        })?,
+    )
+    .map_err(|e| Error::Common(format!("Could not create secret key. {}", e)))?)
+}
+
+fn common_encrypt(sk_bytes: &[u8], password: &str) -> Result<Vec<u8>, Error> {
     let params = ParamsBuilder::new()
         .output_len(AES_KEY_SIZE)
         .build()
@@ -49,7 +76,6 @@ pub fn encrypt(sk: SecretKey, password: &str) -> Result<Vec<u8>, Error> {
     let aes = Aes256Gcm::new_from_slice(&aes_key)
         .map_err(|e| Error::Common(format!("Could not init cipher. {}", e)))?;
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
-    let sk_bytes: &[u8] = &sk.to_bytes();
     let data = aes
         .encrypt(&nonce, sk_bytes)
         .map_err(|e| Error::Common(format!("Could not encrypt secret key. {}", e)))?;
@@ -82,7 +108,7 @@ pub fn encrypt(sk: SecretKey, password: &str) -> Result<Vec<u8>, Error> {
     Ok(serde_json::to_vec(&skf).unwrap())
 }
 
-pub fn decrypt(file_bytes: &[u8], password: &str) -> Result<SecretKey, Error> {
+fn common_decrypt(file_bytes: &[u8], password: &str) -> Result<Vec<u8>, Error> {
     let skf: SecretKeyFile = serde_json::from_slice(file_bytes)
         .map_err(|e| Error::Common(format!("Could not decode JSON. {}", e)))?;
 
@@ -118,14 +144,44 @@ pub fn decrypt(file_bytes: &[u8], password: &str) -> Result<SecretKey, Error> {
         .map_err(|e| Error::Common(format!("Could not init cipher. {}", e)))?;
     let nonce = &skf.encrypted_sk[0..12];
     let data = &skf.encrypted_sk[12..];
-    let sk_bytes: &[u8] = &aes.decrypt(nonce.into(), data)
-    	.map_err(|_| Error::BadPassword)?
-//    	.map_err(|e| Error::Common(format!("Could not decrypt secret key. {}", e)))?
-    	[0..32];
-    Ok(SecretKey::from_bytes(
-        sk_bytes.try_into().map_err(|e| {
-            Error::Common(format!("Could not transform bytes representation. {}", e))
-        })?,
-    )
-    .map_err(|e| Error::Common(format!("Could not create shared key. {}", e)))?)
+    let sk_bytes: &[u8] = &aes
+        .decrypt(nonce.into(), data)
+        .map_err(|_| Error::BadPassword)?;
+    Ok(Vec::from(sk_bytes))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sk_encrypt_decrypt() {
+        let sk = SecretKey::random();
+        let pass = "testpass";
+        let encrypted = encrypt(sk.clone(), pass).unwrap();
+        let decrypted = decrypt(&encrypted, pass).unwrap();
+
+        assert_eq!(sk, decrypted);
+    }
+
+    #[test]
+    fn eth_encrypt_decrypt() {
+        let pk = SecretKey::random().to_hex();
+        let pass = "testpass";
+        let encrypted = encrypt_eth(pk.clone(), pass).unwrap();
+        let decrypted = decrypt_eth(&encrypted, pass).unwrap();
+
+        assert_eq!(pk, decrypted);
+    }
+
+    #[test]
+    fn eth_with_0x() {
+        let mut pk = SecretKey::random().to_hex();
+        pk.insert_str(0, "0x");
+        let pass = "testpass";
+        let encrypted = encrypt_eth(pk.clone(), pass).unwrap();
+        let decrypted = decrypt_eth(&encrypted, pass).unwrap();
+
+        assert_eq!(pk, decrypted);
+    }
 }

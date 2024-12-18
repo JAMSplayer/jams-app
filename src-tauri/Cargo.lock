@@ -1180,8 +1180,6 @@ checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 [[package]]
 name = "autonomi"
 version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0a9003cb26f187e2d880fac8af28fb2d27e842d8558053d713febeb29a93db3"
 dependencies = [
  "bip39",
  "blst",
@@ -2886,8 +2884,6 @@ dependencies = [
 [[package]]
 name = "evmlib"
 version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "696d29383d15c3c9262d2cbe44cc45f65c6ebfda689c6780f8aed8a0d5b1ae11"
 dependencies = [
  "alloy",
  "dirs-next",
@@ -4366,6 +4362,7 @@ dependencies = [
  "aes-gcm",
  "argon2",
  "futures",
+ "hex 0.3.2",
  "lazy_static",
  "lofty",
  "password-hash",
@@ -7722,14 +7719,14 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "safe"
-version = "0.1.4"
-source = "git+ssh://git@github.com/JAMSplayer/safe.git#a1f40352e143adcaaa49c923e1e445d33d6bac67"
+version = "0.1.5"
 dependencies = [
  "alloy-primitives",
  "autonomi",
  "blsttc",
  "bytes",
  "evmlib",
+ "hex 0.3.2",
  "libp2p 0.53.2",
  "rand 0.8.5",
  "self_encryption",
@@ -8300,8 +8297,6 @@ dependencies = [
 [[package]]
 name = "sn_build_info"
 version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5eae8800936142f7682351e64d70595bf292b84af4aaedaab882d17b8f02d1a4"
 dependencies = [
  "chrono",
  "tracing",
@@ -8344,8 +8339,6 @@ dependencies = [
 [[package]]
 name = "sn_evm"
 version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b009392908f39e82970972025c3d7c00c26dd7e1795777cd6ec4b720265f365"
 dependencies = [
  "custom_debug",
  "evmlib",
@@ -8368,8 +8361,6 @@ dependencies = [
 [[package]]
 name = "sn_logging"
 version = "0.2.40"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fec4d5102fa45dae7ce38a16f97ff64b60196e94db7b3d4625f171a50582531"
 dependencies = [
  "chrono",
  "dirs-next",
@@ -8385,9 +8376,7 @@ dependencies = [
 
 [[package]]
 name = "sn_networking"
-version = "0.19.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e69e3a8052ce728c83bf0c971b371e84efb53f9cd556867fb2d30a8b464aa97c"
+version = "0.19.5"
 dependencies = [
  "aes-gcm-siv",
  "async-trait",
@@ -8427,8 +8416,6 @@ dependencies = [
 [[package]]
 name = "sn_peers_acquisition"
 version = "0.5.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40d2f43f4f9877089dd713c7515c16ca7b7fc2f556ae32baeed575715ca683bc"
 dependencies = [
  "clap",
  "lazy_static",
@@ -8445,8 +8432,6 @@ dependencies = [
 [[package]]
 name = "sn_protocol"
 version = "0.17.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7977031fe9c362e4f373941efa25ad4d18959bbf72a9bb6ab918d2cb3375531"
 dependencies = [
  "blsttc",
  "bytes",
@@ -8475,8 +8460,6 @@ dependencies = [
 [[package]]
 name = "sn_registers"
 version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f91329de6970a50885d42fa49dc8371907597814c1a7e3960174f1bab4d040a"
 dependencies = [
  "blsttc",
  "crdts",
@@ -8491,8 +8474,6 @@ dependencies = [
 [[package]]
 name = "sn_transfers"
 version = "0.20.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5df3eeb2b9af4ba633511c972de7486a5e00236080c28e4d0e094cf2bf1f48"
 dependencies = [
  "blsttc",
  "chrono",

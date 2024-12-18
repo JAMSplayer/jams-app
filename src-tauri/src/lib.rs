@@ -73,15 +73,15 @@ fn load_create_import_key(
     app_root: &PathBuf,
     login: String,
     password: String,
-    sk: Option<SecretKey>, // if you want to import secret key during registration
+    eth_pk: Option<String>, // if you want to import ethereum private key during registration
     register: bool,
-) -> Result<SecretKey, Error> {
+) -> Result<String, Error> {
     let sk_dir = user_root(app_root, login);
     let mut sk_file = sk_dir.clone();
     sk_file.push(SK_FILENAME);
 
     let not_readable_msg = format!("Could not read user key file: {}", &sk_file.display());
-    let sk = if sk_file
+    let eth_pk = if sk_file
         .try_exists()
         .map_err(|_| Error::Common(not_readable_msg.clone()))?
     {
@@ -91,15 +91,15 @@ fn load_create_import_key(
 
         let bytes = fs::read(&sk_file).map_err(|_| Error::Common(not_readable_msg.clone()))?;
 
-        secure_sk::decrypt(&bytes, &password)?
+        secure_sk::decrypt_eth(&bytes, &password)?
     } else {
         if !register {
             return Err(Error::BadLogin);
         }
 
-        let sk = sk.unwrap_or(SecretKey::random());
+        let pk = eth_pk.unwrap_or(SecretKey::random().to_hex()); // bls secret key can be used as eth privkey
 
-        let file_bytes = secure_sk::encrypt(sk.clone(), &password)?;
+        let file_bytes = secure_sk::encrypt_eth(pk.clone(), &password)?;
         fs::create_dir_all(sk_dir.clone()).map_err(|_| {
             Error::Common(format!("Could not create user dir: {}", &sk_dir.display()))
         })?;
@@ -109,10 +109,10 @@ fn load_create_import_key(
                 &sk_file.display()
             ))
         })?;
-        sk
+        pk
     };
 
-    Ok(sk)
+    Ok(eth_pk)
 }
 
 #[tauri::command]
@@ -212,31 +212,22 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 async fn sign_in(
     login: String,
     password: String,
-    secret_key_import: Option<String>,
+    eth_pk_import: Option<String>,
     register: bool,
     mut app: AppHandle,
 ) -> Result<(), Error> {
     let app_root = make_root(&mut app)?;
+    println!("eth_pk_import: {:?}", eth_pk_import);
+    println!("register: {:?}", register);
 
-    let secret_key_import = if let Some(ski) = secret_key_import {
-        if !register {
-            return Err(Error::Common(String::from(
-                "Only can import secret key when registering",
-            )));
-        }
-        Some(SecretKey::from_hex(&ski).map_err(|e| Error::Common(format!("Secret key: {}", e)))?)
-    } else {
-        None
-    };
-
-    let sk = load_create_import_key(
+    let pk = load_create_import_key(
         &app_root,
         login.clone(),
         password,
-        secret_key_import,
+        eth_pk_import,
         register,
     )?;
-    println!("\n\nSecret Key: {}", sk.to_hex());
+    println!("\n\nEth Private Key: {}", pk);
 
     let signed_in_safe = app
         .try_state::<Mutex<Option<Safe>>>()
@@ -244,8 +235,8 @@ async fn sign_in(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error::NotConnected)?
-        .login(Some(sk))?;
+        .ok_or(Error::NotConnected)? // not signed in
+        .login_with_eth(Some(pk))?; // sign in
 
     let address = signed_in_safe.address()?.to_string();
     println!("ETH wallet address: {}", address);
@@ -322,7 +313,7 @@ async fn create_register(
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .register_create(&data.as_bytes(), meta, None)
+        .register_create(data.into_bytes(), meta, None)
         .await?;
 
     println!("\n\nRegister created: {:?}", reg);
@@ -383,7 +374,7 @@ async fn write_register(
             .await
             .as_mut()
             .ok_or(Error::NotConnected)?
-            .register_write(&mut reg, data.as_bytes())
+            .register_write(&mut reg, data.into_bytes())
             .await?;
 
         println!("\n\nRegister updated: {:?}", reg);
@@ -458,6 +449,7 @@ struct FilePicture {
 
 #[tauri::command]
 async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>, String> {
+    // TODO: change error type to Error
     const MAX_TITLE_LENGTH: usize = 100;
     const MAX_ARTIST_LENGTH: usize = 100;
     const MAX_ALBUM_LENGTH: usize = 100;
