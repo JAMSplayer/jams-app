@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SelectYear from "@/components/select-year";
 import { toast } from "sonner";
-import { UploadSong } from "@/backend/autonomi";
+import { UploadSong } from "@/backend/uploading";
 import { SongUpload } from "@/types/songs/song-upload";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
