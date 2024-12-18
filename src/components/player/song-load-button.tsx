@@ -1,5 +1,5 @@
 import { useAudioPlayer } from "@/components/player/audio-provider";
-import { Song } from "@/types/song";
+import { Song } from "@/types/songs/song";
 import { Button } from "../ui/button";
 import { usePlayerStore } from "@/store/player-store";
 import { useTranslation } from "react-i18next";
