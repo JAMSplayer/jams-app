@@ -1,4 +1,8 @@
 use futures::lock::Mutex;
+use lofty::file::AudioFile;
+use lofty::prelude::ItemKey;
+use lofty::prelude::TaggedFileExt;
+use lofty::read_from_path;
 use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
@@ -69,15 +73,15 @@ fn load_create_import_key(
     app_root: &PathBuf,
     login: String,
     password: String,
-    sk: Option<SecretKey>, // if you want to import secret key during registration
+    eth_pk: Option<String>, // if you want to import ethereum private key during registration
     register: bool,
-) -> Result<SecretKey, Error> {
+) -> Result<String, Error> {
     let sk_dir = user_root(app_root, login);
     let mut sk_file = sk_dir.clone();
     sk_file.push(SK_FILENAME);
 
     let not_readable_msg = format!("Could not read user key file: {}", &sk_file.display());
-    let sk = if sk_file
+    let eth_pk = if sk_file
         .try_exists()
         .map_err(|_| Error::Common(not_readable_msg.clone()))?
     {
@@ -87,15 +91,15 @@ fn load_create_import_key(
 
         let bytes = fs::read(&sk_file).map_err(|_| Error::Common(not_readable_msg.clone()))?;
 
-        secure_sk::decrypt(&bytes, &password)?
+        secure_sk::decrypt_eth(&bytes, &password)?
     } else {
         if !register {
             return Err(Error::BadLogin);
         }
 
-        let sk = sk.unwrap_or(SecretKey::random());
+        let pk = eth_pk.unwrap_or(SecretKey::random().to_hex()); // bls secret key can be used as eth privkey
 
-        let file_bytes = secure_sk::encrypt(sk.clone(), &password)?;
+        let file_bytes = secure_sk::encrypt_eth(pk.clone(), &password)?;
         fs::create_dir_all(sk_dir.clone()).map_err(|_| {
             Error::Common(format!("Could not create user dir: {}", &sk_dir.display()))
         })?;
@@ -105,10 +109,10 @@ fn load_create_import_key(
                 &sk_file.display()
             ))
         })?;
-        sk
+        pk
     };
 
-    Ok(sk)
+    Ok(eth_pk)
 }
 
 #[tauri::command]
@@ -165,10 +169,18 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 
     let mut peers: Vec<Multiaddr> = Vec::new();
 
-    let add_network_contacts = peer.map(|p_str| p_str.parse::<Multiaddr>().inspect(|multi_addr| {
-        println!("Peer: {}", &multi_addr);
-        peers.push(multi_addr.clone());
-    }).map(|_| false).unwrap_or(true)).unwrap_or(true);
+    let add_network_contacts = peer
+        .map(|p_str| {
+            p_str
+                .parse::<Multiaddr>()
+                .inspect(|multi_addr| {
+                    println!("Peer: {}", &multi_addr);
+                    peers.push(multi_addr.clone());
+                })
+                .map(|_| false)
+                .unwrap_or(true)
+        })
+        .unwrap_or(true);
 
     if add_network_contacts {
         println!("Connecting to official network.");
@@ -188,8 +200,10 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
     println!("\n\nConnected.");
 
     // Emit the connect event with the extracted address
-    let _ = app.emit("connect", ())
+    let _ = app
+        .emit("connected", ())
         .inspect_err(|e| eprintln!("{}", e));
+
 
     // Store the `safe` object in the application's state
     *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(safe);
@@ -201,23 +215,45 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 async fn sign_in(
     login: String,
     password: String,
-    secret_key_import: Option<String>,
+    eth_pk_import: Option<String>,
     register: bool,
     mut app: AppHandle,
 ) -> Result<(), Error> {
     let app_root = make_root(&mut app)?;
 
+    println!("eth_pk_import: {:?}", eth_pk_import);
+    println!("register: {:?}", register);
+
+    let pk = load_create_import_key(
+        &app_root,
+        login.clone(),
+        password,
+        eth_pk_import,
+        register,
+    )?;
+    println!("\n\nEth Private Key: {}", pk);
+
+
     let secret_key_import = if let Some(ski) = secret_key_import {
         if !register {
-            return Err(Error::Common(String::from("Only can import secret key when registering")));
+            return Err(Error::Common(String::from(
+                "Only can import secret key when registering",
+            )));
         }
         Some(SecretKey::from_hex(&ski).map_err(|e| Error::Common(format!("Secret key: {}", e)))?)
     } else {
         None
     };
 
-    let sk = load_create_import_key(&app_root, login.clone(), password, secret_key_import, register)?;
+    let sk = load_create_import_key(
+        &app_root,
+        login.clone(),
+        password,
+        secret_key_import,
+        register,
+    )?;
     println!("\n\nSecret Key: {}", sk.to_hex());
+
 
     let signed_in_safe = app
         .try_state::<Mutex<Option<Safe>>>()
@@ -225,8 +261,8 @@ async fn sign_in(
         .lock()
         .await
         .as_mut()
-        .ok_or(Error::NotConnected)?
-        .login(Some(sk))?;
+        .ok_or(Error::NotConnected)? // not signed in
+        .login_with_eth(Some(pk))?; // sign in
 
     let address = signed_in_safe.address()?.to_string();
     println!("ETH wallet address: {}", address);
@@ -247,8 +283,7 @@ async fn sign_in(
         ))
     })?;
 
-    let _ = app.emit("sign_in", ())
-        .inspect_err(|e| eprintln!("{}", e));
+    let _ = app.emit("sign_in", ()).inspect_err(|e| eprintln!("{}", e));
 
     Ok(())
 }
@@ -265,7 +300,8 @@ async fn disconnect(app: AppHandle) -> Result<(), Error> {
     app.unmanage::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?;
 
-    let _ = app.emit("disconnect", ())
+    let _ = app
+        .emit("disconnected", ())
         .inspect_err(|e| eprintln!("{}", e));
 
     Ok(())
@@ -303,7 +339,7 @@ async fn create_register(
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .register_create(&data.as_bytes(), meta, None)
+        .register_create(data.into_bytes(), meta, None)
         .await?;
 
     println!("\n\nRegister created: {:?}", reg);
@@ -364,7 +400,7 @@ async fn write_register(
             .await
             .as_mut()
             .ok_or(Error::NotConnected)?
-            .register_write(&mut reg, data.as_bytes())
+            .register_write(&mut reg, data.into_bytes())
             .await?;
 
         println!("\n\nRegister updated: {:?}", reg);
@@ -408,6 +444,163 @@ fn check_key(
     load_create_import_key(&app_root, login, password, None, false).map(|sk| sk.to_hex())
 }
 
+#[derive(Debug, serde::Serialize)]
+struct FileMetadata {
+    file_path: String,
+    title: Option<String>,
+    artist: Option<String>,
+    album: Option<String>,
+    genre: Option<String>,
+    year: Option<u32>,
+    track_number: Option<u32>,
+    duration: Option<u64>,        // Duration in seconds
+    channels: Option<u8>,         // Optional
+    sample_rate: Option<u32>,     // Optional
+    picture: Option<FilePicture>, // Use FilePicture struct for image and MIME type
+}
+
+fn truncate_to_max_length(value: String, max_length: usize) -> String {
+    if value.len() > max_length {
+        value.chars().take(max_length).collect() // Truncate string to the maximum length
+    } else {
+        value
+    }
+}
+
+fn truncate_number(value: u32, max_length: usize) -> u32 {
+    // Convert the number to a string and truncate it if it exceeds the max length
+    let max_value = 10u32.pow(max_length as u32) - 1; // e.g., for max_length = 4, max_value = 9999
+    if value > max_value {
+        value % (max_value + 1) // Truncate the value to fit the length
+    } else {
+        value
+    }
+}
+
+#[derive(Debug, serde::Serialize)]
+struct FilePicture {
+    data: Vec<u8>,             // Image data
+    mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
+}
+
+#[tauri::command]
+async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>, String> {
+    // TODO: change error type to Error
+    const MAX_TITLE_LENGTH: usize = 100;
+    const MAX_ARTIST_LENGTH: usize = 100;
+    const MAX_ALBUM_LENGTH: usize = 100;
+    const MAX_GENRE_LENGTH: usize = 30;
+    const MAX_YEAR_LENGTH: usize = 4;
+    const MAX_TRACK_NUMBER_LENGTH: usize = 3;
+
+    let mut metadata_list = Vec::new();
+
+    for file_path in file_paths {
+        match read_from_path(&file_path) {
+            Ok(tagged_file) => {
+                let properties = tagged_file.properties();
+
+                // Safely attempt to read each metadata field, skipping any that fail
+                let title = tagged_file
+                    .primary_tag()
+                    .and_then(|tag| tag.get_string(&ItemKey::TrackTitle).map(String::from))
+                    .map(|t| truncate_to_max_length(t, MAX_TITLE_LENGTH));
+
+                let artist = tagged_file
+                    .primary_tag()
+                    .and_then(|tag| tag.get_string(&ItemKey::TrackArtist).map(String::from))
+                    .map(|a| truncate_to_max_length(a, MAX_ARTIST_LENGTH));
+
+                let album = tagged_file
+                    .primary_tag()
+                    .and_then(|tag| tag.get_string(&ItemKey::AlbumTitle).map(String::from))
+                    .map(|a| truncate_to_max_length(a, MAX_ALBUM_LENGTH));
+
+                let genre = tagged_file
+                    .primary_tag()
+                    .and_then(|tag| tag.get_string(&ItemKey::Genre).map(String::from))
+                    .map(|g| truncate_to_max_length(g, MAX_GENRE_LENGTH));
+
+                let year = tagged_file
+                    .primary_tag()
+                    .and_then(|tag| tag.get_string(&ItemKey::Year))
+                    .and_then(|s| s.parse::<u32>().ok())
+                    .map(|value| truncate_number(value, MAX_YEAR_LENGTH)); // Truncate if needed
+
+                let track_number = tagged_file
+                    .primary_tag()
+                    .and_then(|tag| tag.get_string(&ItemKey::TrackNumber))
+                    .and_then(|s| s.parse::<u32>().ok())
+                    .map(|value| truncate_number(value, MAX_TRACK_NUMBER_LENGTH)); // Truncate if needed
+
+                let duration = Some(properties.duration().as_secs());
+                let channels = properties.channels();
+                let sample_rate = properties.sample_rate();
+
+                let picture = tagged_file
+                    .primary_tag()
+                    .and_then(|tag| tag.pictures().first()) // Get the first picture
+                    .map(|pic| {
+                        (
+                            pic.data().to_vec(),                          // Access the picture data
+                            pic.mime_type().map(|mime| mime.to_string()), // Map the MIME type to an Option<String>
+                        )
+                    });
+
+                // Add file metadata to the list
+                metadata_list.push(FileMetadata {
+                    file_path,
+                    title,
+                    artist,
+                    album,
+                    genre,
+                    year,
+                    track_number,
+                    duration,
+                    channels,
+                    sample_rate,
+                    picture: picture.map(|(data, mime_type)| FilePicture { data, mime_type }),
+                });
+            }
+            Err(err) => {
+                // Log the error and skip the problematic file
+                eprintln!("Failed to read metadata for {}: {}", file_path, err);
+            }
+        }
+    }
+
+    Ok(metadata_list)
+}
+
+#[tauri::command]
+async fn upload(
+    file: String, // file path
+    app: AppHandle,
+) -> Result<String, Error> { // hex-encoded xorname
+    let path = PathBuf::from(file);
+    let data = fs::read(&path)
+        .map_err(|e| Error::Common(format!("File {} is not readable: {}", path.display(), e)))?;
+    put_data(data, app).await
+}
+
+#[tauri::command]
+async fn put_data(
+    data: Vec<u8>,
+    app: AppHandle
+) -> Result<String, Error> { // hex-encoded xorname
+    let data_address = app
+        .try_state::<Mutex<Option<Safe>>>()
+        .ok_or(Error::NotConnected)?
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error::NotConnected)? // safe
+        .upload(data)
+        .await?;
+
+    Ok(hex::encode(data_address))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -427,6 +620,9 @@ pub fn run() {
             client_address,
             balance,
             check_key,
+            get_file_metadata,
+            upload,
+            put_data,
         ])
         .setup(|app| {
             server::run(app.handle().clone());
