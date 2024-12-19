@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Dropzone from "../dropzone";
 import { FileDetail } from "@/types/file-detail";
-import { BaseDirectory, stat } from "@tauri-apps/plugin-fs";
+import { stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
 import { fetchMetadata } from "@/backend/metadata";
@@ -76,11 +76,6 @@ export default function UploadSongsPanel() {
             // Check if metadata is available
             const meta = metadata.length > 0 ? metadata[0] : null;
 
-            if (meta?.picture) {
-                console.log("data", Buffer.from(meta.picture.data));
-                console.log("mime", meta.picture.mime_type);
-            }
-            console.log("test: ", meta?.year);
             // Proceed with whatever information is available
             return {
                 fullPath: filePath,

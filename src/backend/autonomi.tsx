@@ -1,4 +1,3 @@
-import { SongUpload } from "@/types/songs/song-upload";
 import { invoke } from "@tauri-apps/api/core";
 
 // =======
@@ -188,24 +187,26 @@ export async function writeRegister(
 }
 
 export async function uploadFile(
-    path: string, // filesystem path
-): Promise<string | null> { // xorname address
+    path: string // filesystem path
+): Promise<string | null> {
+    // xorname address
     console.log("uploading file: " + path + "...");
     try {
         return await invoke("upload", { file: path });
-    } catch(e) {
+    } catch (e) {
         console.error("uploadFile: ", e);
     }
     return null;
 }
 
 export async function putData(
-    data: Uint8Array, // file data
-): Promise<string | null> { // xorname address
+    data: Uint8Array // file data
+): Promise<string | null> {
+    // xorname address
     console.log("saving data blob of " + data.length + " bytes...");
     try {
         return await invoke("put_data", { data: data });
-    } catch(e) {
+    } catch (e) {
         console.error("putData: ", e);
     }
     return null;
