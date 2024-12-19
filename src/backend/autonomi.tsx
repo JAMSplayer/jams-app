@@ -34,23 +34,23 @@ export async function connectInner(peer?: string): Promise<boolean> {
     return false;
 }
 
-// Finds user folder in storage by login,
+// Finds user folder in storage by username,
 // and decrypts SecretKey with the password
 export async function signIn(
-    login: string,
+    username: string,
     password: string
 ): Promise<boolean> {
     console.log("logging in...");
     try {
         await invoke("sign_in", {
-            login: login,
+            login: username,
             password: password,
             register: false,
         });
         console.log("logged in.");
         return true;
     } catch (e) {
-        console.error("login: ", e);
+        console.error("signIn: ", e);
     }
     return false;
 }
@@ -58,14 +58,14 @@ export async function signIn(
 // Creates user folder in storage
 // and encrypts SecretKey with the password and stores in the folder
 export async function register(
-    login: string,
+    username: string,
     password: string,
     secretKeyImport?: string // if you want to register an account with particular SK
 ): Promise<boolean> {
     console.log("registering...");
     try {
         await invoke("sign_in", {
-            login: login,
+            login: username,
             password: password,
             register: true,
             secret_key_import: secretKeyImport,
@@ -79,7 +79,7 @@ export async function register(
 }
 
 // Checks if user is connected to the network.
-// This implies, that user is also logged to the application: login
+// This implies, that user is also logged to the application: username
 // and password were OK, and SecretKey has been decrypted from storage.
 export async function isConnected(): Promise<boolean> {
     console.log("Attempting to check if network is connected");
@@ -127,12 +127,12 @@ export async function balance(): Promise<string | null> {
 }
 
 export async function secretKey(
-    login: string,              // which user SK to get
+    username: string,              // which user SK to get
     password: string,           // user password to decrypt the key
 ): Promise<string | null> {     // if password is bad or other error occured, null will be returned
     try {
         return await invoke("check_key", {
-            login: login,
+            login: username,
             password: password,
         });
     } catch (e) {
