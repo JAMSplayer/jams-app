@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Dropzone from "../dropzone";
 import { FileDetail } from "@/types/file-detail";
-import { BaseDirectory, stat } from "@tauri-apps/plugin-fs";
+import { stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
 import { fetchMetadata } from "@/backend/metadata";

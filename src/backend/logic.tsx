@@ -135,7 +135,7 @@ export async function getConnectedUserAccount(): Promise<AccountUser | null> {
                 return user as AccountUser;
             }
 
-            console.error("User not found.");
+            console.log("User not found.");
         }
     } catch (e) {
         console.error("Unexpected error in getConnectedUserAccount: ", e);
@@ -157,7 +157,7 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
 
         // Filter out invalid Ethereum addresses and then map the results
         return accounts
-            .filter(([username, address]) => isEthereumAddress(address)) // Filter valid addresses
+            .filter(([_username, address]) => isEthereumAddress(address)) // Filter valid addresses
             .map(([username, address]) => ({
                 username,
                 address,

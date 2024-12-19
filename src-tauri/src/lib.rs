@@ -204,7 +204,6 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
         .emit("connected", ())
         .inspect_err(|e| eprintln!("{}", e));
 
-
     // Store the `safe` object in the application's state
     *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(safe);
 
@@ -220,40 +219,11 @@ async fn sign_in(
     mut app: AppHandle,
 ) -> Result<(), Error> {
     let app_root = make_root(&mut app)?;
-
     println!("eth_pk_import: {:?}", eth_pk_import);
     println!("register: {:?}", register);
 
-    let pk = load_create_import_key(
-        &app_root,
-        login.clone(),
-        password,
-        eth_pk_import,
-        register,
-    )?;
+    let pk = load_create_import_key(&app_root, login.clone(), password, eth_pk_import, register)?;
     println!("\n\nEth Private Key: {}", pk);
-
-
-    let secret_key_import = if let Some(ski) = secret_key_import {
-        if !register {
-            return Err(Error::Common(String::from(
-                "Only can import secret key when registering",
-            )));
-        }
-        Some(SecretKey::from_hex(&ski).map_err(|e| Error::Common(format!("Secret key: {}", e)))?)
-    } else {
-        None
-    };
-
-    let sk = load_create_import_key(
-        &app_root,
-        login.clone(),
-        password,
-        secret_key_import,
-        register,
-    )?;
-    println!("\n\nSecret Key: {}", sk.to_hex());
-
 
     let signed_in_safe = app
         .try_state::<Mutex<Option<Safe>>>()
@@ -435,13 +405,9 @@ async fn balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> 
 }
 
 #[tauri::command]
-fn check_key(
-    login: String,
-    password: String,
-    mut app: AppHandle,
-) -> Result<String, Error> {
+fn check_key(login: String, password: String, mut app: AppHandle) -> Result<String, Error> {
     let app_root = make_root(&mut app)?;
-    load_create_import_key(&app_root, login, password, None, false).map(|sk| sk.to_hex())
+    load_create_import_key(&app_root, login, password, None, false)
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -572,22 +538,21 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
     Ok(metadata_list)
 }
 
+// returns hex-encoded xorname
 #[tauri::command]
 async fn upload(
     file: String, // file path
     app: AppHandle,
-) -> Result<String, Error> { // hex-encoded xorname
+) -> Result<String, Error> {
     let path = PathBuf::from(file);
     let data = fs::read(&path)
         .map_err(|e| Error::Common(format!("File {} is not readable: {}", path.display(), e)))?;
     put_data(data, app).await
 }
 
+// returns hex-encoded xorname
 #[tauri::command]
-async fn put_data(
-    data: Vec<u8>,
-    app: AppHandle
-) -> Result<String, Error> { // hex-encoded xorname
+async fn put_data(data: Vec<u8>, app: AppHandle) -> Result<String, Error> {
     let data_address = app
         .try_state::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?
