@@ -398,6 +398,16 @@ async fn balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> 
     Ok(format!("{:x}", balance)) // hex string
 }
 
+#[tauri::command]
+fn check_key(
+    login: String,
+    password: String,
+    mut app: AppHandle,
+) -> Result<String, Error> {
+    let app_root = make_root(&mut app)?;
+    load_create_import_key(&app_root, login, password, None, false).map(|sk| sk.to_hex())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -416,6 +426,7 @@ pub fn run() {
             write_register,
             client_address,
             balance,
+            check_key,
         ])
         .setup(|app| {
             server::run(app.handle().clone());
