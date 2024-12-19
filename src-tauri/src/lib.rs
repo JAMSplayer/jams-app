@@ -165,10 +165,18 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 
     let mut peers: Vec<Multiaddr> = Vec::new();
 
-    let add_network_contacts = peer.map(|p_str| p_str.parse::<Multiaddr>().inspect(|multi_addr| {
-        println!("Peer: {}", &multi_addr);
-        peers.push(multi_addr.clone());
-    }).map(|_| false).unwrap_or(true)).unwrap_or(true);
+    let add_network_contacts = peer
+        .map(|p_str| {
+            p_str
+                .parse::<Multiaddr>()
+                .inspect(|multi_addr| {
+                    println!("Peer: {}", &multi_addr);
+                    peers.push(multi_addr.clone());
+                })
+                .map(|_| false)
+                .unwrap_or(true)
+        })
+        .unwrap_or(true);
 
     if add_network_contacts {
         println!("Connecting to official network.");
@@ -188,7 +196,8 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
     println!("\n\nConnected.");
 
     // Emit the connect event with the extracted address
-    let _ = app.emit("connect", ())
+    let _ = app
+        .emit("connected", ())
         .inspect_err(|e| eprintln!("{}", e));
 
     // Store the `safe` object in the application's state
@@ -209,14 +218,22 @@ async fn sign_in(
 
     let secret_key_import = if let Some(ski) = secret_key_import {
         if !register {
-            return Err(Error::Common(String::from("Only can import secret key when registering")));
+            return Err(Error::Common(String::from(
+                "Only can import secret key when registering",
+            )));
         }
         Some(SecretKey::from_hex(&ski).map_err(|e| Error::Common(format!("Secret key: {}", e)))?)
     } else {
         None
     };
 
-    let sk = load_create_import_key(&app_root, login.clone(), password, secret_key_import, register)?;
+    let sk = load_create_import_key(
+        &app_root,
+        login.clone(),
+        password,
+        secret_key_import,
+        register,
+    )?;
     println!("\n\nSecret Key: {}", sk.to_hex());
 
     let signed_in_safe = app
@@ -247,8 +264,7 @@ async fn sign_in(
         ))
     })?;
 
-    let _ = app.emit("sign_in", ())
-        .inspect_err(|e| eprintln!("{}", e));
+    let _ = app.emit("sign_in", ()).inspect_err(|e| eprintln!("{}", e));
 
     Ok(())
 }
@@ -265,7 +281,8 @@ async fn disconnect(app: AppHandle) -> Result<(), Error> {
     app.unmanage::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?;
 
-    let _ = app.emit("disconnect", ())
+    let _ = app
+        .emit("disconnected", ())
         .inspect_err(|e| eprintln!("{}", e));
 
     Ok(())
