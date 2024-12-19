@@ -126,7 +126,7 @@ export async function getConnectedUserAccount(): Promise<AccountUser | null> {
                 return user as AccountUser;
             }
 
-            console.error("User not found.");
+            console.log("User not found.");
         }
     } catch (e) {
         console.error("Unexpected error in getConnectedUserAccount: ", e);

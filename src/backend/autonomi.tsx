@@ -186,10 +186,10 @@ export async function writeRegister(
     return false;
 }
 
+// returns xorname address
 export async function uploadFile(
-    path: string // filesystem path
+    path: string, // filesystem path
 ): Promise<string | null> {
-    // xorname address
     console.log("uploading file: " + path + "...");
     try {
         return await invoke("upload", { file: path });
@@ -199,10 +199,10 @@ export async function uploadFile(
     return null;
 }
 
+// returns xorname address
 export async function putData(
-    data: Uint8Array // file data
+    data: Uint8Array, // file data
 ): Promise<string | null> {
-    // xorname address
     console.log("saving data blob of " + data.length + " bytes...");
     try {
         return await invoke("put_data", { data: data });
