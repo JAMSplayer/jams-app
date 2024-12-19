@@ -13,8 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SelectYear from "@/components/select-year";
 import { toast } from "sonner";
-import { uploadFile } from "@/backend/autonomi";
-
+import { UploadSong } from "@/backend/uploading";
+import { SongUpload } from "@/types/songs/song-upload";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 // TODO
 // when the file is uploaded successfully, show dialog to allow the user to put it into a playlist.
@@ -98,6 +99,8 @@ export default function SingleFilePanel({
             picture: "", // this will be set after base64 conversion
         },
     });
+
+    const [isUploading, setIsUploading] = useState<boolean>(false);
 
     // image ----------------------------------------------------------------
 
@@ -267,11 +270,21 @@ export default function SingleFilePanel({
 
     // end track number ------------------------------------------------------------
 
-    const onSubmit = (data: FormSchema) => {
+    const onSubmit = async (data: FormSchema) => {
         console.log("Submitted Values:", { ...data, tags });
-        // let songXorname = uploadFile(path); // TODO: handle await, null
-        // let artXorname = putData(artBytes); // TODO: handle await, null
-        // TODO: update song object with songXorname and artXorname, update playlist data, sync with network
+
+        const song: SongUpload = { ...data, tags };
+
+        try {
+            setIsUploading(true);
+            // TODO: add a playlist to which the song has to be added
+            const result = await UploadSong(song);
+            console.log("The song has been uploaded: ", result);
+        } catch (ex) {
+            console.log("The song could not be uploaded: ", ex);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -285,15 +298,19 @@ export default function SingleFilePanel({
                     </Button>
                 </div>
 
-                <Button
-                    size={"sm"}
-                    type="submit"
-                    form="customizeForm"
-                    className="mr-3"
-                    disabled={!isValid}
-                >
-                    Upload <UploadIcon />
-                </Button>
+                {isUploading ? (
+                    <LoadingSpinner />
+                ) : (
+                    <Button
+                        size={"sm"}
+                        type="submit"
+                        form="customizeForm"
+                        className="mr-3"
+                        disabled={!isValid}
+                    >
+                        Upload <UploadIcon />
+                    </Button>
+                )}
             </div>
 
             {/* Information Card */}

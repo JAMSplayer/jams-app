@@ -1,4 +1,4 @@
-import { Song } from "@/types/song";
+import { Song } from "@/types/songs/song";
 import { createContext, useContext, useMemo, useReducer, useRef } from "react";
 
 interface PlayerState {

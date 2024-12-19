@@ -1,3 +1,4 @@
+import { SongUpload } from "@/types/songs/song-upload";
 import { invoke } from "@tauri-apps/api/core";
 
 // =======
@@ -28,7 +29,7 @@ export async function connectInner(peer?: string): Promise<boolean> {
         }
         console.log("connected.");
         return true;
-    } catch(e) {
+    } catch (e) {
         console.error("connectInner: ", e);
     }
     return false;

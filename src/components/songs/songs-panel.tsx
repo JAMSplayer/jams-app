@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import SongScroller from "./songs-scroller";
-import { Song } from "@/types/song";
+import { Song } from "@/types/songs/song";
 import { Input } from "../ui/input";
 import {
     Select,
