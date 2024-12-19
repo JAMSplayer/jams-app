@@ -36,7 +36,7 @@ export async function connectInner(peer?: string): Promise<boolean> {
 }
 
 // Finds user folder in storage by login,
-// and decrypts SecretKey with the password
+// and decrypts keys with the password
 export async function signIn(
     login: string,
     password: string
@@ -57,11 +57,11 @@ export async function signIn(
 }
 
 // Creates user folder in storage
-// and encrypts SecretKey with the password and stores in the folder
+// and encrypts Private Key with the password and stores in the folder
 export async function register(
     login: string,
     password: string,
-    secretKeyImport?: string // if you want to register an account with particular SK
+    ethPkImport?: string // if you want to register an account with particular privkey
 ): Promise<boolean> {
     console.log("registering...");
     try {
@@ -69,7 +69,7 @@ export async function register(
             login: login,
             password: password,
             register: true,
-            secret_key_import: secretKeyImport,
+            ethPkImport: ethPkImport,
         });
         console.log("registered.");
         return true;
@@ -79,9 +79,8 @@ export async function register(
     return false;
 }
 
-// Checks if user is connected to the network.
-// This implies, that user is also logged to the application: login
-// and password were OK, and SecretKey has been decrypted from storage.
+// Checks if user is connected to the network. This does not mean,
+// that the user is also signed in.
 export async function isConnected(): Promise<boolean> {
     console.log("Attempting to check if network is connected");
     try {
@@ -188,8 +187,26 @@ export async function writeRegister(
     return false;
 }
 
-export async function UploadSong(song: SongUpload): Promise<boolean> {
-    console.log("starting song upload for: ", song);
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-    return false;
+export async function uploadFile(
+    path: string, // filesystem path
+): Promise<string | null> { // xorname address
+    console.log("uploading file: " + path + "...");
+    try {
+        return await invoke("upload", { file: path });
+    } catch(e) {
+        console.error("uploadFile: ", e);
+    }
+    return null;
+}
+
+export async function putData(
+    data: Uint8Array, // file data
+): Promise<string | null> { // xorname address
+    console.log("saving data blob of " + data.length + " bytes...");
+    try {
+        return await invoke("put_data", { data: data });
+    } catch(e) {
+        console.error("putData: ", e);
+    }
+    return null;
 }

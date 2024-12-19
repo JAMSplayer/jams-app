@@ -277,6 +277,7 @@ export default function SingleFilePanel({
 
         try {
             setIsUploading(true);
+            // TODO: add a playlist to which the song has to be added
             const result = await UploadSong(song);
             console.log("The song has been uploaded: ", result);
         } catch (ex) {

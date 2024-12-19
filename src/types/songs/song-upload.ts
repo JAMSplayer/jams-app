@@ -1,3 +1,4 @@
+// TODO: add file path, and picture bytes
 export type SongUpload = {
     title: string;
     artist: string;
