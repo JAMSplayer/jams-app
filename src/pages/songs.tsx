@@ -2,7 +2,7 @@ import SongsPanel from "@/components/songs/songs-panel";
 
 export default function Songs() {
     return (
-        <div className="">
+        <div>
             <SongsPanel />
         </div>
     );

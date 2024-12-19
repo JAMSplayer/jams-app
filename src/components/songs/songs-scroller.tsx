@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { PlayIcon } from "lucide-react";
-import { Song } from "@/types/song";
+import { Song } from "@/types/songs/song";
 import { useAudioPlayer } from "../player/audio-provider";
 import { usePlayerStore } from "@/store/player-store";
 

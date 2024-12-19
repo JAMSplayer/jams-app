@@ -1,4 +1,4 @@
-import { Song } from "@/types/song";
+import { Song } from "@/types/songs/song";
 
 export type RegisterAccountUser = {
     username: string;
