@@ -9,17 +9,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../ui/select";
+import { Playlist } from "@/types/playlists/playlist";
 
-export default function SongsPanel() {
+interface SongsPanelProps {
+    playlist?: Playlist;
+}
+
+const SongsPanel = ({ playlist }: SongsPanelProps) => {
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-    // The songs can be passed from an API or a state, depending on your use case
+    // This will be filled from the fetchedSongs below
     const [songs, setSongs] = useState<Song[]>([]);
 
-    // Fetch songs or handle loading state here
     useEffect(() => {
-        // Simulating a fetch of songs
+        // Simulating a fetch of all songs - these will be shown unless the user has selected a playlist, in which only they will be displayed
+        // TODO pull this from a query that gets all songs from all playlists on the system.
         const fetchedSongs: Song[] = [
             {
                 id: 1,
@@ -204,8 +209,15 @@ export default function SongsPanel() {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
         ];
-        setSongs(fetchedSongs);
-    }, []);
+
+        if (playlist && playlist.songs.length > 0) {
+            // show songs from selected playlist
+            setSongs(playlist.songs);
+        } else {
+            // show all songs
+            setSongs(fetchedSongs);
+        }
+    }, [, playlist]); // if playlist changes, also reset - useful if user clicks all songs menu item again
 
     return (
         <div className="w-full">
@@ -244,4 +256,6 @@ export default function SongsPanel() {
             />
         </div>
     );
-}
+};
+
+export default SongsPanel;

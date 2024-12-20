@@ -5,6 +5,7 @@ import {
     LayoutGrid,
     LucideIcon,
     Music,
+    List,
 } from "lucide-react";
 
 type Submenu = {
@@ -54,6 +55,21 @@ export function getMenuList(_pathname: string): Group[] {
                         {
                             href: "/upload-songs",
                             label: "Upload Songs",
+                        },
+                    ],
+                },
+                {
+                    href: "",
+                    label: "Playlists",
+                    icon: List,
+                    submenus: [
+                        {
+                            href: "/playlists",
+                            label: "All Playlists",
+                        },
+                        {
+                            href: "/create-playlist",
+                            label: "Create Playlist",
                         },
                     ],
                 },
