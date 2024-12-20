@@ -764,6 +764,170 @@ dependencies = [
 ]
 
 [[package]]
+name = "ant-bootstrap"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e7afa7e0e74e667c9439380576a01eaa64c90734894e4d2172a35540ae36313"
+dependencies = [
+ "ant-logging",
+ "ant-protocol",
+ "atomic-write-file",
+ "chrono",
+ "clap",
+ "dirs-next",
+ "futures",
+ "libp2p 0.54.1",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.65",
+ "tokio",
+ "tracing",
+ "url",
+ "wasmtimer 0.2.1",
+]
+
+[[package]]
+name = "ant-build-info"
+version = "0.1.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed09557f3d4eed245a2657592e67343135723a33e6d33c72c8c5a1b1462acd0b"
+dependencies = [
+ "chrono",
+ "tracing",
+ "vergen",
+]
+
+[[package]]
+name = "ant-evm"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e60886e44bc9cd3688162317b50e6ffd2bed5cc9dd4798357494d8482c67aa5"
+dependencies = [
+ "custom_debug",
+ "evmlib",
+ "hex 0.4.3",
+ "lazy_static",
+ "libp2p 0.54.1",
+ "rand 0.8.5",
+ "ring 0.17.8",
+ "rmp-serde",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.65",
+ "tiny-keccak",
+ "tracing",
+ "wasmtimer 0.2.1",
+ "xor_name",
+]
+
+[[package]]
+name = "ant-logging"
+version = "0.2.41"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26db2a78573dc713cda29d01fccb280c30bae0be32f6d3138f5443bc6021afcf"
+dependencies = [
+ "chrono",
+ "dirs-next",
+ "file-rotate",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.65",
+ "tracing",
+ "tracing-appender",
+ "tracing-core",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "ant-networking"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81e40e6e73df7382cb28f3c2f4d7c61ace367d4fb99591f3d7307cfa3ce7adfb"
+dependencies = [
+ "aes-gcm-siv",
+ "ant-bootstrap",
+ "ant-build-info",
+ "ant-evm",
+ "ant-protocol",
+ "ant-registers",
+ "async-trait",
+ "bytes",
+ "custom_debug",
+ "exponential-backoff",
+ "futures",
+ "getrandom 0.2.15",
+ "hex 0.4.3",
+ "hkdf",
+ "itertools 0.12.1",
+ "lazy_static",
+ "libp2p 0.54.1",
+ "rand 0.8.5",
+ "rayon",
+ "rmp-serde",
+ "self_encryption",
+ "serde",
+ "sha2 0.10.8",
+ "strum",
+ "thiserror 1.0.65",
+ "tiny-keccak",
+ "tokio",
+ "tracing",
+ "void",
+ "walkdir",
+ "wasm-bindgen-futures",
+ "wasmtimer 0.2.1",
+ "xor_name",
+]
+
+[[package]]
+name = "ant-protocol"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f276b6691d18c3d92006fda69bd326e29488e06d8fad4c9b8933d8dfc512ac5e"
+dependencies = [
+ "ant-build-info",
+ "ant-evm",
+ "ant-registers",
+ "blsttc",
+ "bytes",
+ "color-eyre",
+ "crdts",
+ "custom_debug",
+ "dirs-next",
+ "exponential-backoff",
+ "hex 0.4.3",
+ "lazy_static",
+ "libp2p 0.54.1",
+ "rmp-serde",
+ "serde",
+ "serde_json",
+ "sha2 0.10.8",
+ "thiserror 1.0.65",
+ "tiny-keccak",
+ "tonic-build",
+ "tracing",
+ "xor_name",
+]
+
+[[package]]
+name = "ant-registers"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "617707407c7e6d7c57e401fd507ebc312ac2eca12c5c6896632abd85f3ea53f8"
+dependencies = [
+ "blsttc",
+ "crdts",
+ "hex 0.4.3",
+ "rmp-serde",
+ "serde",
+ "thiserror 1.0.65",
+ "tiny-keccak",
+ "xor_name",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1188,6 +1352,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
+name = "atomic-write-file"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23e32862ecc63d580f4a5e1436a685f51e0629caeb7a7933e4f017d5e2099e13"
+dependencies = [
+ "nix 0.29.0",
+ "rand 0.8.5",
+]
+
+[[package]]
 name = "attohttpc"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1226,10 +1400,15 @@ checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 
 [[package]]
 name = "autonomi"
-version = "0.2.4"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0a9003cb26f187e2d880fac8af28fb2d27e842d8558053d713febeb29a93db3"
+checksum = "256dd7c9c49b154cf2477ec4e21fdeadc578145fb602e660d6ebdf6b955c937f"
 dependencies = [
+ "ant-bootstrap",
+ "ant-evm",
+ "ant-networking",
+ "ant-protocol",
+ "ant-registers",
  "bip39",
  "blst",
  "blstrs 0.7.1",
@@ -1251,11 +1430,6 @@ dependencies = [
  "sha2 0.10.8",
  "sn_bls_ckd",
  "sn_curv",
- "sn_evm",
- "sn_networking",
- "sn_peers_acquisition",
- "sn_protocol",
- "sn_registers",
  "thiserror 1.0.65",
  "tokio",
  "tracing",
@@ -1265,20 +1439,6 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "xor_name",
-]
-
-[[package]]
-name = "backoff"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b62ddb9cb1ec0a098ad4bbf9344d0713fa193ae1a80af55febcff2627b6a00c1"
-dependencies = [
- "futures-core",
- "getrandom 0.2.15",
- "instant",
- "pin-project-lite",
- "rand 0.8.5",
- "tokio",
 ]
 
 [[package]]
@@ -2948,6 +3108,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "exponential-backoff"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ffb309d235a642598183aeda8925e871e85dd5a433c2c877e69ff0a960f4c02"
+dependencies = [
+ "fastrand",
+]
+
+[[package]]
 name = "eyre"
 version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3157,16 +3326,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
-]
-
-[[package]]
-name = "fs2"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213"
-dependencies = [
- "libc",
- "winapi",
 ]
 
 [[package]]
@@ -4413,7 +4572,7 @@ dependencies = [
  "aes-gcm",
  "argon2",
  "futures",
- "hex 0.3.2",
+ "hex 0.4.3",
  "lazy_static",
  "lofty",
  "password-hash",
@@ -4675,10 +4834,8 @@ dependencies = [
  "libp2p-connection-limits 0.3.1",
  "libp2p-core 0.41.3",
  "libp2p-gossipsub 0.46.1",
- "libp2p-identify 0.44.2",
  "libp2p-identity",
  "libp2p-kad 0.45.3",
- "libp2p-metrics 0.14.1",
  "libp2p-swarm 0.44.2",
  "multiaddr",
  "pin-project",
@@ -4702,11 +4859,11 @@ dependencies = [
  "libp2p-core 0.42.0",
  "libp2p-dns",
  "libp2p-gossipsub 0.47.0",
- "libp2p-identify 0.45.0",
+ "libp2p-identify",
  "libp2p-identity",
  "libp2p-kad 0.46.2",
  "libp2p-mdns",
- "libp2p-metrics 0.15.0",
+ "libp2p-metrics",
  "libp2p-noise",
  "libp2p-quic",
  "libp2p-relay",
@@ -4820,6 +4977,7 @@ dependencies = [
  "quick-protobuf",
  "rand 0.8.5",
  "rw-stream-sink",
+ "serde",
  "smallvec",
  "thiserror 1.0.65",
  "tracing",
@@ -4900,34 +5058,12 @@ dependencies = [
  "quick-protobuf-codec",
  "rand 0.8.5",
  "regex",
+ "serde",
  "sha2 0.10.8",
  "smallvec",
  "tracing",
  "void",
  "web-time",
-]
-
-[[package]]
-name = "libp2p-identify"
-version = "0.44.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5d635ebea5ca0c3c3e77d414ae9b67eccf2a822be06091b9c1a0d13029a1e2f"
-dependencies = [
- "asynchronous-codec",
- "either",
- "futures",
- "futures-bounded",
- "futures-timer",
- "libp2p-core 0.41.3",
- "libp2p-identity",
- "libp2p-swarm 0.44.2",
- "lru",
- "quick-protobuf",
- "quick-protobuf-codec",
- "smallvec",
- "thiserror 1.0.65",
- "tracing",
- "void",
 ]
 
 [[package]]
@@ -5022,6 +5158,7 @@ dependencies = [
  "quick-protobuf",
  "quick-protobuf-codec",
  "rand 0.8.5",
+ "serde",
  "sha2 0.10.8",
  "smallvec",
  "thiserror 1.0.65",
@@ -5054,30 +5191,13 @@ dependencies = [
 
 [[package]]
 name = "libp2p-metrics"
-version = "0.14.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fdac91ae4f291046a3b2660c039a2830c931f84df2ee227989af92f7692d3357"
-dependencies = [
- "futures",
- "instant",
- "libp2p-core 0.41.3",
- "libp2p-identify 0.44.2",
- "libp2p-identity",
- "libp2p-kad 0.45.3",
- "libp2p-swarm 0.44.2",
- "pin-project",
- "prometheus-client",
-]
-
-[[package]]
-name = "libp2p-metrics"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77ebafa94a717c8442d8db8d3ae5d1c6a15e30f2d347e0cd31d057ca72e42566"
 dependencies = [
  "futures",
  "libp2p-core 0.42.0",
- "libp2p-identify 0.45.0",
+ "libp2p-identify",
  "libp2p-identity",
  "libp2p-kad 0.46.2",
  "libp2p-relay",
@@ -5805,6 +5925,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "nix"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
+dependencies = [
+ "bitflags 2.6.0",
+ "cfg-if",
+ "cfg_aliases",
+ "libc",
+]
+
+[[package]]
 name = "nodrop"
 version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5936,7 +6068,7 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
- "proc-macro-crate 1.3.1",
+ "proc-macro-crate 2.0.2",
  "proc-macro2",
  "quote",
  "syn 2.0.87",
@@ -7780,22 +7912,20 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "safe"
-version = "0.1.6"
-source = "git+ssh://git@github.com/JAMSplayer/safe.git#84c5311753ae6058aba51481ee5ad1e972973fec"
+version = "0.1.7"
+source = "git+ssh://git@github.com/JAMSplayer/safe.git#1b475182991c35a8a23ffac858c7885a09323524"
 dependencies = [
  "alloy-primitives",
+ "ant-logging",
+ "ant-registers",
  "autonomi",
  "blsttc",
  "bytes",
  "evmlib",
- "hex 0.3.2",
+ "hex 0.4.3",
  "libp2p 0.53.2",
  "rand 0.8.5",
- "self_encryption",
  "serde",
- "sn_logging",
- "sn_peers_acquisition",
- "sn_registers",
  "tiny-keccak",
  "tokio",
  "tracing",
@@ -7908,15 +8038,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "957da2573cde917463ece3570eab4a0b3f19de6f1646cde62e6fd3868f566036"
 dependencies = [
  "cc",
-]
-
-[[package]]
-name = "secrecy"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bd1c54ea06cfd2f6b63219704de0b9b4f72dcc2b8fdef820be6cd799780e91e"
-dependencies = [
- "zeroize",
 ]
 
 [[package]]
@@ -8357,17 +8478,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sn_build_info"
-version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5eae8800936142f7682351e64d70595bf292b84af4aaedaab882d17b8f02d1a4"
-dependencies = [
- "chrono",
- "tracing",
- "vergen",
-]
-
-[[package]]
 name = "sn_curv"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8398,183 +8508,6 @@ dependencies = [
  "thiserror 1.0.65",
  "typenum",
  "zeroize",
-]
-
-[[package]]
-name = "sn_evm"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b009392908f39e82970972025c3d7c00c26dd7e1795777cd6ec4b720265f365"
-dependencies = [
- "custom_debug",
- "evmlib",
- "hex 0.4.3",
- "lazy_static",
- "libp2p 0.53.2",
- "rand 0.8.5",
- "ring 0.17.8",
- "rmp-serde",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.65",
- "tiny-keccak",
- "tracing",
- "wasmtimer 0.2.1",
- "xor_name",
-]
-
-[[package]]
-name = "sn_logging"
-version = "0.2.40"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fec4d5102fa45dae7ce38a16f97ff64b60196e94db7b3d4625f171a50582531"
-dependencies = [
- "chrono",
- "dirs-next",
- "file-rotate",
- "serde",
- "serde_json",
- "thiserror 1.0.65",
- "tracing",
- "tracing-appender",
- "tracing-core",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "sn_networking"
-version = "0.19.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7771e40492f4f7bb771732ab209025856063cb152ce1522556d3fe1eedc0965f"
-dependencies = [
- "aes-gcm-siv",
- "async-trait",
- "backoff",
- "bytes",
- "custom_debug",
- "futures",
- "getrandom 0.2.15",
- "hex 0.4.3",
- "hkdf",
- "itertools 0.12.1",
- "lazy_static",
- "libp2p 0.54.1",
- "rand 0.8.5",
- "rayon",
- "rmp-serde",
- "self_encryption",
- "serde",
- "sha2 0.10.8",
- "sn_build_info",
- "sn_evm",
- "sn_protocol",
- "sn_registers",
- "sn_transfers",
- "strum",
- "thiserror 1.0.65",
- "tiny-keccak",
- "tokio",
- "tracing",
- "void",
- "walkdir",
- "wasm-bindgen-futures",
- "wasmtimer 0.2.1",
- "xor_name",
-]
-
-[[package]]
-name = "sn_peers_acquisition"
-version = "0.5.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40d2f43f4f9877089dd713c7515c16ca7b7fc2f556ae32baeed575715ca683bc"
-dependencies = [
- "clap",
- "lazy_static",
- "libp2p 0.54.1",
- "rand 0.8.5",
- "reqwest",
- "sn_protocol",
- "thiserror 1.0.65",
- "tokio",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "sn_protocol"
-version = "0.17.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7977031fe9c362e4f373941efa25ad4d18959bbf72a9bb6ab918d2cb3375531"
-dependencies = [
- "blsttc",
- "bytes",
- "color-eyre",
- "crdts",
- "custom_debug",
- "dirs-next",
- "hex 0.4.3",
- "lazy_static",
- "libp2p 0.54.1",
- "rmp-serde",
- "serde",
- "serde_json",
- "sha2 0.10.8",
- "sn_build_info",
- "sn_evm",
- "sn_registers",
- "sn_transfers",
- "thiserror 1.0.65",
- "tiny-keccak",
- "tonic-build",
- "tracing",
- "xor_name",
-]
-
-[[package]]
-name = "sn_registers"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f91329de6970a50885d42fa49dc8371907597814c1a7e3960174f1bab4d040a"
-dependencies = [
- "blsttc",
- "crdts",
- "hex 0.4.3",
- "rmp-serde",
- "serde",
- "thiserror 1.0.65",
- "tiny-keccak",
- "xor_name",
-]
-
-[[package]]
-name = "sn_transfers"
-version = "0.20.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5df3eeb2b9af4ba633511c972de7486a5e00236080c28e4d0e094cf2bf1f48"
-dependencies = [
- "blsttc",
- "chrono",
- "custom_debug",
- "dirs-next",
- "fs2",
- "hex 0.4.3",
- "lazy_static",
- "libp2p 0.54.1",
- "rand 0.8.5",
- "rayon",
- "ring 0.17.8",
- "rmp-serde",
- "secrecy",
- "serde",
- "serde_bytes",
- "serde_json",
- "tempfile",
- "thiserror 1.0.65",
- "tiny-keccak",
- "tracing",
- "walkdir",
- "xor_name",
 ]
 
 [[package]]
