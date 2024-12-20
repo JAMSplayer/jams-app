@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { PlayIcon, XIcon } from "lucide-react";
+import { EditIcon, PlayIcon, XIcon } from "lucide-react";
 import { Playlist } from "@/types/playlists/playlist";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
 interface PlaylistScrollerProps {
     playlists: Playlist[];

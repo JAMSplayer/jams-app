@@ -10,6 +10,8 @@ import {
     SelectValue,
 } from "../ui/select";
 import { Playlist } from "@/types/playlists/playlist";
+import { useAudioPlayer } from "../player/audio-provider";
+import { usePlayerStore } from "@/store/player-store";
 
 interface SongsPanelProps {
     playlist?: Playlist;
@@ -18,6 +20,15 @@ interface SongsPanelProps {
 const SongsPanel = ({ playlist }: SongsPanelProps) => {
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+    const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
+    const player = useAudioPlayer();
+
+    const handlePlaySong = (song: Song) => {
+        setPlayerVisibility(true);
+        setHasLoaded(true);
+        player.play(song);
+    };
 
     // This will be filled from the fetchedSongs below
     const [songs, setSongs] = useState<Song[]>([]);
@@ -213,6 +224,8 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
         if (playlist && playlist.songs.length > 0) {
             // show songs from selected playlist
             setSongs(playlist.songs);
+            // play first song
+            handlePlaySong(playlist.songs[0]);
         } else {
             // show all songs
             setSongs(fetchedSongs);
