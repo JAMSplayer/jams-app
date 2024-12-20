@@ -10,6 +10,7 @@ import PreferenceSettings from "./components/settings/preference-settings";
 import NetworkSettings from "./components/settings/network-settings";
 import Songs from "./pages/songs";
 import UploadSongs from "./pages/upload-songs";
+import Playlists from "./pages/playlists";
 
 const AppRoutes = () => {
     return (
@@ -17,6 +18,7 @@ const AppRoutes = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/songs" element={<Songs />} />
             <Route path="/upload-songs" element={<UploadSongs />} />
+            <Route path="/playlists" element={<Playlists />} />
             {/* <Route path="*" element={<NotFound />} /> */}
             <Route path="/settings/*" element={<Settings />}>
                 <Route path="status" element={<StatusSettings />} />

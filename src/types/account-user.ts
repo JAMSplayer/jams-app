@@ -1,4 +1,4 @@
-import { Song } from "@/types/songs/song";
+import { Playlist } from "./playlists/playlist";
 
 export type RegisterAccountUser = {
     username: string;
@@ -12,7 +12,7 @@ export type AccountUser = {
     address: string;
     dateCreated: Date;
     dateUpdated: Date;
-    songs?: Song[];
+    playlists?: Playlist[];
 };
 
 export type SimpleAccountUser = {

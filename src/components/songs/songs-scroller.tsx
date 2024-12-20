@@ -85,15 +85,9 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 )}
 
                                 <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <button
-                                        className="bg-primary text-background p-2 rounded-full hover:bg-primary-dark focus:outline-none"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handlePlaySong(song);
-                                        }}
-                                    >
+                                    <div className="bg-primary text-background p-2 rounded-full hover:bg-primary-dark focus:outline-none">
                                         <PlayIcon className="w-6 h-6" />
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
 
