@@ -131,7 +131,7 @@ const PlaylistScroller = ({
                     ))}
                 </div>
             ) : (
-                <p>No Playlists found.</p>
+                <p>No playlists found.</p>
             )}
         </div>
     );
