@@ -18,6 +18,7 @@ import {
     getTestnetPeerAddress,
 } from "@/backend/backend-store";
 import Networks from "@/enums/networks";
+import { isEthereumAddress } from "@/lib/utils/address";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
@@ -84,6 +85,14 @@ export async function registerUser(
             return null;
         }
 
+        // check if address is not a valid address
+        if (!isEthereumAddress(address)) {
+            console.error(
+                `Failed to retrieve a valid address for user: ${newUser.username}`
+            );
+            return null;
+        }
+
         const registeredUser = { ...newUser, address };
         registeredUser.password = ""; // we cannot save passwords
 
@@ -141,12 +150,18 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
     const accounts = await listAccounts();
 
     // If the accounts are not null, map the tuples to SimpleAccountUser objects
+    // Assuming accounts is an array of tuples [username, address]
     if (accounts) {
+        // Reverse the accounts array
         accounts.reverse();
-        return accounts.map(([username, address]) => ({
-            username,
-            address,
-        }));
+
+        // Filter out invalid Ethereum addresses and then map the results
+        return accounts
+            .filter(([_username, address]) => isEthereumAddress(address)) // Filter valid addresses
+            .map(([username, address]) => ({
+                username,
+                address,
+            }));
     } else {
         return [];
     }

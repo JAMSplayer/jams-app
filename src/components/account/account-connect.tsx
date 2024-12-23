@@ -6,6 +6,7 @@ import SignedInPanel from "./signed-in/signed-in-panel";
 import CreateAccountPanel from "./create-account/create-account-panel";
 import { disconnect as autonomiDisconnect } from "@/backend/autonomi";
 import Avatar from "./avatar";
+import RecoverAccountPanel from "./recover-account/recover-account-panel";
 
 export default function AccountConnect() {
     // ====================================================================================
@@ -24,6 +25,7 @@ export default function AccountConnect() {
         NONE: "none",
         SIGN_IN: "sign_in",
         CREATE_ACCOUNT: "create_account",
+        RECOVER_ACCOUNT: "recover_account",
     };
 
     const [currentPanel, setCurrentPanel] = useState(SignedOutPanelState.NONE);
@@ -43,6 +45,10 @@ export default function AccountConnect() {
 
     const handleReturnToSignInPanelClicked = () => {
         setCurrentPanel(SignedOutPanelState.SIGN_IN);
+    };
+
+    const handleRecoverAccountClicked = () => {
+        setCurrentPanel(SignedOutPanelState.RECOVER_ACCOUNT);
     };
 
     const disconnect = () => {
@@ -109,10 +115,13 @@ export default function AccountConnect() {
 
                     {currentPanel === SignedOutPanelState.SIGN_IN && (
                         <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
-                            <div className="border-b border-dashed px-4 py-5 border-secondary">
+                            <div className="border-b px-4 py-5 border-secondary">
                                 <SignInPanel
                                     onCreateAccountClicked={
                                         handleCreateAccountClicked
+                                    }
+                                    onRecoverAccountClicked={
+                                        handleRecoverAccountClicked
                                     }
                                 />
                             </div>
@@ -121,8 +130,20 @@ export default function AccountConnect() {
 
                     {currentPanel === SignedOutPanelState.CREATE_ACCOUNT && (
                         <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
-                            <div className="border-b border-dashed px-4 py-5 border-secondary">
+                            <div className="border-b px-4 py-5 border-secondary">
                                 <CreateAccountPanel
+                                    onReturnToSignInPanelClicked={
+                                        handleReturnToSignInPanelClicked
+                                    }
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {currentPanel === SignedOutPanelState.RECOVER_ACCOUNT && (
+                        <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
+                            <div className="border-b px-4 py-5 border-secondary">
+                                <RecoverAccountPanel
                                     onReturnToSignInPanelClicked={
                                         handleReturnToSignInPanelClicked
                                     }

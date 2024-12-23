@@ -34,23 +34,23 @@ export async function connectInner(peer?: string): Promise<boolean> {
     return false;
 }
 
-// Finds user folder in storage by login,
-// and decrypts keys with the password
+// Finds user folder in storage by username,
+// and decrypts key with the password
 export async function signIn(
-    login: string,
+    username: string,
     password: string
 ): Promise<boolean> {
     console.log("logging in...");
     try {
         await invoke("sign_in", {
-            login: login,
+            login: username,
             password: password,
             register: false,
         });
         console.log("logged in.");
         return true;
     } catch (e) {
-        console.error("login: ", e);
+        console.error("signIn: ", e);
     }
     return false;
 }
@@ -58,14 +58,14 @@ export async function signIn(
 // Creates user folder in storage
 // and encrypts Private Key with the password and stores in the folder
 export async function register(
-    login: string,
+    username: string,
     password: string,
     ethPkImport?: string // if you want to register an account with particular privkey
 ): Promise<boolean> {
     console.log("registering...");
     try {
         await invoke("sign_in", {
-            login: login,
+            login: username,
             password: password,
             register: true,
             ethPkImport: ethPkImport,
@@ -121,6 +121,21 @@ export async function balance(): Promise<string | null> {
         return await invoke("balance");
     } catch (e) {
         console.error("balance: ", e);
+    }
+    return null;
+}
+
+export async function secretKey(
+    username: string,              // which user SK to get
+    password: string,           // user password to decrypt the key
+): Promise<string | null> {     // if password is bad or other error occured, null will be returned
+    try {
+        return await invoke("check_key", {
+            login: username,
+            password: password,
+        });
+    } catch (e) {
+        console.error("secretKey: ", e);
     }
     return null;
 }

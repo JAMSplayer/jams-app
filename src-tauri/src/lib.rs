@@ -404,6 +404,12 @@ async fn balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> 
     Ok(format!("{:x}", balance)) // hex string
 }
 
+#[tauri::command]
+fn check_key(login: String, password: String, mut app: AppHandle) -> Result<String, Error> {
+    let app_root = make_root(&mut app)?;
+    load_create_import_key(&app_root, login, password, None, false)
+}
+
 #[derive(Debug, serde::Serialize)]
 struct FileMetadata {
     file_path: String,
@@ -578,6 +584,7 @@ pub fn run() {
             write_register,
             client_address,
             balance,
+            check_key,
             get_file_metadata,
             upload,
             put_data,

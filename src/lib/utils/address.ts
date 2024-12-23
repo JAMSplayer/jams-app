@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 export const formatAddress = (address: string | undefined): string => {
     // Ensure address is a string, and handle undefined or null values
     if (!address || address.length <= 20) {
@@ -7,4 +9,8 @@ export const formatAddress = (address: string | undefined): string => {
     const start = address.slice(0, 10);
     const end = address.slice(-10);
     return `${start}...${end}`;
+};
+
+export const isEthereumAddress = (address: string): boolean => {
+    return ethers.isAddress(address);
 };
