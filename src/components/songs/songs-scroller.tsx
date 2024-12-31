@@ -3,6 +3,7 @@ import { PlayIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { useAudioPlayer } from "../player/audio-provider";
 import { usePlayerStore } from "@/store/player-store";
+import { useTranslation } from "react-i18next";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -11,6 +12,7 @@ interface SongScrollerProps {
 }
 
 const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
+    const { t } = useTranslation();
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
 
@@ -111,7 +113,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                         </div>
                     ))
                 ) : (
-                    <p>No songs found.</p>
+                    <p>{t("noSongsFound")}</p>
                 )}
             </div>
         </div>

@@ -3,21 +3,33 @@ import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TopLevelBreadcrumbs from "@/components/navigation/top-level-breadcrumbs";
 import SecondaryLevelBreadcrumbs from "@/components/navigation/secondary-level-breadcrumbs";
-
-const secondaryNavigation = [
-    { name: "Status", href: "/settings/status", current: false },
-    { name: "Storage", href: "/settings/storage", current: false },
-    { name: "Notifications", href: "/settings/notifications", current: false },
-    { name: "Preferences", href: "/settings/preference", current: false },
-    { name: "Network", href: "/settings/network", current: false },
-];
+import { useTranslation } from "react-i18next";
 
 export default function Settings() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
 
+    const secondaryNavigation = [
+        { name: t("status"), href: "/settings/status", current: false },
+        { name: t("storage"), href: "/settings/storage", current: false },
+        {
+            name: t("notifications"),
+            href: "/settings/notifications",
+            current: false,
+        },
+        {
+            name: t("preferences"),
+            href: "/settings/preference",
+            current: false,
+        },
+        { name: t("network"), href: "/settings/network", current: false },
+    ];
+
     // Initialize pages with default settings page
-    const [pages, setPages] = useState([{ name: "Settings", current: true }]);
+    const [pages, setPages] = useState([
+        { name: t("settings"), current: true },
+    ]);
 
     // Use effect to navigate to StatusSettings when the component mounts
     useEffect(() => {
@@ -27,9 +39,9 @@ export default function Settings() {
         );
         // Update pages state
         if (currentNavItem) {
-            setPages([{ name: "Settings", current: true }, currentNavItem]);
+            setPages([{ name: t("settings"), current: true }, currentNavItem]);
         } else {
-            setPages([{ name: "Settings", current: true }]);
+            setPages([{ name: t("settings"), current: true }]);
         }
 
         // Check if the current path is not set, then navigate to status by default

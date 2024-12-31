@@ -12,12 +12,14 @@ import {
 import { Playlist } from "@/types/playlists/playlist";
 import { useAudioPlayer } from "../player/audio-provider";
 import { usePlayerStore } from "@/store/player-store";
+import { useTranslation } from "react-i18next";
 
 interface SongsPanelProps {
     playlist?: Playlist;
 }
 
 const SongsPanel = ({ playlist }: SongsPanelProps) => {
+    const { t } = useTranslation();
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
@@ -254,8 +256,12 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                             <SelectValue placeholder="Select Sort Order" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="asc">Ascending</SelectItem>
-                            <SelectItem value="desc">Descending</SelectItem>
+                            <SelectItem value="asc">
+                                {t("ascending")}
+                            </SelectItem>
+                            <SelectItem value="desc">
+                                {t("descending")}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

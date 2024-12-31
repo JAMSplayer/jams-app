@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
 import isOnline from "is-online";
+import { useTranslation } from "react-i18next";
 
 interface StatusItem {
     name: string;
@@ -20,6 +21,8 @@ interface StatusItem {
 }
 
 export default function StatusRow() {
+    const { t } = useTranslation();
+
     const { address, balance } = { address: "someAddress", balance: 12.24 }; // TODO get from signed in user, if they are signed in
     const [onlineStatus, setOnlineStatus] = useState(false);
     const hasUserBalance = balance > 0;
@@ -48,33 +51,33 @@ export default function StatusRow() {
 
     const statusList: StatusItem[] = [
         {
-            name: "Token Balance",
+            name: t("tokenBalance"),
             icon: hasUserBalance ? CheckIcon : OctagonXIcon,
             description: hasUserBalance
-                ? "Your wallet address contains tokens"
-                : "Your wallet address is empty",
+                ? t("yourWalletAddressContainsTokens")
+                : t("YourWalletAddressIsEmpty"),
             bgColor: hasUserBalance ? "bg-green-600" : "bg-red-600",
         },
         {
-            name: "Internet Connection",
+            name: t("internetConnection"),
             icon: onlineStatus ? CheckIcon : OctagonXIcon,
             description: onlineStatus
-                ? "You are connected to the internet"
-                : "You are not connected to the internet",
+                ? t("youAreConnectedToTheInternet")
+                : t("youAreNotConnectedToTheInternet"),
             bgColor: onlineStatus ? "bg-green-600" : "bg-red-600",
         },
         {
-            name: "Autonomi Node",
+            name: t("autonomiNode"),
             icon: OctagonXIcon,
-            description: "Your Autonomi node is not connected",
+            description: t("yourAutonomiNodeIsNotConnected"),
             bgColor: "bg-red-600",
         },
         {
-            name: "Wallet Connected",
+            name: t("walletConnected"),
             icon: address ? CheckIcon : OctagonXIcon,
             description: address
-                ? "Your wallet is connected"
-                : "Your wallet is not connected",
+                ? t("yourWalletIsConnected")
+                : t("yourWalletIsNotConnected"),
             bgColor: address ? "bg-green-600" : "bg-red-600",
         },
     ];
@@ -98,7 +101,7 @@ export default function StatusRow() {
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogAction>Close</AlertDialogAction>
+                            <AlertDialogAction>{t("close")}</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
 
@@ -144,7 +147,7 @@ export default function StatusRow() {
                                                 className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:text-muted-foreground text-primary focus:outline-none"
                                             >
                                                 <span className="sr-only">
-                                                    Open options
+                                                    {t("openOptions")}
                                                 </span>
                                                 <InfoIcon
                                                     aria-hidden="true"

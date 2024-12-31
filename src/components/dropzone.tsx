@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { UploadIcon } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Window } from "@tauri-apps/api/window";
+import { useTranslation } from "react-i18next";
 
 interface DropzoneProps {
     onFilesAdded: (filePaths: string[]) => void;
 }
 
 function Dropzone({ onFilesAdded }: DropzoneProps) {
+    const { t } = useTranslation();
     const dropZoneRef = useRef<HTMLDivElement | null>(null);
     const [isOverTarget, setIsOverTarget] = useState(false);
 
@@ -105,12 +107,12 @@ function Dropzone({ onFilesAdded }: DropzoneProps) {
                     aria-hidden="true"
                 />
                 <p className="text-foreground">
-                    Drag and drop files or{" "}
+                    {t("dragAndDropFilesOr")}{" "}
                     <span
                         className="text-blue-500 underline cursor-pointer"
                         onClick={handleBrowseClick}
                     >
-                        browse
+                        {t("browse")}
                     </span>
                 </p>
             </div>
