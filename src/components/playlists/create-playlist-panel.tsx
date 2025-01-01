@@ -366,18 +366,18 @@ export default function CreatePlaylistPanel() {
                                 </div>
                             </div>
 
-                            {/* Album Art */}
+                            {/* Platlist Art */}
                             <div className="flex justify-center items-center relative">
                                 {selectedImage || base64Picture ? (
                                     <img
                                         src={selectedImage || base64Picture} // Update the image source
-                                        alt="Album Art"
+                                        alt="Playlist Art"
                                         className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
                                         onClick={handleImageSelect} // Handle image selection
                                     />
                                 ) : (
                                     <div className="w-full h-full max-w-sm max-h-sm flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
-                                        No Album Art
+                                        No Playlist Art
                                     </div>
                                 )}
                                 <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">
