@@ -221,7 +221,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
         ];
 
-        if (playlist && playlist.songs.length > 0) {
+        if (playlist && playlist.songs && playlist.songs.length > 0) {
             // show songs from selected playlist
             setSongs(playlist.songs);
             // play first song

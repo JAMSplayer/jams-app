@@ -14,6 +14,9 @@ import { createPlaylistSchema } from "@/form-schemas/create-playlist-schema";
 import { Playlist } from "@/types/playlists/playlist";
 import { v4 as uuidv4 } from "uuid";
 import { useStorage } from "@/providers/storage-provider";
+import { ArrowLeftRightIcon } from "lucide-react";
+import { Song } from "@/types/songs/song";
+import { ScrollArea } from "../ui/scroll-area";
 
 type FormSchema = z.infer<typeof createPlaylistSchema>;
 
@@ -34,6 +37,62 @@ export default function CreatePlaylistPanel() {
     });
 
     const { store } = useStorage();
+
+    // add songs ----------------------------------------------------------------
+
+    const [leftSongs, setLeftSongs] = useState<Song[]>([]);
+    const [rightSongs, setRightSongs] = useState<Song[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        const fetchSongs = async () => {
+            if (!store) {
+                console.error("Store is not initialized.");
+                return;
+            }
+
+            try {
+                const storedPlaylists = (await store.get("playlists")) || [];
+                const playlists = Array.isArray(storedPlaylists)
+                    ? storedPlaylists
+                    : [];
+                const allSongsMap = new Map();
+
+                // Extract unique songs
+                playlists.forEach((playlist: any) => {
+                    if (playlist.songs) {
+                        playlist.songs.forEach((song: Song) => {
+                            if (!allSongsMap.has(song.id)) {
+                                allSongsMap.set(song.id, song);
+                            }
+                        });
+                    }
+                });
+
+                setLeftSongs(Array.from(allSongsMap.values()));
+            } catch (error) {
+                console.error("Failed to fetch songs:", error);
+            }
+        };
+
+        fetchSongs();
+    }, [store]);
+
+    const handleMoveToRight = (song: Song) => {
+        setLeftSongs((prev) => prev.filter((s) => s.id !== song.id));
+        setRightSongs((prev) => [...prev, song]);
+    };
+
+    const handleMoveToLeft = (song: Song) => {
+        setRightSongs((prev) => prev.filter((s) => s.id !== song.id));
+        setLeftSongs((prev) => [...prev, song]);
+    };
+
+    const filteredLeftSongs = leftSongs.filter((song) =>
+        song.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // end add songs ----------------------------------------------------------------
 
     // image ----------------------------------------------------------------
 
@@ -181,7 +240,14 @@ export default function CreatePlaylistPanel() {
         const createdAt = new Date();
         const updatedAt = new Date();
 
-        const playlist: Playlist = { ...data, tags, id, createdAt, updatedAt };
+        const playlist: Playlist = {
+            ...data,
+            tags,
+            id,
+            createdAt,
+            updatedAt,
+            songs: rightSongs,
+        };
 
         try {
             // Load existing playlists
@@ -227,9 +293,9 @@ export default function CreatePlaylistPanel() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Form Fields */}
                             <div className="md:col-span-2">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {/* Title */}
-                                    <div className="col-span-2">
+                                    <div className="col-span-3">
                                         <label className="block text-sm font-medium mb-1">
                                             Title{" "}
                                             <span className="text-red-500">
@@ -249,7 +315,7 @@ export default function CreatePlaylistPanel() {
                                     </div>
 
                                     {/* Description */}
-                                    <div className="col-span-2">
+                                    <div className="col-span-3">
                                         <label className="block text-sm font-medium mb-1">
                                             Description{" "}
                                         </label>
@@ -265,103 +331,190 @@ export default function CreatePlaylistPanel() {
                                         )}
                                     </div>
 
-                                    {/* Tags Input */}
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">
-                                            Tags
-                                        </label>
-                                        <div className="flex gap-2 mb-2">
-                                            <Input
-                                                type="text"
-                                                autoCapitalize="off"
-                                                autoComplete="off"
-                                                autoCorrect="off"
-                                                value={tagInput}
-                                                onChange={(e) =>
-                                                    setTagInput(e.target.value)
-                                                }
-                                                onKeyDown={(e) => {
-                                                    if (
-                                                        e.key === "Enter" &&
-                                                        tagInput.trim()
-                                                    ) {
-                                                        addTag(e); // Call addTag function when Enter is pressed
+                                    <div className="col-span-1">
+                                        {/* Tags Input */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">
+                                                Tags
+                                            </label>
+                                            <div className="flex gap-2 mb-2">
+                                                <Input
+                                                    type="text"
+                                                    autoCapitalize="off"
+                                                    autoComplete="off"
+                                                    autoCorrect="off"
+                                                    value={tagInput}
+                                                    onChange={(e) =>
+                                                        setTagInput(
+                                                            e.target.value
+                                                        )
                                                     }
-                                                }}
-                                                placeholder="Add a tag"
-                                                className="flex-1"
-                                                disabled={
-                                                    tags.length >= MAX_TAGS
-                                                } // Disable input if max tags reached
-                                            />
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                variant="secondary"
-                                                onClick={addTag}
-                                                disabled={
-                                                    tags.length >= MAX_TAGS || // Max tags reached
-                                                    tagInput.trim().length ===
-                                                        0 || // Empty input
-                                                    tagInput.trim().length >
-                                                        MAX_TAG_LENGTH || // Exceeds max length
-                                                    !/^[a-zA-Z0-9]*$/.test(
+                                                    onKeyDown={(e) => {
+                                                        if (
+                                                            e.key === "Enter" &&
+                                                            tagInput.trim()
+                                                        ) {
+                                                            addTag(e); // Call addTag function when Enter is pressed
+                                                        }
+                                                    }}
+                                                    placeholder="Add a tag"
+                                                    className="flex-1"
+                                                    disabled={
+                                                        tags.length >= MAX_TAGS
+                                                    } // Disable input if max tags reached
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    onClick={addTag}
+                                                    disabled={
+                                                        tags.length >=
+                                                            MAX_TAGS || // Max tags reached
                                                         tagInput.trim()
-                                                    ) // Contains invalid characters
-                                                }
-                                            >
-                                                Add
-                                            </Button>
-                                        </div>
-                                        {tagInput.trim().length >
-                                            MAX_TAG_LENGTH && (
-                                            <p className="text-red-500 text-xs">
-                                                Tags cannot exceed{" "}
-                                                {MAX_TAG_LENGTH} characters.
-                                            </p>
-                                        )}
-                                        {tags.length === MAX_TAGS && (
-                                            <p className="text-red-500 text-xs">
-                                                Max tags reached.
-                                            </p>
-                                        )}
-                                        {tagInput.trim().length > 0 &&
-                                            !/^[a-zA-Z0-9]*$/.test(
-                                                tagInput
-                                            ) && (
+                                                            .length === 0 || // Empty input
+                                                        tagInput.trim().length >
+                                                            MAX_TAG_LENGTH || // Exceeds max length
+                                                        !/^[a-zA-Z0-9]*$/.test(
+                                                            tagInput.trim()
+                                                        ) // Contains invalid characters
+                                                    }
+                                                >
+                                                    Add
+                                                </Button>
+                                            </div>
+                                            {tagInput.trim().length >
+                                                MAX_TAG_LENGTH && (
                                                 <p className="text-red-500 text-xs">
-                                                    Tags can only contain
-                                                    letters and numbers.
+                                                    Tags cannot exceed{" "}
+                                                    {MAX_TAG_LENGTH} characters.
                                                 </p>
                                             )}
+                                            {tags.length === MAX_TAGS && (
+                                                <p className="text-red-500 text-xs">
+                                                    Max tags reached.
+                                                </p>
+                                            )}
+                                            {tagInput.trim().length > 0 &&
+                                                !/^[a-zA-Z0-9]*$/.test(
+                                                    tagInput
+                                                ) && (
+                                                    <p className="text-red-500 text-xs">
+                                                        Tags can only contain
+                                                        letters and numbers.
+                                                    </p>
+                                                )}
+                                        </div>
                                     </div>
 
-                                    {/* Tags Display */}
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {tags.map((tag, index) => (
-                                            <Badge
-                                                key={index}
-                                                className="flex items-center space-x-1"
-                                                size={"sm"}
-                                                variant={"default"}
-                                            >
-                                                <span
-                                                    className="truncate max-w-[80px]"
-                                                    title={tag}
+                                    <div className="col-span-2">
+                                        {/* Tags Display */}
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {tags.map((tag, index) => (
+                                                <Badge
+                                                    key={index}
+                                                    className="flex items-center space-x-1"
+                                                    size={"sm"}
+                                                    variant={"default"}
                                                 >
-                                                    {tag}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        removeTag(tag)
-                                                    }
-                                                    className="ml-1"
-                                                >
-                                                    <XIcon size={14} />
-                                                </button>
-                                            </Badge>
-                                        ))}
+                                                    <span
+                                                        className="truncate max-w-[80px]"
+                                                        title={tag}
+                                                    >
+                                                        {tag}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            removeTag(tag)
+                                                        }
+                                                        className="ml-1"
+                                                    >
+                                                        <XIcon size={14} />
+                                                    </button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-3">
+                                        {/* Songs Input */}
+                                        <div className="flex items-center gap-4">
+                                            {/* Left Scroll Area */}
+                                            <div className="flex-1">
+                                                <div className="mb-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Search songs"
+                                                        value={searchTerm}
+                                                        onChange={(e) =>
+                                                            setSearchTerm(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className="w-full p-2 border rounded"
+                                                    />
+                                                </div>
+                                                <ScrollArea className="h-80 border rounded">
+                                                    {filteredLeftSongs.map(
+                                                        (song) => (
+                                                            <div
+                                                                key={song.id}
+                                                                onClick={() =>
+                                                                    handleMoveToRight(
+                                                                        song
+                                                                    )
+                                                                }
+                                                                className="p-2 border-b hover:bg-gray-100 cursor-pointer"
+                                                            >
+                                                                <p className="font-medium break-words">
+                                                                    {song.title}
+                                                                </p>
+                                                                <p className="text-sm text-gray-500 break-words">
+                                                                    {
+                                                                        song.artist
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </ScrollArea>
+                                            </div>
+
+                                            {/* Arrow Icon */}
+                                            <div className="flex items-center justify-center">
+                                                <ArrowLeftRightIcon className="w-6 h-6 text-gray-500" />
+                                            </div>
+
+                                            {/* Right Scroll Area */}
+                                            <div className="flex-1">
+                                                <div className="mb-2">
+                                                    <h3 className="text-lg font-semibold text-gray-700">
+                                                        Songs
+                                                    </h3>
+                                                </div>
+                                                <ScrollArea className="h-80 border rounded">
+                                                    {rightSongs.map((song) => (
+                                                        <div
+                                                            key={song.id}
+                                                            onClick={() =>
+                                                                handleMoveToLeft(
+                                                                    song
+                                                                )
+                                                            }
+                                                            className="p-2 border-b hover:bg-gray-100 cursor-pointer"
+                                                        >
+                                                            <p className="font-medium break-words">
+                                                                {song.title}
+                                                            </p>
+                                                            <p className="text-sm text-gray-500 break-words">
+                                                                {song.artist}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </ScrollArea>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
