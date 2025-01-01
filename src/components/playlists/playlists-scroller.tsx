@@ -1,8 +1,7 @@
 import { useMemo } from "react";
-import { EditIcon, PlayIcon, XIcon } from "lucide-react";
+import { PlayIcon, XIcon } from "lucide-react";
 import { Playlist } from "@/types/playlists/playlist";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
 
 interface PlaylistScrollerProps {
     playlists: Playlist[];
@@ -115,12 +114,16 @@ const PlaylistScroller = ({
                                     {playlist.description}
                                 </p>
                                 <div className="text-foreground text-xs mt-1">
-                                    {playlist.songs && (
+                                    {playlist.songs ? (
                                         <>
                                             <small>
                                                 Songs: {playlist.songs.length}
                                             </small>
                                             {" - "}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <small>empty</small> {" - "}
                                         </>
                                     )}
                                     <small>
