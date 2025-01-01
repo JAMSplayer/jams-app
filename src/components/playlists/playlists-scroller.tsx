@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { PlayIcon, XIcon } from "lucide-react";
+import { EditIcon, PlayIcon, XIcon } from "lucide-react";
 import { Playlist } from "@/types/playlists/playlist";
 import { useNavigate } from "react-router-dom";
 
@@ -67,11 +67,11 @@ const PlaylistScroller = ({
                         <div
                             key={playlist.id}
                             className={`relative bg-background hover:bg-secondary rounded-lg shadow-lg transition-all duration-200 group cursor-pointer overflow-hidden 
-                       ${
-                           !playlist.songs || playlist.songs.length === 0
-                               ? "cursor-pointer opacity-50"
-                               : ""
-                       }`}
+            ${
+                !playlist.songs || playlist.songs.length === 0
+                    ? "cursor-pointer opacity-50"
+                    : ""
+            }`}
                             onClick={() => {
                                 if (
                                     playlist.songs &&
@@ -81,6 +81,19 @@ const PlaylistScroller = ({
                                 }
                             }}
                         >
+                            {/* Edit Button */}
+                            <button
+                                className="absolute top-2 right-2 bg-primary text-background p-2 rounded-full hover:bg-primary-dark focus:outline-none z-10"
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent triggering the parent click event
+                                    navigate("/edit-playlist", {
+                                        state: { id: playlist.id },
+                                    });
+                                }}
+                            >
+                                <EditIcon className="w-4 h-4" />
+                            </button>
+
                             {/* Album art */}
                             <div className="relative h-40 bg-gray-900 overflow-hidden">
                                 {playlist.picture ? (
