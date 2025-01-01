@@ -24,7 +24,7 @@ const PlaylistScroller = ({
         if (!trimmedFilterValue) return playlists;
 
         const exactMatches = playlists.filter((playlist) =>
-            [playlist.title, playlist.description, playlist.artist].some(
+            [playlist.title, playlist.description].some(
                 (field) => field?.toLowerCase() === trimmedFilterValue
             )
         );
@@ -34,8 +34,8 @@ const PlaylistScroller = ({
         }
 
         return playlists.filter((playlist) =>
-            [playlist.title, playlist.description, playlist.artist].some(
-                (field) => field?.toLowerCase().includes(trimmedFilterValue)
+            [playlist.title, playlist.description].some((field) =>
+                field?.toLowerCase().includes(trimmedFilterValue)
             )
         );
     };
@@ -46,9 +46,9 @@ const PlaylistScroller = ({
     ) => {
         return playlists.sort((a, b) => {
             if (sortOrder === "asc") {
-                return a.created.getTime() - b.created.getTime();
+                return a.createdAt.getTime() - b.createdAt.getTime();
             } else {
-                return b.created.getTime() - a.created.getTime();
+                return b.createdAt.getTime() - a.createdAt.getTime();
             }
         });
     };
@@ -115,15 +115,17 @@ const PlaylistScroller = ({
                                     {playlist.description}
                                 </p>
                                 <div className="text-foreground text-xs mt-1">
-                                    <small>{playlist.artist}</small>
-                                    {" - "}
-                                    <small>
-                                        Songs: {playlist.songs.length}
-                                    </small>
-                                    {" - "}
+                                    {playlist.songs && (
+                                        <>
+                                            <small>
+                                                Songs: {playlist.songs.length}
+                                            </small>
+                                            {" - "}
+                                        </>
+                                    )}
                                     <small>
                                         {new Date(
-                                            playlist.created
+                                            playlist.createdAt
                                         ).toLocaleDateString()}
                                     </small>{" "}
                                 </div>
