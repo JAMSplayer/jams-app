@@ -314,8 +314,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
             );
 
             await store.set("playlists", updatedPlaylists);
-
-            console.log("The playlist has been successfully updated.");
+            await store.save();
 
             toast("Playlist Updated", {
                 description: "Your playlist has been successfully updated.",

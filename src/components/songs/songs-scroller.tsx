@@ -1,8 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlayIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { useAudioPlayer } from "../player/audio-provider";
 import { usePlayerStore } from "@/store/player-store";
+import { Playlist } from "@/types/playlists/playlist";
+import { useStorage } from "@/providers/storage-provider";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -11,8 +13,30 @@ interface SongScrollerProps {
 }
 
 const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
+    const { store } = useStorage();
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
+
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+
+    useEffect(() => {
+        const loadPlaylists = async () => {
+            if (!store) {
+                console.error("Store is not initialized.");
+                return;
+            }
+
+            try {
+                const storedPlaylists: Playlist[] =
+                    (await store.get("playlists")) || [];
+                setPlaylists(storedPlaylists); // Store playlists in state
+            } catch (error) {
+                console.error("Failed to fetch playlists:", error);
+            }
+        };
+
+        loadPlaylists();
+    }, []); // This runs only once when the component mounts
 
     const handlePlaySong = (song: Song) => {
         setPlayerVisibility(true);
@@ -62,6 +86,17 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
         return sortSongs(filteredSongs, sortOrder);
     }, [songs, filterValue, sortOrder]);
 
+    // Find the playlist title for a song
+    const findPlaylistBySongId = (songId: string): string | undefined => {
+        const playlist = playlists.find(
+            (playlist) =>
+                // Ensure playlist.songs is defined before calling .some() on it
+                playlist.songs &&
+                playlist.songs.some((song) => song.id === songId)
+        );
+        return playlist ? playlist.title : undefined;
+    };
+
     return (
         <div className="p-4 flex flex-col md:flex-row">
             <div className="flex-grow md:w-2/3 space-y-4 pb-16 overflow-y-auto">
@@ -73,7 +108,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                             onClick={() => handlePlaySong(song)}
                         >
                             {/* Album art */}
-                            <div className="relative flex-shrink-0 w-20 md:w-24 bg-background rounded-l-lg overflow-hidden">
+                            <div className="relative flex-shrink-0 w-20 md:w-24 max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.artUrl ? (
                                     <img
                                         src={song.artUrl}
@@ -91,21 +126,57 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 </div>
                             </div>
 
-                            {/* Song details */}
-                            <div className="flex-grow p-4 flex flex-col justify-center">
-                                <h2 className="text-foreground font-semibold text-lg truncate">
-                                    {song.title}
-                                </h2>
-                                <p className="text-foreground text-sm truncate">
-                                    {song.description}
-                                </p>
-                                <div className="text-foreground text-xs mt-1">
-                                    <small>{song.artist}</small> -{" "}
-                                    <small>
-                                        {new Date(
-                                            song.dateCreated
-                                        ).toLocaleDateString()}
-                                    </small>
+                            {/* Song details  */}
+                            <div className="grid grid-cols-4 gap-4">
+                                <div className="col-span-2 p-4 flex flex-col justify-center">
+                                    <h2 className="text-foreground font-semibold text-lg truncate">
+                                        {song.title}
+                                    </h2>
+                                    <p className="text-foreground text-sm truncate">
+                                        {song.artist}
+                                    </p>
+                                </div>
+                                <div className="col-span-1 p-4 flex flex-col justify-center">
+                                    <h2 className="text-foreground font-semibold truncate">
+                                        <p>
+                                            <small>
+                                                Playlist:{" "}
+                                                {findPlaylistBySongId(
+                                                    song.id
+                                                ) ?? "Not found"}
+                                            </small>
+                                        </p>
+                                        <p>
+                                            <small>
+                                                Description: {song.description}
+                                            </small>
+                                        </p>
+                                    </h2>
+                                </div>
+                                <div className="col-span-1 p-4 flex flex-col justify-center">
+                                    <div className="text-foreground text-xs">
+                                        <h2 className="text-foreground text-lg truncate">
+                                            <p>
+                                                <small>
+                                                    Date Created:{" "}
+                                                    {new Date(
+                                                        song.dateCreated
+                                                    ).toLocaleDateString()}
+                                                </small>
+                                            </p>
+
+                                            {song.dateUpdated && (
+                                                <p>
+                                                    <small>
+                                                        Date Updated:{" "}
+                                                        {new Date(
+                                                            song.dateUpdated
+                                                        ).toLocaleDateString()}
+                                                    </small>
+                                                </p>
+                                            )}
+                                        </h2>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -276,6 +276,7 @@ export default function CreatePlaylistPanel() {
 
             // Save updated playlists back to storage
             await store.set("playlists", updatedPlaylists);
+            await store.save();
 
             console.log("The playlist has been successfully added.");
 
