@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { EditIcon, PlayIcon, XIcon } from "lucide-react";
 import { Playlist } from "@/types/playlists/playlist";
 import { useNavigate } from "react-router-dom";
+import { useEditPlaylistIdStore } from "@/store/edit-playlist-id";
 
 interface PlaylistScrollerProps {
     playlists: Playlist[];
@@ -58,6 +59,7 @@ const PlaylistScroller = ({
     }, [playlists, filterValue, sortOrder]);
 
     const navigate = useNavigate();
+    const { setEditPlaylistId } = useEditPlaylistIdStore();
 
     return (
         <div className="p-4">
@@ -86,9 +88,10 @@ const PlaylistScroller = ({
                                 className="absolute top-2 right-2 bg-primary text-background p-2 rounded-full hover:bg-primary-dark focus:outline-none z-10"
                                 onClick={(e) => {
                                     e.stopPropagation(); // Prevent triggering the parent click event
-                                    navigate("/edit-playlist", {
-                                        state: { id: playlist.id },
-                                    });
+                                    setEditPlaylistId(playlist.id);
+                                    navigate(
+                                        `/edit-playlist?id=${playlist.id}`
+                                    );
                                 }}
                             >
                                 <EditIcon className="w-4 h-4" />

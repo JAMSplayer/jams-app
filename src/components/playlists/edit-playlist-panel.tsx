@@ -10,24 +10,27 @@ import { readFile } from "@tauri-apps/plugin-fs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { createPlaylistSchema } from "@/form-schemas/create-playlist-schema";
+import { editPlaylistSchema } from "@/form-schemas/edit-playlist-schema";
 import { Playlist } from "@/types/playlists/playlist";
-import { v4 as uuidv4 } from "uuid";
 import { useStorage } from "@/providers/storage-provider";
 import { ArrowLeftRightIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { ScrollArea } from "../ui/scroll-area";
 
-type FormSchema = z.infer<typeof createPlaylistSchema>;
+type FormSchema = z.infer<typeof editPlaylistSchema>;
 
-export default function CreatePlaylistPanel() {
+interface EditPlaylistPanelProps {
+    id: string;
+}
+
+export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
     const {
         register,
         handleSubmit,
         setValue,
         formState: { errors, isValid },
     } = useForm<FormSchema>({
-        resolver: zodResolver(createPlaylistSchema),
+        resolver: zodResolver(editPlaylistSchema),
         mode: "onChange",
         defaultValues: {
             title: undefined,
@@ -38,30 +41,52 @@ export default function CreatePlaylistPanel() {
 
     const { store } = useStorage();
 
-    // add songs ----------------------------------------------------------------
-
     const [leftSongs, setLeftSongs] = useState<Song[]>([]);
     const [rightSongs, setRightSongs] = useState<Song[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
 
+    // Load playlist data and populate form fields and songs ----------------------------------------------------------------
+
     useEffect(() => {
-        const fetchSongs = async () => {
+        const fetchPlaylistData = async () => {
             if (!store) {
                 console.error("Store is not initialized.");
                 return;
             }
 
             try {
-                const storedPlaylists = (await store.get("playlists")) || [];
-                const playlists = Array.isArray(storedPlaylists)
-                    ? storedPlaylists
-                    : [];
-                const allSongsMap = new Map();
+                const playlists = await store.get("playlists");
 
-                // Extract unique songs
-                playlists.forEach((playlist: any) => {
-                    if (playlist.songs) {
-                        playlist.songs.forEach((song: Song) => {
+                // Ensure playlists is an array
+                const storedPlaylists = Array.isArray(playlists)
+                    ? (playlists as Playlist[])
+                    : [];
+
+                const playlist = storedPlaylists.find(
+                    (p: Playlist) => p.id === id
+                );
+
+                if (!playlist) {
+                    console.error("Playlist not found.");
+                    return;
+                }
+
+                // Set tags from the playlist if available
+                setTags(playlist.tags || []);
+
+                // Populate form fields
+                setValue("title", playlist.title);
+                setValue("description", playlist.description);
+                setValue("picture", playlist.picture);
+
+                // Populate rightSongs with playlist songs
+                setRightSongs(playlist.songs || []);
+
+                // Populate leftSongs with all songs excluding those in the playlist
+                const allSongsMap = new Map();
+                storedPlaylists.forEach((p) => {
+                    if (p.songs) {
+                        p.songs.forEach((song: Song) => {
                             if (!allSongsMap.has(song.id)) {
                                 allSongsMap.set(song.id, song);
                             }
@@ -69,15 +94,26 @@ export default function CreatePlaylistPanel() {
                     }
                 });
 
-                setLeftSongs(Array.from(allSongsMap.values()));
+                const rightSongIds = new Set(
+                    (playlist.songs || []).map((song) => song.id)
+                );
+
+                const filteredLeftSongs = Array.from(
+                    allSongsMap.values()
+                ).filter((song) => !rightSongIds.has(song.id));
+
+                setLeftSongs(filteredLeftSongs);
             } catch (error) {
-                console.error("Failed to fetch songs:", error);
+                console.error("Failed to load playlist data:", error);
             }
         };
 
-        fetchSongs();
-    }, [store]);
+        fetchPlaylistData();
+    }, [store, id, setValue]);
 
+    // end Load playlist data and populate form fields and songs ----------------------------------------------------------------
+
+    // Handle moving songs between boxes
     const handleMoveToRight = (song: Song) => {
         setLeftSongs((prev) => prev.filter((s) => s.id !== song.id));
         setRightSongs((prev) => [...prev, song]);
@@ -88,11 +124,10 @@ export default function CreatePlaylistPanel() {
         setLeftSongs((prev) => [...prev, song]);
     };
 
+    // Filter left songs based on search term
     const filteredLeftSongs = leftSongs.filter((song) =>
         song.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    // end add songs ----------------------------------------------------------------
 
     // image ----------------------------------------------------------------
 
@@ -219,7 +254,7 @@ export default function CreatePlaylistPanel() {
             !tags.includes(trimmedTag) &&
             tags.length < MAX_TAGS
         ) {
-            setTags([...tags, trimmedTag]);
+            setTags((prevTags) => [...prevTags, trimmedTag]);
             setTagInput("");
         } else if (!isValidTag) {
             toast("Invalid Tag", {
@@ -238,52 +273,48 @@ export default function CreatePlaylistPanel() {
 
     // end tags ----------------------------------------------------------------
 
+    // Update the existing playlist in storage
     const onSubmit = async (data: FormSchema) => {
         if (!store) {
             console.error("Store is not initialized.");
             return;
         }
 
-        const id = uuidv4();
-        const createdAt = new Date();
-        const updatedAt = new Date();
-
-        const playlist: Playlist = {
-            ...data,
-            tags,
-            id,
-            createdAt,
-            updatedAt,
-            songs: rightSongs,
-        };
-
         try {
-            // Load existing playlists
-            const existingPlaylists: Playlist[] =
+            const storedPlaylists: Playlist[] =
                 (await store.get("playlists")) || [];
 
-            // Check for duplicate ID
-            const duplicate = existingPlaylists.some((p) => p.id === id);
-            if (duplicate) {
-                console.log(
-                    "A playlist with this ID already exists. Aborting."
-                );
+            const originalPlaylist = storedPlaylists.find(
+                (p: Playlist) => p.id === id
+            );
+
+            if (!originalPlaylist) {
+                console.error("Original playlist not found.");
                 return;
             }
 
-            // Add the new playlist
-            const updatedPlaylists = [...existingPlaylists, playlist];
+            const updatedPlaylist: Playlist = {
+                ...data,
+                id,
+                tags,
+                createdAt: originalPlaylist.createdAt, // Retain the original createdAt value
+                updatedAt: new Date(),
+                songs: rightSongs,
+            };
 
-            // Save updated playlists back to storage
+            const updatedPlaylists = storedPlaylists.map((p: Playlist) =>
+                p.id === id ? updatedPlaylist : p
+            );
+
             await store.set("playlists", updatedPlaylists);
 
-            console.log("The playlist has been successfully added.");
+            console.log("The playlist has been successfully updated.");
 
-            toast("Playlist Created", {
-                description: "Your new playlist has been created.",
+            toast("Playlist Updated", {
+                description: "Your playlist has been successfully updated.",
             });
         } catch (ex) {
-            console.error("The playlist could not be created:", ex);
+            console.error("The playlist could not be updated:", ex);
         }
     };
 
@@ -294,7 +325,7 @@ export default function CreatePlaylistPanel() {
                 <div
                     className={`bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center`}
                 >
-                    <h1 className="text-lg font-bold">Create Playlist</h1>
+                    <h1 className="text-lg font-bold">Edit Playlist</h1>
                 </div>
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
                     <form id="customizeForm" onSubmit={handleSubmit(onSubmit)}>
@@ -558,7 +589,7 @@ export default function CreatePlaylistPanel() {
                             className="mr-3"
                             disabled={!isValid}
                         >
-                            Create <CirclePlusIcon />
+                            Update <CirclePlusIcon />
                         </Button>
                     </div>
                 </div>
