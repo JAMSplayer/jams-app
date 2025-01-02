@@ -126,36 +126,46 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 </div>
                             </div>
 
-                            {/* Song details  */}
-                            <div className="grid grid-cols-4 gap-4">
-                                <div className="col-span-1 p-4 flex flex-col justify-center">
-                                    <h2 className="text-foreground font-semibold text-lg truncate">
-                                        {song.title}
-                                    </h2>
-                                    <p className="text-foreground text-sm truncate">
-                                        {song.artist}
-                                    </p>
-                                </div>
-                                <div className="col-span-2 p-4 flex flex-col justify-center">
-                                    <h2 className="text-foreground font-semibold truncate">
-                                        <p>
-                                            <small>
-                                                Playlist:{" "}
-                                                {findPlaylistBySongId(
-                                                    song.id
-                                                ) ?? "Not found"}
-                                            </small>
+                            {/* Song details */}
+                            <div className="grid grid-cols-3 gap-4 w-full">
+                                {/* First column (left-aligned) */}
+                                <div className="flex justify-start p-4">
+                                    <div className="flex flex-col justify-start">
+                                        <h2 className="text-foreground font-semibold text-lg truncate">
+                                            {song.title}
+                                        </h2>
+                                        <p className="text-foreground text-sm truncate">
+                                            {song.artist}
                                         </p>
-                                        <p>
-                                            <small>
-                                                Description: {song.description}
-                                            </small>
-                                        </p>
-                                    </h2>
+                                    </div>
                                 </div>
-                                <div className="col-span-1 p-4 flex flex-col justify-center">
-                                    <div className="text-foreground text-xs">
-                                        <h2 className="text-foreground text-lg truncate">
+
+                                {/* Second column (left-aligned) */}
+                                <div className="flex justify-start p-4">
+                                    <div className="flex flex-col justify-start">
+                                        <h2 className="text-foreground font-semibold truncate">
+                                            <p>
+                                                <small>
+                                                    Playlist:{" "}
+                                                    {findPlaylistBySongId(
+                                                        song.id
+                                                    ) ?? "Not found"}
+                                                </small>
+                                            </p>
+                                            <p>
+                                                <small>
+                                                    Description:{" "}
+                                                    {song.description}
+                                                </small>
+                                            </p>
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                {/* Third column (left-aligned) */}
+                                <div className="flex justify-start p-4">
+                                    <div className="flex flex-col justify-start">
+                                        <h2 className="text-foreground font-semibold truncate">
                                             <p>
                                                 <small>
                                                     Date Created:{" "}
