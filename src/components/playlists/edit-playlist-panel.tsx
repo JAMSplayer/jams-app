@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CirclePlusIcon, EditIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, CirclePlusIcon, EditIcon, XIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import { useStorage } from "@/providers/storage-provider";
 import { ArrowLeftRightIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { ScrollArea } from "../ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 type FormSchema = z.infer<typeof editPlaylistSchema>;
 
@@ -40,6 +41,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
     });
 
     const { store } = useStorage();
+    const navigate = useNavigate();
 
     const [leftSongs, setLeftSongs] = useState<Song[]>([]);
     const [rightSongs, setRightSongs] = useState<Song[]>([]);
@@ -51,6 +53,11 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
         const fetchPlaylistData = async () => {
             if (!store) {
                 console.error("Store is not initialized.");
+                return;
+            }
+
+            if (!id) {
+                console.error("Playlist ID is missing.");
                 return;
             }
 
@@ -318,8 +325,23 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
         }
     };
 
+    // Handler for the back button
+    const handleBackButtonClick = () => {
+        navigate(-1); // Go back to the previous page in history
+    };
+
     return (
-        <div>
+        <div className="pb-16">
+            {/* Header */}
+            <div className="w-full sticky top-[3.5rem] bg-background z-50 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                    {/* Back Button */}
+                    <Button variant={"ghost"} onClick={handleBackButtonClick}>
+                        <ArrowLeftIcon size={20} />
+                    </Button>
+                </div>
+            </div>
+
             {/* Create Playlist Card */}
             <div className="p-4">
                 <div
