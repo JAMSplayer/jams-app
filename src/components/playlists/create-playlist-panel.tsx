@@ -17,6 +17,7 @@ import { useStorage } from "@/providers/storage-provider";
 import { ArrowLeftRightIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { ScrollArea } from "../ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 type FormSchema = z.infer<typeof createPlaylistSchema>;
 
@@ -37,6 +38,7 @@ export default function CreatePlaylistPanel() {
     });
 
     const { store } = useStorage();
+    const navigate = useNavigate();
 
     // add songs ----------------------------------------------------------------
 
@@ -283,6 +285,8 @@ export default function CreatePlaylistPanel() {
             toast("Playlist Created", {
                 description: "Your new playlist has been created.",
             });
+
+            navigate("/playlists");
         } catch (ex) {
             console.error("The playlist could not be created:", ex);
         }
