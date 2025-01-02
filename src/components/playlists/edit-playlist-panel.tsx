@@ -590,7 +590,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                         onClick={handleImageSelect} // Handle image selection
                                     />
                                 ) : (
-                                    <div className="w-full h-full max-w-sm max-h-sm flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
+                                    <div className="w-full h-full max-w-sm max-h-sm min-h-44 max-h-96 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
                                         No Playlist Art
                                     </div>
                                 )}
