@@ -108,7 +108,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                             onClick={() => handlePlaySong(song)}
                         >
                             {/* Album art */}
-                            <div className="relative flex-shrink-0 w-20 md:w-24 max-h-20 bg-background rounded-l-lg overflow-hidden">
+                            <div className="relative flex-shrink-0 w-20 md:w-24 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.artUrl ? (
                                     <img
                                         src={song.artUrl}
@@ -127,7 +127,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                             </div>
 
                             {/* Song details */}
-                            <div className="grid grid-cols-3 gap-4 w-full">
+                            <div className="grid grid-cols-1 md:grid-cols-3 w-full">
                                 {/* First column (left-aligned) */}
                                 <div className="flex justify-start p-4">
                                     <div className="flex flex-col justify-start">
@@ -141,7 +141,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 </div>
 
                                 {/* Second column (left-aligned) */}
-                                <div className="flex justify-start p-4">
+                                <div className="flex justify-start px-4 sm:pt-4">
                                     <div className="flex flex-col justify-start">
                                         <h2 className="text-foreground font-semibold truncate">
                                             <p>
@@ -163,7 +163,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 </div>
 
                                 {/* Third column (left-aligned) */}
-                                <div className="flex justify-start p-4">
+                                <div className="flex justify-start px-4 pb-4 sm:pt-4">
                                     <div className="flex flex-col justify-start">
                                         <h2 className="text-foreground font-semibold truncate">
                                             <p>
