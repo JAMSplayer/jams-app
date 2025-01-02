@@ -128,7 +128,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
 
                             {/* Song details  */}
                             <div className="grid grid-cols-4 gap-4">
-                                <div className="col-span-2 p-4 flex flex-col justify-center">
+                                <div className="col-span-1 p-4 flex flex-col justify-center">
                                     <h2 className="text-foreground font-semibold text-lg truncate">
                                         {song.title}
                                     </h2>
@@ -136,7 +136,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                         {song.artist}
                                     </p>
                                 </div>
-                                <div className="col-span-1 p-4 flex flex-col justify-center">
+                                <div className="col-span-2 p-4 flex flex-col justify-center">
                                     <h2 className="text-foreground font-semibold truncate">
                                         <p>
                                             <small>
