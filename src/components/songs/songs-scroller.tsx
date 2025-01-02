@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { PlayIcon } from "lucide-react";
+import { EditIcon, HeartIcon, PlayIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { useAudioPlayer } from "../player/audio-provider";
 import { usePlayerStore } from "@/store/player-store";
@@ -162,30 +162,26 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                     </div>
                                 </div>
 
-                                {/* Third column (left-aligned) */}
-                                <div className="flex justify-start px-4 pb-4 sm:pt-4">
-                                    <div className="flex flex-col justify-start">
-                                        <h2 className="text-foreground font-semibold truncate">
-                                            <p>
-                                                <small>
-                                                    Date Created:{" "}
-                                                    {new Date(
-                                                        song.dateCreated
-                                                    ).toLocaleDateString()}
-                                                </small>
-                                            </p>
-
-                                            {song.dateUpdated && (
-                                                <p>
-                                                    <small>
-                                                        Date Updated:{" "}
-                                                        {new Date(
-                                                            song.dateUpdated
-                                                        ).toLocaleDateString()}
-                                                    </small>
-                                                </p>
-                                            )}
-                                        </h2>
+                                {/* Third column (center-aligned vertically) */}
+                                <div className="flex justify-start items-center px-4 pb-4 sm:pt-4">
+                                    <div className="flex flex-col">
+                                        {/* Buttons */}
+                                        <div className="flex space-x-4">
+                                            {/* Favorite button */}
+                                            <button
+                                                onClick={() => {}}
+                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                            >
+                                                <HeartIcon className="w-4 h-4" />
+                                            </button>
+                                            {/* Edit button */}
+                                            <button
+                                                onClick={() => {}}
+                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                            >
+                                                <EditIcon className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
