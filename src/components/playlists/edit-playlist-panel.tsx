@@ -329,6 +329,45 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
         navigate(-1); // Go back to the previous page in history
     };
 
+    const handleDeletePlaylist = async () => {
+        if (!store) {
+            console.error("Store is not initialized.");
+            return;
+        }
+
+        try {
+            // Retrieve existing playlists from the store
+            const storedPlaylists: Playlist[] =
+                (await store.get("playlists")) || [];
+
+            // Ensure playlists is an array
+            if (!Array.isArray(storedPlaylists)) {
+                console.error(
+                    "Playlists are not in the expected array format."
+                );
+                return;
+            }
+
+            // Filter out the playlist with the given ID
+            const updatedPlaylists = storedPlaylists.filter(
+                (playlist) => playlist.id !== id
+            );
+
+            // Save the updated playlists back to the store
+            await store.set("playlists", updatedPlaylists);
+            await store.save();
+
+            toast("Playlist Deleted", {
+                description: "Your playlist has been deleted.",
+            });
+
+            // Navigate away after deletion (e.g., back to playlist list)
+            navigate("/playlists");
+        } catch (error) {
+            console.error("Failed to delete the playlist:", error);
+        }
+    };
+
     return (
         <div className="pb-16">
             {/* Header */}
@@ -343,11 +382,17 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
 
             {/* Create Playlist Card */}
             <div className="p-4">
-                <div
-                    className={`bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center`}
-                >
+                <div className="bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center">
                     <h1 className="text-lg font-bold">Edit Playlist</h1>
+                    <Button
+                        onClick={() => handleDeletePlaylist()}
+                        variant="destructive"
+                        className=" text-white hover:bg-red-700 transition-colors duration-200 focus:outline-none"
+                    >
+                        Delete
+                    </Button>
                 </div>
+
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
                     <form id="customizeForm" onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
