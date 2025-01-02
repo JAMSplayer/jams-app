@@ -288,7 +288,7 @@ export default function CreatePlaylistPanel() {
     };
 
     return (
-        <div>
+        <div className="pb-16">
             {/* Create Playlist Card */}
             <div className="p-4">
                 <div
