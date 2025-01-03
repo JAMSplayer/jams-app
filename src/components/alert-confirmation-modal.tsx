@@ -20,7 +20,9 @@ export const AlertConfirmationModal: React.FC<AlertConfirmationModalProps> = ({
                 <h2 className="text-xl font-semibold mb-4">{title}</h2>
 
                 {/* Description */}
-                <div className="text-sm text-gray-600 mb-6">{description}</div>
+                <div className="text-sm text-gray-600 mb-6 whitespace-pre-wrap">
+                    {description}
+                </div>
 
                 {/* Buttons */}
                 <div className="flex justify-end space-x-4">

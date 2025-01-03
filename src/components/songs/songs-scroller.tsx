@@ -5,6 +5,9 @@ import { useAudioPlayer } from "../player/audio-provider";
 import { usePlayerStore } from "@/store/player-store";
 import { Playlist } from "@/types/playlists/playlist";
 import { useStorage } from "@/providers/storage-provider";
+import { AlertConfirmationModal } from "../alert-confirmation-modal";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -14,6 +17,7 @@ interface SongScrollerProps {
 
 const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
     const { store } = useStorage();
+    const navigate = useNavigate();
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
 
@@ -97,8 +101,81 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
         return playlist ? playlist.title : undefined;
     };
 
+    // delete confirmation modal ----------------------------------------------------------------
+
+    const [
+        isDeleteConfirmationModalVisible,
+        setDeleteConfirmationModalVisible,
+    ] = useState(false);
+
+    const [selectedSongId, setSelectedSongId] = useState<string | null>(null); // Track the song ID
+
+    const handleDeleteClick = (id: string) => {
+        setSelectedSongId(id); // Set the song ID
+        setDeleteConfirmationModalVisible(true); // Show the modal
+    };
+
+    const handleConfirm = async () => {
+        if (!store || !selectedSongId) {
+            console.error("Store is not initialized or no song ID provided.");
+            return;
+        }
+
+        try {
+            // Retrieve existing playlists from the store
+            const storedPlaylists: Playlist[] =
+                (await store.get("playlists")) || [];
+
+            // Ensure playlists is an array
+            if (!Array.isArray(storedPlaylists)) {
+                console.error(
+                    "Playlists are not in the expected array format."
+                );
+                return;
+            }
+
+            // Remove the song with the selected ID from all playlists
+            const updatedPlaylists = storedPlaylists.map((playlist) => ({
+                ...playlist,
+                songs:
+                    playlist.songs?.filter(
+                        (song) => song.id !== selectedSongId
+                    ) || [],
+            }));
+
+            // Save the updated playlists back to the store
+            await store.set("playlists", updatedPlaylists);
+            await store.save();
+
+            toast("Song Deleted", {
+                description: "Your song has been deleted from all playlists.",
+            });
+        } catch (error) {
+            console.error("Failed to delete the song:", error);
+        }
+
+        setDeleteConfirmationModalVisible(false);
+        setSelectedSongId(null); // Reset the selected song ID
+    };
+
+    const handleCancel = () => {
+        setDeleteConfirmationModalVisible(false);
+        setSelectedSongId(null); // Reset the selected song ID
+    };
+
+    // end delete confirmation modal ----------------------------------------------------------------
+
     return (
         <div className="p-4 flex flex-col md:flex-row">
+            {isDeleteConfirmationModalVisible && (
+                <AlertConfirmationModal
+                    title="Confirm Deletion"
+                    description={`Are you sure you want to delete this song from all playlists?\n\nYou can manually add it again via the 'Add Song' page.`}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
+
             <div className="flex-grow md:w-2/3 space-y-4 pb-16 overflow-y-auto">
                 {filteredAndSortedSongs.length > 0 ? (
                     filteredAndSortedSongs.map((song) => (
@@ -169,21 +246,28 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                         <div className="flex space-x-4 pt-2 sm:pt-0">
                                             {/* Favorite button */}
                                             <button
-                                                onClick={() => {}}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                }}
                                                 className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
                                             >
                                                 <HeartIcon className="w-4 h-4" />
                                             </button>
                                             {/* Edit button */}
                                             <button
-                                                onClick={() => {}}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                }}
                                                 className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
                                             >
                                                 <EditIcon className="w-4 h-4" />
                                             </button>
                                             {/* Delete button */}
                                             <button
-                                                onClick={() => {}}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(song.id); // Pass song.id
+                                                }}
                                                 className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background transition-colors duration-200 focus:outline-none"
                                             >
                                                 <XIcon className="w-4 h-4" />
