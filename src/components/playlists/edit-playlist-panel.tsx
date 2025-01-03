@@ -17,6 +17,7 @@ import { ArrowLeftRightIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { ScrollArea } from "../ui/scroll-area";
 import { useNavigate } from "react-router-dom";
+import { AlertConfirmationModal } from "../alert-confirmation-modal";
 
 type FormSchema = z.infer<typeof editPlaylistSchema>;
 
@@ -280,6 +281,59 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
 
     // end tags ----------------------------------------------------------------
 
+    // delete confirmation modal ----------------------------------------------------------------
+
+    const [
+        isDeleteConfirmationModalVisible,
+        setDeleteConfirmationModalVisible,
+    ] = useState(false);
+
+    const handleConfirm = async () => {
+        if (!store) {
+            console.error("Store is not initialized.");
+            return;
+        }
+
+        try {
+            // Retrieve existing playlists from the store
+            const storedPlaylists: Playlist[] =
+                (await store.get("playlists")) || [];
+
+            // Ensure playlists is an array
+            if (!Array.isArray(storedPlaylists)) {
+                console.error(
+                    "Playlists are not in the expected array format."
+                );
+                return;
+            }
+
+            // Filter out the playlist with the given ID
+            const updatedPlaylists = storedPlaylists.filter(
+                (playlist) => playlist.id !== id
+            );
+
+            // Save the updated playlists back to the store
+            await store.set("playlists", updatedPlaylists);
+            await store.save();
+
+            toast("Playlist Deleted", {
+                description: "Your playlist has been deleted.",
+            });
+
+            // Navigate away after deletion (e.g., back to playlist list)
+            navigate("/playlists");
+        } catch (error) {
+            console.error("Failed to delete the playlist:", error);
+        }
+        setDeleteConfirmationModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setDeleteConfirmationModalVisible(false);
+    };
+
+    // end delete confirmation modal ----------------------------------------------------------------
+
     // Update the existing playlist in storage
     const onSubmit = async (data: FormSchema) => {
         if (!store) {
@@ -329,49 +383,19 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
         navigate(-1); // Go back to the previous page in history
     };
 
-    const handleDeletePlaylist = async () => {
-        if (!store) {
-            console.error("Store is not initialized.");
-            return;
-        }
-
-        try {
-            // Retrieve existing playlists from the store
-            const storedPlaylists: Playlist[] =
-                (await store.get("playlists")) || [];
-
-            // Ensure playlists is an array
-            if (!Array.isArray(storedPlaylists)) {
-                console.error(
-                    "Playlists are not in the expected array format."
-                );
-                return;
-            }
-
-            // Filter out the playlist with the given ID
-            const updatedPlaylists = storedPlaylists.filter(
-                (playlist) => playlist.id !== id
-            );
-
-            // Save the updated playlists back to the store
-            await store.set("playlists", updatedPlaylists);
-            await store.save();
-
-            toast("Playlist Deleted", {
-                description: "Your playlist has been deleted.",
-            });
-
-            // Navigate away after deletion (e.g., back to playlist list)
-            navigate("/playlists");
-        } catch (error) {
-            console.error("Failed to delete the playlist:", error);
-        }
-    };
-
     return (
         <div className="pb-16">
+            {isDeleteConfirmationModalVisible && (
+                <AlertConfirmationModal
+                    title="Confirm Deletion"
+                    description="Are you sure you want to delete this playlist?"
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
+
             {/* Header */}
-            <div className="w-full sticky top-[3.5rem] bg-background z-50 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
+            <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                     {/* Back Button */}
                     <Button variant={"ghost"} onClick={handleBackButtonClick}>
@@ -380,12 +404,12 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                 </div>
             </div>
 
-            {/* Create Playlist Card */}
+            {/* Edit Playlist Card */}
             <div className="p-4">
                 <div className="bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center">
                     <h1 className="text-lg font-bold">Edit Playlist</h1>
                     <Button
-                        onClick={() => handleDeletePlaylist()}
+                        onClick={() => setDeleteConfirmationModalVisible(true)}
                         variant="destructive"
                         className=" text-white hover:bg-red-700 transition-colors duration-200 focus:outline-none"
                     >
