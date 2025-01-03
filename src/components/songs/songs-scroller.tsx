@@ -90,15 +90,21 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
         return sortSongs(filteredSongs, sortOrder);
     }, [songs, filterValue, sortOrder]);
 
-    // Find the playlist title for a song
-    const findPlaylistBySongId = (songId: string): string | undefined => {
-        const playlist = playlists.find(
-            (playlist) =>
-                // Ensure playlist.songs is defined before calling .some() on it
-                playlist.songs &&
-                playlist.songs.some((song) => song.id === songId)
-        );
-        return playlist ? playlist.title : undefined;
+    // Find all the playlist titles for a song id
+    const findPlaylistsBySongId = (songId: string): string[] => {
+        if (!Array.isArray(playlists)) {
+            console.error("Playlists data is not in an array format.");
+            return [];
+        }
+
+        // Filter playlists that contain the song and map their titles
+        return playlists
+            .filter(
+                (playlist) =>
+                    playlist.songs &&
+                    playlist.songs.some((song) => song.id === songId)
+            )
+            .map((playlist) => playlist.title);
     };
 
     // delete confirmation modal ----------------------------------------------------------------
@@ -223,10 +229,14 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                         <h2 className="text-foreground font-semibold truncate">
                                             <p>
                                                 <small>
-                                                    Playlist:{" "}
-                                                    {findPlaylistBySongId(
+                                                    Playlists:{" "}
+                                                    {findPlaylistsBySongId(
                                                         song.id
-                                                    ) ?? "Not found"}
+                                                    ).length > 0
+                                                        ? findPlaylistsBySongId(
+                                                              song.id
+                                                          ).join(", ")
+                                                        : "Not found"}
                                                 </small>
                                             </p>
                                             <p>
