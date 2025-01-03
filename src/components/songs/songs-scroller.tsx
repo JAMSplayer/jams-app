@@ -208,11 +208,10 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                     </div>
                                 </div>
                             </div>
-
                             {/* Song details */}
                             <div className="grid grid-cols-1 md:grid-cols-3 w-full">
                                 {/* First column (left-aligned) */}
-                                <div className="flex justify-start p-4">
+                                <div className="flex justify-start p-2">
                                     <div className="flex flex-col justify-start">
                                         <h2 className="text-foreground font-semibold text-lg truncate">
                                             {song.title}
@@ -224,7 +223,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 </div>
 
                                 {/* Second column (left-aligned) */}
-                                <div className="flex justify-start px-4 sm:pt-4">
+                                <div className="flex justify-start p-2">
                                     <div className="flex flex-col justify-start">
                                         <h2 className="text-foreground font-semibold truncate">
                                             <p>
@@ -250,7 +249,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 </div>
 
                                 {/* Third column (center-aligned vertically) */}
-                                <div className="flex justify-start items-center px-4 pb-4 sm:pt-4">
+                                <div className="flex justify-start items-center p-4 hidden md:block">
                                     <div className="flex flex-col">
                                         {/* Buttons */}
                                         <div className="flex space-x-4 pt-2 sm:pt-0">
@@ -284,6 +283,39 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                             </button>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col md:hidden">
+                                {/* Buttons */}
+                                <div className="flex flex-col space-y-4 p-2">
+                                    {/* Favorite button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                    >
+                                        <HeartIcon className="w-4 h-4" />
+                                    </button>
+                                    {/* Edit button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                    >
+                                        <EditIcon className="w-4 h-4" />
+                                    </button>
+                                    {/* Delete button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteClick(song.id); // Pass song.id
+                                        }}
+                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background transition-colors duration-200 focus:outline-none"
+                                    >
+                                        <XIcon className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
