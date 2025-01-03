@@ -7,4 +7,5 @@ export type Song = {
     dateCreated: Date;
     dateUpdated?: Date;
     location: string;
+    tags?: string[];
 };

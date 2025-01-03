@@ -209,7 +209,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                 </div>
                             </div>
                             {/* Song details */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 w-full">
+                            <div className="grid grid-cols-1 md:grid-cols-4 w-full">
                                 {/* First column (left-aligned) */}
                                 <div className="flex justify-start p-2">
                                     <div className="flex flex-col justify-start">
@@ -248,7 +248,26 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                     </div>
                                 </div>
 
-                                {/* Third column (center-aligned vertically) */}
+                                {/* Third column (left-aligned) */}
+                                <div className="flex justify-start p-2">
+                                    <div className="flex flex-col justify-start">
+                                        <h2 className="text-foreground font-semibold truncate">
+                                            <p>
+                                                {song.tags &&
+                                                    song.tags.length > 0 && (
+                                                        <small>
+                                                            Tags:{" "}
+                                                            {song.tags.join(
+                                                                ", "
+                                                            )}
+                                                        </small>
+                                                    )}
+                                            </p>
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                {/* Fourth column (center-aligned vertically) */}
                                 <div className="flex justify-start items-center p-4 hidden md:block">
                                     <div className="flex flex-col">
                                         {/* Buttons */}
