@@ -296,7 +296,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                                     e.stopPropagation();
                                                     handleDeleteClick(song.id); // Pass song.id
                                                 }}
-                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background transition-colors duration-200 focus:outline-none"
+                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive dark:hover:text-white hover:text-background transition-colors duration-200 focus:outline-none"
                                             >
                                                 <XIcon className="w-4 h-4" />
                                             </button>
@@ -331,7 +331,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                             e.stopPropagation();
                                             handleDeleteClick(song.id); // Pass song.id
                                         }}
-                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background transition-colors duration-200 focus:outline-none"
+                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background dark:hover:text-white transition-colors duration-200 focus:outline-none"
                                     >
                                         <XIcon className="w-4 h-4" />
                                     </button>
