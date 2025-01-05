@@ -191,7 +191,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                             onClick={() => handlePlaySong(song)}
                         >
                             {/* Album art */}
-                            <div className="relative flex-shrink-0 w-20 md:w-24 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
+                            <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.artUrl ? (
                                     <img
                                         src={song.artUrl}
