@@ -8,7 +8,7 @@ import React, {
 import { listen } from "@tauri-apps/api/event";
 import { getConnectedUserAccount } from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
-
+import { isConnected as checkNetworkConnection } from "@/backend/autonomi";
 // Define the shape of the context value
 interface ConnectionContextType {
     isConnected: boolean;
@@ -42,8 +42,24 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
         }
     };
 
+    // Initialize connection status on load
+    const initializeConnection = async () => {
+        try {
+            const connected = await checkNetworkConnection(); // Replace with actual connection-checking logic
+            setIsConnected(connected);
+
+            if (connected) {
+                await fetchAccount(); // Fetch account if connected
+            }
+        } catch (error) {
+            console.error("Failed to initialize connection", error);
+        }
+    };
+
     // Set up event listeners for connection updates
     useEffect(() => {
+        initializeConnection(); // Perform initial connection check
+
         const unlistenSignIn = listen("sign_in", () => {
             console.log("Sign In event received");
             fetchAccount(); // sign in on connection
