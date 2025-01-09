@@ -1,5 +1,5 @@
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PowerIcon } from "lucide-react";
 import SignInPanel from "./sign-in/sign-in-panel";
 import SignedInPanel from "./signed-in/signed-in-panel";
@@ -7,6 +7,7 @@ import CreateAccountPanel from "./create-account/create-account-panel";
 import { disconnect as autonomiDisconnect } from "@/backend/autonomi";
 import Avatar from "./avatar";
 import RecoverAccountPanel from "./recover-account/recover-account-panel";
+import Portal from "../portal";
 
 export default function AccountConnect() {
     // ====================================================================================
@@ -30,13 +31,41 @@ export default function AccountConnect() {
 
     const [currentPanel, setCurrentPanel] = useState(SignedOutPanelState.NONE);
 
+    const divRef = useRef<HTMLDivElement>(null);
+
+    const buttonRef = useRef<HTMLButtonElement>(null);
+
+    const handleClickOutside = (event: MouseEvent) => {
+        if (
+            divRef.current &&
+            !divRef.current.contains(event.target as Node) &&
+            !(
+                buttonRef.current &&
+                buttonRef.current.contains(event.target as Node)
+            ) // Ensure it doesn't close when clicking the button
+        ) {
+            setCurrentPanel(SignedOutPanelState.NONE);
+            toggleSignInPanel();
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+
+        // Cleanup listener on component unmount
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     const toggleSignInPanel = () => {
         // Toggle to SignInPanel if not currently open
-        setCurrentPanel(
-            currentPanel === SignedOutPanelState.SIGN_IN
-                ? SignedOutPanelState.NONE
-                : SignedOutPanelState.SIGN_IN
-        );
+
+        if (currentPanel === SignedOutPanelState.NONE) {
+            setCurrentPanel(SignedOutPanelState.SIGN_IN);
+        } else {
+            setCurrentPanel(SignedOutPanelState.NONE);
+        }
     };
 
     const handleCreateAccountClicked = () => {
@@ -58,9 +87,6 @@ export default function AccountConnect() {
     };
 
     const connect = () => {
-        //  TODO functionality to connect - this can be created via tauri commands to the backend.
-        //  NOTE: connecting is an integral part of login and register functionalities, so it probably should be moved there.
-        //setIsSignInPanelOpen(!isSignInPanelOpen);
         toggleSignInPanel();
     };
 
@@ -82,7 +108,7 @@ export default function AccountConnect() {
 
                     {isConnectedPanelOpen && (
                         <>
-                            <div className="absolute right-3 mt-4 w-73 origin-top-right rounded-lg bg-card shadow-large border z-50">
+                            <div className="absolute right-3 mt-4 w-73 origin-top-right rounded-lg bg-card shadow-large border">
                                 <SignedInPanel account={account} />
 
                                 <div className="p-3 flex justify-center">
@@ -108,48 +134,64 @@ export default function AccountConnect() {
                     <Button
                         variant={"default"}
                         size={"sm"}
+                        ref={buttonRef}
                         onClick={() => connect()}
                     >
                         Connect Account
                     </Button>
 
                     {currentPanel === SignedOutPanelState.SIGN_IN && (
-                        <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
-                            <div className="border-b px-4 py-5 border-secondary">
-                                <SignInPanel
-                                    onCreateAccountClicked={
-                                        handleCreateAccountClicked
-                                    }
-                                    onRecoverAccountClicked={
-                                        handleRecoverAccountClicked
-                                    }
-                                />
+                        <Portal>
+                            <div
+                                ref={divRef}
+                                className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border"
+                            >
+                                <div className="border-b px-4 py-5 border-secondary">
+                                    <SignInPanel
+                                        onCreateAccountClicked={
+                                            handleCreateAccountClicked
+                                        }
+                                        onRecoverAccountClicked={
+                                            handleRecoverAccountClicked
+                                        }
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        </Portal>
                     )}
 
                     {currentPanel === SignedOutPanelState.CREATE_ACCOUNT && (
-                        <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
-                            <div className="border-b px-4 py-5 border-secondary">
-                                <CreateAccountPanel
-                                    onReturnToSignInPanelClicked={
-                                        handleReturnToSignInPanelClicked
-                                    }
-                                />
+                        <Portal>
+                            <div
+                                ref={divRef}
+                                className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border"
+                            >
+                                <div className="border-b px-4 py-5 border-secondary">
+                                    <CreateAccountPanel
+                                        onReturnToSignInPanelClicked={
+                                            handleReturnToSignInPanelClicked
+                                        }
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        </Portal>
                     )}
 
                     {currentPanel === SignedOutPanelState.RECOVER_ACCOUNT && (
-                        <div className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border z-50">
-                            <div className="border-b px-4 py-5 border-secondary">
-                                <RecoverAccountPanel
-                                    onReturnToSignInPanelClicked={
-                                        handleReturnToSignInPanelClicked
-                                    }
-                                />
+                        <Portal>
+                            <div
+                                ref={divRef}
+                                className="absolute right-3 mt-4 w-full max-w-md origin-top-right rounded-lg bg-card shadow-large border"
+                            >
+                                <div className="border-b px-4 py-5 border-secondary">
+                                    <RecoverAccountPanel
+                                        onReturnToSignInPanelClicked={
+                                            handleReturnToSignInPanelClicked
+                                        }
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        </Portal>
                     )}
                 </>
             )}

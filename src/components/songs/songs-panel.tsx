@@ -235,7 +235,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
     return (
         <div className="w-full">
             {/* Filters */}
-            <div className="w-full sticky top-[3.5rem] bg-background z-50 border-b border-t border-secondary p-4 border-l">
+            <div className="w-full sticky top-[3.5rem] bg-background z-10 border-b border-t border-secondary p-4 border-l">
                 <div className="flex items-center space-x-2">
                     <Input
                         type="text"
@@ -262,11 +262,13 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             </div>
 
             {/* Song Scroller */}
-            <SongScroller
-                songs={songs}
-                filterValue={filterValue}
-                sortOrder={sortOrder}
-            />
+            <div className="relative z-0">
+                <SongScroller
+                    songs={songs}
+                    filterValue={filterValue}
+                    sortOrder={sortOrder}
+                />
+            </div>
         </div>
     );
 };
