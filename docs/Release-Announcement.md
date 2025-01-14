@@ -12,7 +12,7 @@ But first..
 
 Two remarkable community members, @loziniak and @safemedia, have created a stunning and functional cross-platform desktop application from the ground up. This app has been recognized as the JAMS MVP, which is an incredible achievement! 🤩
 
-Huge personal thank you to you both @loziniak and cobite. Let’s keep kicking ass!
+Huge personal thank you to you both @loziniak and @cobite. Let’s keep kicking ass!
 
 It’s worth mentioning that these rockstars also have their own individual Autonomi projects in the works. Don’t @ me though, these projects are shrouded in mystery but there is no doubt in my mind that they will stun!
 
@@ -28,7 +28,7 @@ JAMS MVP is cross platform, written in Rust and built with Tauri. There are boun
 
 Currently we are using the now deprecated register data type but will very soon be adapting to the new upcoming data types and API release. Then the plan is to build out features for a full release, though the MVP provides some nice features out of the gate.
 
-### Back End and System Designs - @loziniak aka Loz
+### Back End and System Designs - @loziniak
 
 > whatever you feel is relevant and can provide insight to other developers and / or laymen community members!
 
@@ -45,11 +45,10 @@ Currently we are using the now deprecated register data type but will very soon 
 ## JAMS MVP Features
 
 * Account and wallet connection / creation
-* Multi Language Support (English, Spanish, German?, Mandarin Chinese, Hindi)
+* Multi Language Support (English, Spanish, German?, Mandarin Chinese, Hindi, Polish)
 * Import
-* Upload
-* Download
-* Edit
+* Music upload and Download
+* Edit song metadata
 * Export Account (.zip)
 * Personal Library
 * Search (personal library)
@@ -58,7 +57,8 @@ Currently we are using the now deprecated register data type but will very soon 
 
 ### (Upcoming) Full Release Features
 
-* MVP Feature Set +
+MVP Feature Set +
+
 * Discover Page
 * Unverified Artist Profile
 * Follow
@@ -69,7 +69,8 @@ Currently we are using the now deprecated register data type but will very soon 
 
 Read more about JAMStand [here](https://medium.com/@nkoteskey/what-is-jams-jamstand-tl-dr-4b01e6dedd72).
 
-* MVP + Full Release +
+MVP + Full Release +
+
 * Verified Artists
 * Paid Plans (highly competitive)
 * Collectibles (NFTs)
