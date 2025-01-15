@@ -64,6 +64,7 @@ MVP Feature Set +
 * Follow
 * Tipping Button
 * Listener Metrics
+* Native Token Support
 
 ### After Eventual JAMStand Integration
 
