@@ -54,6 +54,7 @@ Currently we are using the now deprecated register data type but will very soon 
 * Search (personal library)
 * Playlist Creation / Edit / Share
 * Player Controls
+* Free of Advertisements
 
 ### (Upcoming) Full Release Features
 
