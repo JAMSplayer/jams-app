@@ -7,7 +7,7 @@ import { Playlist } from "@/types/playlists/playlist";
 import { useStorage } from "@/providers/storage-provider";
 import { AlertConfirmationModal } from "../alert-confirmation-modal";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -17,7 +17,7 @@ interface SongScrollerProps {
 
 const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
     const { store } = useStorage();
-    const navigate = useNavigate();
+//    const navigate = useNavigate();
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
 
