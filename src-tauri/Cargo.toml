@@ -2,8 +2,9 @@
 name = "jams-desktop"
 version = "0.1.0"
 description = "JAMS Desktop"
-authors = ["cobite", "loziniak", "Nick Virag"]
+authors = ["Nigel", "cobite", "loziniak", "Nick Virag"]
 license = "UNLICENSED"
+homepage = "https://jams.community/"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
