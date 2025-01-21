@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SelectYear from "@/components/select-year";
 import { toast } from "sonner";
-import { UploadSong } from "@/backend/uploading";
+import { uploadSong } from "@/backend/uploading";
 import { SongUpload } from "@/types/songs/song-upload";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -278,7 +278,8 @@ export default function SingleFilePanel({
         try {
             setIsUploading(true);
             // TODO: add a playlist to which the song has to be added
-            const result = await UploadSong(song);
+            const result = await uploadSong(song, fileDetail.fullPath);
+            // TODO: update song object with songXorname and artXorname, update playlist data, sync with network
             console.log("The song has been uploaded: ", result);
         } catch (ex) {
             console.log("The song could not be uploaded: ", ex);
