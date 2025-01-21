@@ -279,7 +279,7 @@ async fn disconnect(app: AppHandle) -> Result<(), Error> {
 
 fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
     if name.is_empty() {
-        return Err(Error::Common(String::from("Empty register name.")));
+        return Err(Error::Common(String::from("Empty name.")));
     }
     let mut mb = XorNameBuilder::from_str(&name[0]);
     for n in &name[1..] {
@@ -289,12 +289,12 @@ fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
 }
 
 #[tauri::command]
-async fn create_register(
+async fn create_reg(
     name: Vec<String>,
     data: String,
     safe: State<'_, Mutex<Option<Safe>>>,
-) -> Result<String, Error> {
-    println!("\n\nRegister create...");
+) -> Result<(), Error> {
+    println!("\n\nReg create...");
     println!("Name: {:?}", name);
 
     let meta = meta_builder(name)
@@ -304,76 +304,62 @@ async fn create_register(
     println!("Meta: {}", &meta);
 
     //    let (mut reg, cost, royalties) = safe
-    let reg = safe
+    safe
         .lock()
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .register_create(data.into_bytes(), meta, None)
+        .reg_create(data.into_bytes(), &meta)
         .await?;
 
-    println!("\n\nRegister created: {:?}", reg);
+    println!("\n\nReg created");
     //    println!("Costs: {}, {}", cost, royalties);
 
     //    Ok((reg.address().to_hex(), cost.as_nano(), royalties.as_nano()))
-    Ok(reg.address().to_hex())
+    Ok(())
 }
 
 #[tauri::command]
-async fn read_register(
+async fn read_reg(
     name: Vec<String>,
     safe: State<'_, Mutex<Option<Safe>>>,
 ) -> Result<String, Error> {
     let meta = meta_builder(name)?.build();
 
-    let mut reg = safe
+    let data = safe
         .lock()
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .open_own_register(meta)
+        .read_reg(&meta, None)
         .await?;
-
-    let data = Safe::read_register(&mut reg, 0)
-        .await?
-        .unwrap_or(Vec::new());
 
     Ok(String::from_utf8(data).map_err(|e| Error::Common(format!("{e}")))?)
 }
 
 #[tauri::command]
-async fn write_register(
+async fn write_reg(
     name: Vec<String>,
     data: String,
     safe: State<'_, Mutex<Option<Safe>>>,
 ) -> Result<(), Error> {
-    println!("\n\nRegister write...");
+    println!("\n\nReg write...");
     println!("Name: {:?}", name);
 
     let meta = meta_builder(name)?.build();
     println!("Meta: {}", meta);
 
-    let mut reg = safe
-        .lock()
-        .await
-        .as_mut()
-        .ok_or(Error::NotConnected)?
-        .open_own_register(meta)
-        .await?;
-
-    println!("\n\nRegister found: {:?}", reg);
-
     println!("Writing data: {}", &data);
     if !data.is_empty() {
-        let reg = safe
+        safe
             .lock()
             .await
             .as_mut()
             .ok_or(Error::NotConnected)?
-            .register_write(&mut reg, data.into_bytes())
+            .reg_write(data.into_bytes(), &meta)
             .await?;
 
-        println!("\n\nRegister updated: {:?}", reg);
+        println!("\n\nReg updated.");
     } else {
         return Err(Error::Common(String::from("Empty data object string.")));
     }
@@ -401,7 +387,21 @@ async fn balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> 
         .ok_or(Error::NotConnected)?
         .balance()
         .await?;
-    Ok(format!("{:x}", balance)) // hex string
+//    Ok(format!("{:x}", balance)) // hex string
+    Ok(format!("{}", balance.0))
+}
+
+#[tauri::command]
+async fn gas_balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> {
+    let balance = safe
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error::NotConnected)?
+        .balance()
+        .await?;
+//    Ok(format!("{:x}", balance)) // hex string
+    Ok(format!("{}", balance.1))
 }
 
 #[tauri::command]
@@ -579,11 +579,12 @@ pub fn run() {
             sign_in,
             is_connected,
             disconnect,
-            create_register,
-            read_register,
-            write_register,
+            create_reg,
+            read_reg,
+            write_reg,
             client_address,
             balance,
+            gas_balance,
             check_key,
             get_file_metadata,
             upload,
