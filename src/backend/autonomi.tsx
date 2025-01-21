@@ -163,7 +163,7 @@ export async function createReg(
     } catch (e) {
         console.error("createReg: ", e);
     }
-    return null;
+    return false;
 }
 
 export async function readReg(name: string[]): Promise<object | null> {
