@@ -1,12 +1,12 @@
 import { Song } from "../songs/song";
 
 export type Playlist = {
-    id: number;
+    id: string;
     picture?: string;
     title: string;
     description?: string;
-    artist: string;
-    created: Date;
-    updated: Date;
-    songs: Song[];
+    createdAt: Date;
+    updatedAt: Date;
+    songs?: Song[];
+    tags?: string[];
 };

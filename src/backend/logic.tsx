@@ -2,10 +2,10 @@ import {
     connectInner,
     register,
     clientAddress,
-    createRegister,
+    createReg,
     isConnected,
-    readRegister,
-    writeRegister,
+    readReg,
+    writeReg,
     listAccounts,
 } from "@/backend/autonomi";
 import {
@@ -96,11 +96,11 @@ export async function registerUser(
         const registeredUser = { ...newUser, address };
         registeredUser.password = ""; // we cannot save passwords
 
-        // Create a new register for the user
-        const registerAddress = await createRegister(["user"], registeredUser);
-        if (!registerAddress) {
+        // Create a new Reg for the user
+        const regCreated = await createReg(["user"], registeredUser);
+        if (!regCreated) {
             console.error(
-                `Failed to create a new user register for: ${newUser.username}`
+                `Failed to create a new user Reg for: ${newUser.username}`
             );
             return null;
         }
@@ -118,7 +118,7 @@ export async function registerUser(
 
 export async function saveUser(user: AccountUser) {
     console.log("saving user: ", user);
-    await writeRegister(["user"], user);
+    await writeReg(["user"], user);
 }
 
 // Returns user account object if account is connected, null if not.
@@ -129,7 +129,7 @@ export async function getConnectedUserAccount(): Promise<AccountUser | null> {
         if (connected) {
             console.log("getting user...");
 
-            const user = await readRegister(["user"]);
+            const user = await readReg(["user"]);
             if (user) {
                 console.log("user: ", user);
                 return user as AccountUser;

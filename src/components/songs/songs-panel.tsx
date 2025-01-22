@@ -40,7 +40,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
         // TODO pull this from a query that gets all songs from all playlists on the system.
         const fetchedSongs: Song[] = [
             {
-                id: 1,
+                id: "1",
                 title: "Song 1",
                 description: "Description for 1",
                 artist: "Artist 1",
@@ -50,7 +50,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 2,
+                id: "2",
                 title: "Song 2",
                 description: "Description for 2",
                 artist: "Artist 2",
@@ -60,7 +60,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 3,
+                id: "3",
                 title: "Song 3",
                 description: "Description for 3",
                 artist: "Artist 3",
@@ -69,7 +69,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 4,
+                id: "4",
                 title: "Song 4",
                 description: "Description for 4",
                 artist: "Artist 4",
@@ -78,7 +78,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 5,
+                id: "5",
                 title: "Song 5",
                 description: "Description for 5",
                 artist: "Artist 5",
@@ -87,7 +87,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 6,
+                id: "6",
                 title: "Song 6",
                 description: "Description for 6",
                 artist: "Artist 6",
@@ -96,7 +96,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 7,
+                id: "7",
                 title: "Song 7",
                 description: "Description for 7",
                 artist: "Artist 7",
@@ -105,7 +105,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 8,
+                id: "8",
                 title: "Song 8",
                 description: "Description for 8",
                 artist: "Artist 8",
@@ -114,7 +114,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 9,
+                id: "9",
                 title: "Song 9",
                 description: "Description for 9",
                 artist: "Artist 9",
@@ -123,7 +123,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 10,
+                id: "10",
                 title: "Song 10",
                 description: "Description for 10",
                 artist: "Artist 10",
@@ -132,7 +132,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 11,
+                id: "11",
                 title: "Song 11",
                 description: "Description for 11",
                 artist: "Artist 11",
@@ -141,7 +141,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 12,
+                id: "12",
                 title: "Song 12",
                 description: "Description for 12",
                 artist: "Artist 6",
@@ -150,7 +150,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 13,
+                id: "13",
                 title: "Song 13",
                 description: "Description for 13",
                 artist: "Artist 13",
@@ -159,7 +159,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 14,
+                id: "14",
                 title: "Song 14",
                 description: "Description for 14",
                 artist: "Artist 13",
@@ -168,7 +168,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 15,
+                id: "15",
                 title: "Song 15",
                 description: "Description for 15",
                 artist: "Artist 13",
@@ -177,7 +177,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 16,
+                id: "16",
                 title: "Song 16",
                 description: "Description for 16",
                 artist: "Artist 13",
@@ -186,7 +186,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 17,
+                id: "17",
                 title: "Song 17",
                 description: "Description for 17",
                 artist: "Artist 13",
@@ -195,7 +195,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 18,
+                id: "18",
                 title: "Song 18",
                 description: "Description for 18",
                 artist: "Artist 13",
@@ -204,7 +204,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 19,
+                id: "19",
                 title: "Song 19",
                 description: "Description for 19",
                 artist: "Artist 13",
@@ -213,7 +213,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3",
             },
             {
-                id: 20,
+                id: "20",
                 title: "Song 20",
                 description: "Description for 20",
                 artist: "Artist 13",
@@ -223,7 +223,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
         ];
 
-        if (playlist && playlist.songs.length > 0) {
+        if (playlist && playlist.songs && playlist.songs.length > 0) {
             // show songs from selected playlist
             setSongs(playlist.songs);
             // play first song
@@ -237,7 +237,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
     return (
         <div className="w-full">
             {/* Filters */}
-            <div className="w-full sticky top-[3.5rem] bg-background z-50 border-b border-t border-secondary p-4 border-l">
+            <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-4 border-l">
                 <div className="flex items-center space-x-2">
                     <Input
                         type="text"

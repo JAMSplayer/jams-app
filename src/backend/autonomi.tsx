@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 // Just basic types allowed and types, that correspond to Rust types.
 // =======
 
-const REGISTER_META_PREFIX = "jams";
+const REG_META_PREFIX = "jams";
 
 export async function listAccounts(): Promise<[string, string][] | null> {
     try {
@@ -141,62 +141,61 @@ export async function secretKey(
 }
 
 function prepareMeta(name: string[]): string[] {
-    name.unshift(REGISTER_META_PREFIX);
+    name.unshift(REG_META_PREFIX);
     return name;
 }
 
-export async function createRegister(
+export async function createReg(
     name: string[],
     data?: object
-): Promise<string | null> {
+): Promise<boolean> {
     prepareMeta(name);
-    console.log("creating register...");
+    console.log("creating Reg: " + name + "...");
     try {
-        const ret = await invoke<[string, number, number]>("create_register", {
+        await invoke("create_reg", {
             name: name,
             data: typeof data === "undefined" ? "" : JSON.stringify(data),
         });
 
-        console.log("created register.");
-        console.log(ret);
-
+        console.log("created Reg.");
         console.log(await balance());
-        // const [address, cost, royalties] = ret;
-        const [address] = ret;
-        return address;
+        return true;
     } catch (e) {
-        console.error("createRegister: ", e);
+        console.error("createReg: ", e);
     }
-    return null;
+    return false;
 }
 
-export async function readRegister(name: string[]): Promise<object | null> {
+export async function readReg(name: string[]): Promise<object | null> {
     prepareMeta(name);
-    console.log("reading register: " + name + "...");
+    console.log("reading Reg: " + name + "...");
 
     try {
-        return JSON.parse(await invoke("read_register", { name: name }));
+        return JSON.parse(await invoke("read_reg", { name: name }));
     } catch (e) {
-        console.error("readRegister: ", e);
+        console.error("readReg: ", e);
     }
     return null;
 }
 
-export async function writeRegister(
+export async function writeReg(
     name: string[],
     data: object
 ): Promise<boolean> {
     prepareMeta(name);
-    console.log("writing register: " + name + "...");
+    console.log("writing Reg: " + name + "...");
 
     try {
-        await invoke("write_register", {
+        await invoke("write_reg", {
             name: name,
             data: JSON.stringify(data),
         });
+
+        console.log("written Reg.");
+        console.log(await balance());
         return true;
     } catch (e) {
-        console.error("writeRegister: ", e);
+        console.error("writeReg: ", e);
     }
     return false;
 }
