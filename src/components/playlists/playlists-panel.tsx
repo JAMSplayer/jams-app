@@ -9,9 +9,12 @@ import {
 } from "../ui/select";
 import { Playlist } from "@/types/playlists/playlist";
 import PlaylistScroller from "./playlists-scroller";
+import { useTranslation } from "react-i18next";
 import { useStorage } from "@/providers/storage-provider";
 
 export default function PlaylistsPanel() {
+    const { t } = useTranslation();
+
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
@@ -52,7 +55,7 @@ export default function PlaylistsPanel() {
                 <div className="flex items-center space-x-2">
                     <Input
                         type="text"
-                        placeholder="Search"
+                        placeholder={t("search")}
                         value={filterValue}
                         onChange={(e) => setFilterValue(e.target.value)}
                         className="border px-2 py-1 w-full md:w-1/3"
@@ -67,8 +70,12 @@ export default function PlaylistsPanel() {
                             <SelectValue placeholder="Select Sort Order" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="asc">Ascending</SelectItem>
-                            <SelectItem value="desc">Descending</SelectItem>
+                            <SelectItem value="asc">
+                                {t("ascending")}
+                            </SelectItem>
+                            <SelectItem value="desc">
+                                {t("descending")}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

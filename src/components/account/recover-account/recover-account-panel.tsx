@@ -15,6 +15,7 @@ import { recoverAccountSchema } from "@/form-schemas/recover-account-schema";
 import { Input } from "@/components/ui/input";
 import { RecoverAccountUser } from "@/types/account-user";
 import { registerUser } from "@/backend/logic";
+import { useTranslation } from "react-i18next";
 
 interface RecoverAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -26,6 +27,8 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
     // ====================================================================================
     // Recover Account Form Functionality
     // ====================================================================================
+
+    const { t } = useTranslation();
 
     const recoverAccountForm = useForm<z.infer<typeof recoverAccountSchema>>({
         resolver: zodResolver(recoverAccountSchema),
@@ -74,7 +77,7 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
             />{" "}
             <div className="px-4">
                 <div className="flex justify-center items-center">
-                    <div className="text-md">Recover Account</div>
+                    <div className="text-md">{t("recoverAccount")}</div>
                 </div>
                 <Form {...recoverAccountForm}>
                     <form
@@ -86,10 +89,12 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                             name="secretKey"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Secret Key</FormLabel>
+                                    <FormLabel>{t("secretKey")}</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Enter your secret key"
+                                            placeholder={t(
+                                                "enterYourSecretKey"
+                                            )}
                                             autoCapitalize="off"
                                             autoComplete="off"
                                             autoCorrect="off"
@@ -107,10 +112,10 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                             name="username"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Username</FormLabel>
+                                    <FormLabel>{t("username")}</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Enter your username"
+                                            placeholder={t("enterYourUsername")}
                                             autoCapitalize="off"
                                             autoComplete="off"
                                             autoCorrect="off"
@@ -128,7 +133,7 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                             name="password"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>{t("password")}</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Enter your password"
@@ -150,10 +155,14 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                             name="confirmPassword"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormLabel>
+                                        {t("confirmPassword")}
+                                    </FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Confirm your password"
+                                            placeholder={t(
+                                                "confirmYourPassword"
+                                            )}
                                             type="password"
                                             autoCapitalize="off"
                                             autoComplete="off"
@@ -173,7 +182,7 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                                 className="mt-4 w-full"
                                 disabled={!isValid}
                             >
-                                Recover Account
+                                {t("recoverAccount")}
                             </Button>
                         </div>
                     </form>

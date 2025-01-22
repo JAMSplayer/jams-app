@@ -5,8 +5,10 @@ import { CableIcon, GlobeLockIcon, ZapOffIcon } from "lucide-react";
 import { Input } from "./ui/input";
 import { isValidPeerAddress } from "@/lib/utils/network";
 import Networks from "@/enums/networks";
+import { useTranslation } from "react-i18next";
 
 export default function DisconnectedPanel() {
+    const { t } = useTranslation();
     const [inputValue, setInputValue] = useState("");
 
     return (
@@ -15,7 +17,7 @@ export default function DisconnectedPanel() {
             <div className="flex flex-col items-center">
                 <ZapOffIcon size={50} />
                 <p className="mt-6 text-gray-700 text-lg font-medium sm:text-xl/8 text-center flex items-center gap-2">
-                    You are disconnected
+                    {t("youAreDisconnected")}
                 </p>
             </div>
 
@@ -24,7 +26,7 @@ export default function DisconnectedPanel() {
                 {/* Mainnet Section */}
                 <div className="flex-1 flex flex-col items-center p-4">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                        Mainnet
+                        {t("mainnet")}
                     </h3>
                     <Button
                         onClick={() => {
@@ -33,7 +35,7 @@ export default function DisconnectedPanel() {
                         }}
                         className="w-full max-w-sm"
                     >
-                        <span>Connect to Mainnet</span>
+                        <span>{t("connectToMainnet")}</span>
                         <GlobeLockIcon className="ml-2" />
                     </Button>
                 </div>
@@ -44,11 +46,11 @@ export default function DisconnectedPanel() {
                 {/* Testnet Section */}
                 <div className="flex-1 flex flex-col items-center p-4">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                        Testnet
+                        {t("testnet")}
                     </h3>
                     <Input
                         type="text"
-                        placeholder="Enter Testnet Peer Address"
+                        placeholder={t("enterTestnetPeerAddress")}
                         className="w-full max-w-sm px-4 py-2 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
@@ -64,7 +66,7 @@ export default function DisconnectedPanel() {
                         disabled={!isValidPeerAddress(inputValue)}
                         className="w-full max-w-sm mt-4"
                     >
-                        <span>Connect to Testnet</span>
+                        <span>{t("connectToTestnet")}</span>
                         <CableIcon className="ml-2" />
                     </Button>
                 </div>

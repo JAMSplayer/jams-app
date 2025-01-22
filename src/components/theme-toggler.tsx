@@ -3,8 +3,10 @@ import { useTheme } from "next-themes";
 import { Switch } from "@headlessui/react";
 import { useEffect, useState } from "react";
 import { load, Store } from "@tauri-apps/plugin-store";
+import { useTranslation } from "react-i18next";
 
 export function ThemeToggler() {
+    const { t } = useTranslation();
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [enabled, setEnabled] = useState(false); // Switch state
     const [isLoading, setIsLoading] = useState(true); // Loading state
@@ -89,7 +91,7 @@ export function ThemeToggler() {
             className={`${enabled ? "bg-secondary" : "bg-border"}
           group relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none`}
         >
-            <span className="sr-only">Use setting</span>
+            <span className="sr-only">{t("useSetting")}</span>
             <span className="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-5">
                 <span
                     aria-hidden="true"
