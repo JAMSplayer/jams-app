@@ -268,11 +268,13 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             </div>
 
             {/* Song Scroller */}
-            <SongScroller
-                songs={songs}
-                filterValue={filterValue}
-                sortOrder={sortOrder}
-            />
+            <div className="relative z-0">
+                <SongScroller
+                    songs={songs}
+                    filterValue={filterValue}
+                    sortOrder={sortOrder}
+                />
+            </div>
         </div>
     );
 };
