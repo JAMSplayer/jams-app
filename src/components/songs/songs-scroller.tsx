@@ -1,8 +1,14 @@
-import { useMemo } from "react";
-import { PlayIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { EditIcon, HeartIcon, PlayIcon, XIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { useAudioPlayer } from "../player/audio-provider";
 import { usePlayerStore } from "@/store/player-store";
+import { useTranslation } from "react-i18next";
+import { Playlist } from "@/types/playlists/playlist";
+import { useStorage } from "@/providers/storage-provider";
+import { AlertConfirmationModal } from "../alert-confirmation-modal";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -11,8 +17,32 @@ interface SongScrollerProps {
 }
 
 const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
+    const { t } = useTranslation();
+    const { store } = useStorage();
+    const navigate = useNavigate();
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
+
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+
+    useEffect(() => {
+        const loadPlaylists = async () => {
+            if (!store) {
+                console.error("Store is not initialized.");
+                return;
+            }
+
+            try {
+                const storedPlaylists: Playlist[] =
+                    (await store.get("playlists")) || [];
+                setPlaylists(storedPlaylists); // Store playlists in state
+            } catch (error) {
+                console.error("Failed to fetch playlists:", error);
+            }
+        };
+
+        loadPlaylists();
+    }, []); // This runs only once when the component mounts
 
     const handlePlaySong = (song: Song) => {
         setPlayerVisibility(true);
@@ -62,8 +92,98 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
         return sortSongs(filteredSongs, sortOrder);
     }, [songs, filterValue, sortOrder]);
 
+    // Find all the playlist titles for a song id
+    const findPlaylistsBySongId = (songId: string): string[] => {
+        if (!Array.isArray(playlists)) {
+            console.error("Playlists data is not in an array format.");
+            return [];
+        }
+
+        // Filter playlists that contain the song and map their titles
+        return playlists
+            .filter(
+                (playlist) =>
+                    playlist.songs &&
+                    playlist.songs.some((song) => song.id === songId)
+            )
+            .map((playlist) => playlist.title);
+    };
+
+    // delete confirmation modal ----------------------------------------------------------------
+
+    const [
+        isDeleteConfirmationModalVisible,
+        setDeleteConfirmationModalVisible,
+    ] = useState(false);
+
+    const [selectedSongId, setSelectedSongId] = useState<string | null>(null); // Track the song ID
+
+    const handleDeleteClick = (id: string) => {
+        setSelectedSongId(id); // Set the song ID
+        setDeleteConfirmationModalVisible(true); // Show the modal
+    };
+
+    const handleConfirm = async () => {
+        if (!store || !selectedSongId) {
+            console.error("Store is not initialized or no song ID provided.");
+            return;
+        }
+
+        try {
+            // Retrieve existing playlists from the store
+            const storedPlaylists: Playlist[] =
+                (await store.get("playlists")) || [];
+
+            // Ensure playlists is an array
+            if (!Array.isArray(storedPlaylists)) {
+                console.error(
+                    "Playlists are not in the expected array format."
+                );
+                return;
+            }
+
+            // Remove the song with the selected ID from all playlists
+            const updatedPlaylists = storedPlaylists.map((playlist) => ({
+                ...playlist,
+                songs:
+                    playlist.songs?.filter(
+                        (song) => song.id !== selectedSongId
+                    ) || [],
+            }));
+
+            // Save the updated playlists back to the store
+            await store.set("playlists", updatedPlaylists);
+            await store.save();
+
+            toast("Song Deleted", {
+                description: "Your song has been deleted from all playlists.",
+            });
+        } catch (error) {
+            console.error("Failed to delete the song:", error);
+        }
+
+        setDeleteConfirmationModalVisible(false);
+        setSelectedSongId(null); // Reset the selected song ID
+    };
+
+    const handleCancel = () => {
+        setDeleteConfirmationModalVisible(false);
+        setSelectedSongId(null); // Reset the selected song ID
+    };
+
+    // end delete confirmation modal ----------------------------------------------------------------
+
     return (
         <div className="p-4 flex flex-col md:flex-row">
+            {isDeleteConfirmationModalVisible && (
+                <AlertConfirmationModal
+                    title="Confirm Deletion"
+                    description={`Are you sure you want to delete this song from all playlists?\n\nYou can manually add it again via the 'Add Song' page.`}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
+
             <div className="flex-grow md:w-2/3 space-y-4 pb-16 overflow-y-auto">
                 {filteredAndSortedSongs.length > 0 ? (
                     filteredAndSortedSongs.map((song) => (
@@ -73,7 +193,7 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                             onClick={() => handlePlaySong(song)}
                         >
                             {/* Album art */}
-                            <div className="relative flex-shrink-0 w-20 md:w-24 bg-background rounded-l-lg overflow-hidden">
+                            <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.artUrl ? (
                                     <img
                                         src={song.artUrl}
@@ -90,28 +210,139 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                     </div>
                                 </div>
                             </div>
-
                             {/* Song details */}
-                            <div className="flex-grow p-4 flex flex-col justify-center">
-                                <h2 className="text-foreground font-semibold text-lg truncate">
-                                    {song.title}
-                                </h2>
-                                <p className="text-foreground text-sm truncate">
-                                    {song.description}
-                                </p>
-                                <div className="text-foreground text-xs mt-1">
-                                    <small>{song.artist}</small> -{" "}
-                                    <small>
-                                        {new Date(
-                                            song.dateCreated
-                                        ).toLocaleDateString()}
-                                    </small>
+                            <div className="grid grid-cols-1 md:grid-cols-4 w-full">
+                                {/* First column (left-aligned) */}
+                                <div className="flex justify-start p-2">
+                                    <div className="flex flex-col justify-start">
+                                        <h2 className="text-foreground font-semibold text-lg truncate">
+                                            {song.title}
+                                        </h2>
+                                        <p className="text-foreground text-sm truncate">
+                                            {song.artist}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Second column (left-aligned) */}
+                                <div className="flex justify-start p-2">
+                                    <div className="flex flex-col justify-start">
+                                        <h2 className="text-foreground font-semibold truncate">
+                                            <p>
+                                                <small>
+                                                    Playlists:{" "}
+                                                    {findPlaylistsBySongId(
+                                                        song.id
+                                                    ).length > 0
+                                                        ? findPlaylistsBySongId(
+                                                              song.id
+                                                          ).join(", ")
+                                                        : "Not found"}
+                                                </small>
+                                            </p>
+                                            <p>
+                                                <small>
+                                                    Description:{" "}
+                                                    {song.description}
+                                                </small>
+                                            </p>
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                {/* Third column (left-aligned) */}
+                                <div className="flex justify-start p-2">
+                                    <div className="flex flex-col justify-start">
+                                        <h2 className="text-foreground font-semibold truncate">
+                                            <p>
+                                                {song.tags &&
+                                                    song.tags.length > 0 && (
+                                                        <small>
+                                                            Tags:{" "}
+                                                            {song.tags.join(
+                                                                ", "
+                                                            )}
+                                                        </small>
+                                                    )}
+                                            </p>
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                {/* Fourth column (center-aligned vertically) */}
+                                <div className="flex justify-start items-center p-4 hidden md:block">
+                                    <div className="flex flex-col">
+                                        {/* Buttons */}
+                                        <div className="flex space-x-4 pt-2 sm:pt-0">
+                                            {/* Favorite button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                }}
+                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                            >
+                                                <HeartIcon className="w-4 h-4" />
+                                            </button>
+                                            {/* Edit button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                }}
+                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                            >
+                                                <EditIcon className="w-4 h-4" />
+                                            </button>
+                                            {/* Delete button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(song.id); // Pass song.id
+                                                }}
+                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive dark:hover:text-white hover:text-background transition-colors duration-200 focus:outline-none"
+                                            >
+                                                <XIcon className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col md:hidden">
+                                {/* Buttons */}
+                                <div className="flex flex-col space-y-4 p-2">
+                                    {/* Favorite button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                    >
+                                        <HeartIcon className="w-4 h-4" />
+                                    </button>
+                                    {/* Edit button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                    >
+                                        <EditIcon className="w-4 h-4" />
+                                    </button>
+                                    {/* Delete button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteClick(song.id); // Pass song.id
+                                        }}
+                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background dark:hover:text-white transition-colors duration-200 focus:outline-none"
+                                    >
+                                        <XIcon className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     ))
                 ) : (
-                    <p>No songs found.</p>
+                    <p>{t("noSongsFound")}</p>
                 )}
             </div>
         </div>

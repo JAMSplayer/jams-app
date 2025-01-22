@@ -8,8 +8,11 @@ import { toast } from "sonner";
 import SubDividerLayout from "@/enums/sub-divider-layout";
 import SubDivider from "./sub-divider";
 import { useStorage } from "@/providers/storage-provider";
+import { useTranslation } from "react-i18next";
 
 export default function StorageSettings() {
+    const { t } = useTranslation();
+
     const { store } = useStorage();
     const [downloadFolder, setDownloadFolder] = useState("");
     const [isLoading, setIsLoading] = useState<boolean | null>(null);
@@ -60,7 +63,7 @@ export default function StorageSettings() {
             <SubDivider title="Download" layout={SubDividerLayout.TOP} />
             {isLoading !== null && !isLoading && (
                 <div className="p-4">
-                    <Label htmlFor="location">Download Location</Label>
+                    <Label htmlFor="location">{t("downloadLocation")}</Label>
                     <div className="flex">
                         <button
                             type="button"
@@ -70,7 +73,7 @@ export default function StorageSettings() {
                             className="hover:bg-accent hover:text-accent-foreground  py-2 px-4 border border-input inline-flex items-center justify-center whitespace-nowrap rounded-l-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                         >
                             <FolderSearchIcon size={20} className="mr-2" />
-                            Select
+                            {t("select")}
                         </button>
 
                         {/* Right-side file input */}
@@ -78,7 +81,7 @@ export default function StorageSettings() {
                             id="input"
                             type="text"
                             className="block w-full rounded-r-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-50"
-                            placeholder="select download folder"
+                            placeholder={t("selectDownloadFolder")}
                             value={downloadFolder}
                             readOnly
                         />
@@ -95,7 +98,7 @@ export default function StorageSettings() {
                             }}
                             className="mr-2"
                         >
-                            Default
+                            {t("default")}
                         </Button>
 
                         <Button
@@ -107,14 +110,15 @@ export default function StorageSettings() {
                                         value: downloadFolder,
                                     });
                                     await store.save();
-                                    toast("Download Folder Updated", {
-                                        description:
-                                            "Your download folder location has been updated.",
+                                    toast(t("downloadFolderUpdated"), {
+                                        description: t(
+                                            "yourDownloadFolderLocationHasBeenUpdated"
+                                        ),
                                     });
                                 }
                             }}
                         >
-                            Save
+                            {t("save")}
                         </Button>
                     </div>
                 </div>

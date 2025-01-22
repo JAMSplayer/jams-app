@@ -7,6 +7,7 @@ import {
     Music,
     List,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Submenu = {
     href: string;
@@ -28,69 +29,70 @@ type Group = {
 };
 
 export function getMenuList(_pathname: string): Group[] {
+    const { t } = useTranslation();
     return [
         {
             groupLabel: "",
             menus: [
                 {
                     href: "/",
-                    label: "Dashboard",
+                    label: t("dashboard"),
                     icon: LayoutGrid,
                     submenus: [],
                 },
             ],
         },
         {
-            groupLabel: "Music",
+            groupLabel: t("music"),
             menus: [
                 {
                     href: "",
-                    label: "Songs",
+                    label: t("songs"),
                     icon: Music,
                     submenus: [
                         {
                             href: "/songs",
-                            label: "All Songs",
+                            label: t("allSongs"),
                         },
                         {
                             href: "/upload-songs",
-                            label: "Upload Songs",
+                            label: t("uploadSongs"),
                         },
                     ],
                 },
                 {
                     href: "",
-                    label: "Playlists",
+                    label: t("playlists"),
                     icon: List,
                     submenus: [
                         {
                             href: "/playlists",
-                            label: "All Playlists",
+                            label: t("allPlaylists"),
                         },
                         {
                             href: "/create-playlist",
-                            label: "Create Playlist",
+                            label: t("createPlaylist"),
                         },
                     ],
                 },
                 {
                     href: "/favorites",
-                    label: "Favorites",
+                    label: t("favorites"),
                     icon: Bookmark,
                 },
                 {
                     href: "/tags",
-                    label: "Tags",
+                    label: t("tags"),
                     icon: Tag,
                 },
             ],
         },
         {
-            groupLabel: "Other",
+            groupLabel: t("other"),
             menus: [
                 {
                     href: "/settings/status",
-                    label: "Settings",
+                    label: t("settings"),
                     icon: Settings,
                 },
             ],

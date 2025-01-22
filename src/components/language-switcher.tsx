@@ -28,6 +28,7 @@ import {
 import { toast } from "sonner";
 import { useLanguage } from "@/providers/language-provider";
 import { languageOptions } from "@/enums/languages";
+import { useTranslation } from "react-i18next";
 
 const FormSchema = z.object({
     language: z.string({
@@ -36,6 +37,7 @@ const FormSchema = z.object({
 });
 
 export default function LanguageSwitcher() {
+    const { t } = useTranslation();
     const { language, setLanguage } = useLanguage();
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -47,8 +49,8 @@ export default function LanguageSwitcher() {
         const selectedLanguage = data.language;
         if (selectedLanguage) {
             setLanguage(selectedLanguage); // Update the language using the context provider's function
-            toast("Language Updated", {
-                description: "Your selected language has been updated.",
+            toast(t("languageUpdated"), {
+                description: t("yourSelectedLanguageHasBeenUpdated"),
             });
         }
     }
@@ -62,7 +64,7 @@ export default function LanguageSwitcher() {
                         name="language"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel>Language</FormLabel>
+                                <FormLabel>{t("language")}</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <FormControl>
@@ -89,12 +91,14 @@ export default function LanguageSwitcher() {
                                     <PopoverContent className="w-[200px] p-0">
                                         <Command>
                                             <CommandInput
-                                                placeholder="Search language..."
+                                                placeholder={t(
+                                                    "searchLanguage"
+                                                )}
                                                 className="h-9"
                                             />
                                             <CommandList>
                                                 <CommandEmpty>
-                                                    No language found.
+                                                    {t("noLanguageFound")}.
                                                 </CommandEmpty>
                                                 <CommandGroup>
                                                     {languageOptions.map(
@@ -135,7 +139,7 @@ export default function LanguageSwitcher() {
                         )}
                     />
                     <Button type="submit" className="self-end">
-                        Submit
+                        {t("submit")}
                     </Button>
                 </div>
             </form>
