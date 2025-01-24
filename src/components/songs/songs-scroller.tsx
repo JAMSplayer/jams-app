@@ -9,6 +9,7 @@ import { useStorage } from "@/providers/storage-provider";
 import { AlertConfirmationModal } from "../alert-confirmation-modal";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import Portal from "../portal";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -176,12 +177,14 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
     return (
         <div className="p-4 flex flex-col md:flex-row">
             {isDeleteConfirmationModalVisible && (
-                <AlertConfirmationModal
-                    title="Confirm Deletion"
-                    description={`Are you sure you want to delete this song from all playlists?\n\nYou can manually add it again via the 'Add Song' page.`}
-                    onConfirm={handleConfirm}
-                    onCancel={handleCancel}
-                />
+                <Portal>
+                    <AlertConfirmationModal
+                        title="Confirm Deletion"
+                        description={`Are you sure you want to delete this song from all playlists?\n\nYou can manually add it again via the 'Add Song' page.`}
+                        onConfirm={handleConfirm}
+                        onCancel={handleCancel}
+                    />
+                </Portal>
             )}
 
             <div className="flex-grow md:w-2/3 space-y-4 pb-16 overflow-y-auto">
