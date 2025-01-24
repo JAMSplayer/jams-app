@@ -21,6 +21,7 @@ import RecentAccounts from "./recent-accounts";
 import { signIn as autonomiSignIn } from "@/backend/autonomi";
 import { registeredAccounts } from "@/backend/logic";
 import { SimpleAccountUser } from "@/types/account-user";
+import { useTranslation } from "react-i18next";
 
 interface SignInPanelProps {
     onCreateAccountClicked: () => void;
@@ -31,6 +32,8 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
     onCreateAccountClicked,
     onRecoverAccountClicked,
 }) => {
+    const { t } = useTranslation();
+
     // ====================================================================================
     // Sign In Form Functionality
     // ====================================================================================
@@ -63,8 +66,8 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
 
         // Check if foundAccount exists instead of accountExists
         if (!foundAccount) {
-            toast("Sign In Warning", {
-                description: "This username does not exist.",
+            toast(t("signInWarning"), {
+                description: t("thisUsernameDoesNotExist"),
             });
         } else {
             // Set the username field in the form to the selected recent account's username
@@ -121,8 +124,8 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
         );
 
         if (!usernameExists) {
-            toast("Register Warning", {
-                description: "This username does not exist.",
+            toast(t("registerWarning"), {
+                description: t("thisUsernameDoesNotExist"),
             });
         } else {
             autonomiSignIn(values.username, values.password);
@@ -141,10 +144,14 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
         <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="flex w-full">
                 <TabsTrigger value="sign-in" className="flex-1 text-center">
-                    <span className="block w-full text-center">Sign In</span>
+                    <span className="block w-full text-center">
+                        {t("signIn")}
+                    </span>
                 </TabsTrigger>
                 <TabsTrigger value="recent" className="flex-1 text-center">
-                    <span className="block w-full text-center">Recent</span>
+                    <span className="block w-full text-center">
+                        {t("recent")}
+                    </span>
                 </TabsTrigger>
             </TabsList>
 
@@ -157,10 +164,12 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                                 name="username"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Username</FormLabel>
+                                        <FormLabel>{t("username")}</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="Enter your username"
+                                                placeholder={t(
+                                                    "enterYourUsername"
+                                                )}
                                                 autoCapitalize="off"
                                                 autoComplete="off"
                                                 autoCorrect="off"
@@ -196,10 +205,12 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>{t("password")}</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="Enter your password"
+                                                placeholder={t(
+                                                    "enterYourPassword"
+                                                )}
                                                 type="password"
                                                 autoCapitalize="off"
                                                 autoComplete="off"
@@ -217,7 +228,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                                 className="mt-4 w-full"
                                 disabled={!formState.isValid}
                             >
-                                Sign In
+                                {t("signIn")}
                             </Button>
                         </form>
                     </Form>
@@ -225,7 +236,9 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                     {/* Divider */}
                     <div className="flex items-center justify-center mt-4">
                         <div className="w-full border-t border-gray-300"></div>
-                        <span className="px-3 text-sm text-gray-500">or</span>
+                        <span className="px-3 text-sm text-gray-500">
+                            {t("or")}
+                        </span>
                         <div className="w-full border-t border-gray-300"></div>
                     </div>
 
@@ -238,7 +251,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                                 <UserRoundPlusIcon />
                             </div>
                             <span className="uppercase text-center">
-                                Create Account
+                                {t("createAccount")}
                             </span>
                         </Button>
                     </div>
@@ -248,7 +261,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                             className="text-sm font-medium text-primary hover:underline hover:cursor-pointer"
                             onClick={handleRecoverAccountClicked}
                         >
-                            Recover Existing Account
+                            {t("recoverExistingAccount")}
                         </a>
                     </div>
                 </div>

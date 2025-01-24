@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
 import { formatBytes } from "@/lib/utils/formatting";
+import { useTranslation } from "react-i18next";
 
 interface MultipleFilePanelProps {
     onBack: () => void;
@@ -20,6 +21,7 @@ export default function MultipleFilePanel({
     onBack,
     fileDetails,
 }: MultipleFilePanelProps) {
+    const { t } = useTranslation();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [minimizedStates, setMinimizedStates] = useState(
         fileDetails.map(() => false) // Initialize all as not minimized
@@ -81,7 +83,7 @@ export default function MultipleFilePanel({
                     </div>
                 )}
                 <Button size={"sm"} className="mr-3">
-                    Upload All <UploadIcon />
+                    {t("uploadAll")} <UploadIcon />
                 </Button>
             </div>
 
@@ -92,12 +94,12 @@ export default function MultipleFilePanel({
                         isMinimized ? "rounded-lg" : "rounded-t-lg"
                     } border border-secondary flex justify-between items-center`}
                 >
-                    <h1 className="text-lg font-bold">Information</h1>
+                    <h1 className="text-lg font-bold">{t("information")}</h1>
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={toggleMinimize}
-                        aria-label={isMinimized ? "Expand" : "Minimize"}
+                        aria-label={isMinimized ? t("expand") : t("minimize")}
                     >
                         {isMinimized ? (
                             <ChevronDownIcon className="w-5 h-5" />
@@ -110,17 +112,18 @@ export default function MultipleFilePanel({
                     <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
                         {fileDetails[currentIndex].name && (
                             <p className="text-sm text-gray-500 mb-1">
-                                Name: {fileDetails[currentIndex].name}
+                                {t("name")}: {fileDetails[currentIndex].name}
                             </p>
                         )}
                         {fileDetails[currentIndex].location && (
                             <p className="text-sm text-gray-500 mb-1">
-                                Location: {fileDetails[currentIndex].location}
+                                {t("location")}:{" "}
+                                {fileDetails[currentIndex].location}
                             </p>
                         )}
                         {fileDetails[currentIndex].size && (
                             <p className="text-sm text-gray-500 mb-1">
-                                Size:{" "}
+                                {t("size")}:{" "}
                                 {fileDetails.length > 0 &&
                                     fileDetails[currentIndex]?.size !== null &&
                                     fileDetails[currentIndex]?.size !==
@@ -130,7 +133,8 @@ export default function MultipleFilePanel({
                         )}
                         {fileDetails[currentIndex].extension && (
                             <p className="text-sm text-gray-500">
-                                Extension: {fileDetails[currentIndex].extension}
+                                {t("extension")}:{" "}
+                                {fileDetails[currentIndex].extension}
                             </p>
                         )}
                     </div>
@@ -142,10 +146,12 @@ export default function MultipleFilePanel({
                 <div
                     className={`bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center`}
                 >
-                    <h1 className="text-lg font-bold">Customize</h1>
+                    <h1 className="text-lg font-bold">{t("customize")}</h1>
                 </div>
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                    <p className="text-sm text-gray-500 mb-1">Coming Soon</p>
+                    <p className="text-sm text-gray-500 mb-1">
+                        {t("comingSoon")}
+                    </p>
                 </div>
             </div>
         </div>

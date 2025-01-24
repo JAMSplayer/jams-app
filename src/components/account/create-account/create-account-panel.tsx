@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { RegisterAccountUser, SimpleAccountUser } from "@/types/account-user";
 import { registerUser } from "@/backend/logic";
+import { useTranslation } from "react-i18next";
 
 interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -27,6 +28,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     // ====================================================================================
     // Create Account Form Functionality
     // ====================================================================================
+    const { t } = useTranslation();
 
     const createAccountForm = useForm<z.infer<typeof createAccountSchema>>({
         resolver: zodResolver(createAccountSchema),
@@ -74,7 +76,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
         );
 
         if (foundAccount) {
-            setUsernameAlreadyExistsError("This username already exists");
+            setUsernameAlreadyExistsError(t("thisUsernameAlreadyExists"));
         } else {
             setUsernameAlreadyExistsError(null);
         }
@@ -93,7 +95,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
             />{" "}
             <div className="px-4">
                 <div className="flex justify-center items-center">
-                    <div className="text-md">Create Account</div>
+                    <div className="text-md">{t("createAccount")}</div>
                 </div>
                 <Form {...createAccountForm}>
                     <form
@@ -105,11 +107,13 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                             name="username"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Username</FormLabel>
+                                    <FormLabel>{t("username")}</FormLabel>
                                     <>
                                         <FormControl>
                                             <Input
-                                                placeholder="Enter your username"
+                                                placeholder={t(
+                                                    "enterYourUsername"
+                                                )}
                                                 autoCapitalize="off"
                                                 autoComplete="off"
                                                 autoCorrect="off"
@@ -138,10 +142,10 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                             name="password"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>{t("password")}</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Enter your password"
+                                            placeholder={t("enterYourPassword")}
                                             type="password"
                                             autoCapitalize="off"
                                             autoComplete="off"
@@ -159,11 +163,15 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                             name="confirmPassword"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormLabel>
+                                        {t("confirmPassword")}
+                                    </FormLabel>
                                     <>
                                         <FormControl>
                                             <Input
-                                                placeholder="Confirm your password"
+                                                placeholder={t(
+                                                    "confirmYourPassword"
+                                                )}
                                                 type="password"
                                                 autoCapitalize="off"
                                                 autoComplete="off"
@@ -183,7 +191,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                 className="mt-4 w-full"
                                 disabled={!isValid}
                             >
-                                Create Account
+                                {t("createAccount")}
                             </Button>
                         </div>
                     </form>
