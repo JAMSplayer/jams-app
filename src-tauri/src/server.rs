@@ -5,7 +5,7 @@ use tauri::Manager;
 use warp::{http::Response, Filter};
 
 fn autonomi(path: String) -> Result<RegisterAddress, String> {
-    // e.g. 08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962823aacdc081a17136c4e09f82a29ac50dba22dbc898a41b5d68d4971dc9b62ad5d82ef0e5f9d7b2224eb285497489d4a__BegBlag.mp3
+    // e.g. 08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962__BegBlag.mp3
     let filename = path.get(162..).ok_or(String::from("Error parsing URL"))?;
     let address = path.get(..160).ok_or(String::from("Error parsing URL"))?;
     println!("{address}");
