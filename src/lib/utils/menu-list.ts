@@ -13,6 +13,7 @@ type Submenu = {
     href: string;
     label: string;
     active?: boolean;
+    requiresAuth?: boolean;
 };
 
 type Menu = {
@@ -21,6 +22,7 @@ type Menu = {
     active?: boolean;
     icon: LucideIcon;
     submenus?: Submenu[];
+    requiresAuth?: boolean;
 };
 
 type Group = {
@@ -57,6 +59,7 @@ export function getMenuList(_pathname: string): Group[] {
                         {
                             href: "/upload-songs",
                             label: t("uploadSongs"),
+                            requiresAuth: true,
                         },
                     ],
                 },
