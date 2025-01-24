@@ -1,6 +1,6 @@
 [package]
 name = "jams-desktop"
-version = "0.1.1"
+version = "0.1.2"
 description = "JAMS Desktop"
 authors = ["Nigel", "cobite", "loziniak", "Nick Virag"]
 license = "UNLICENSED"
