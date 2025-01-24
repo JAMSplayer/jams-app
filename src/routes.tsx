@@ -13,6 +13,7 @@ import UploadSongs from "./pages/upload-songs";
 import Playlists from "./pages/playlists";
 import CreatePlaylist from "./pages/create-playlist";
 import EditPlaylist from "./pages/edit-playlist";
+import Favorites from "./pages/favorites";
 
 const AppRoutes = () => {
     return (
@@ -23,6 +24,7 @@ const AppRoutes = () => {
             <Route path="/playlists" element={<Playlists />} />
             <Route path="/create-playlist" element={<CreatePlaylist />} />
             <Route path="/edit-playlist" element={<EditPlaylist />} />
+            <Route path="/favorites" element={<Favorites />} />
             {/* <Route path="*" element={<NotFound />} /> */}
             <Route path="/settings/*" element={<Settings />}>
                 <Route path="status" element={<StatusSettings />} />
