@@ -74,7 +74,7 @@ export function Menu({ isOpen }: MenuProps) {
                                             label,
                                             icon: Icon,
                                             submenus,
-                                            requiresAuth, // Check this property
+//                                            requiresAuth, // Check this property
                                         },
                                         index
                                     ) =>
