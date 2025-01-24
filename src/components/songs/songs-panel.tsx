@@ -41,6 +41,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
         const fetchedSongs: Song[] = [
             {
                 id: "1",
+                xorname: "123",
                 title: "Song 1",
                 description: "Description for 1",
                 artist: "Artist 1",
@@ -51,6 +52,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "2",
+                xorname: "123",
                 title: "Song 2",
                 description: "Description for 2",
                 artist: "Artist 2",
@@ -61,6 +63,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "3",
+                xorname: "123",
                 title: "Song 3",
                 description: "Description for 3",
                 artist: "Artist 3",
@@ -70,6 +73,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "4",
+                xorname: "123",
                 title: "Song 4",
                 description: "Description for 4",
                 artist: "Artist 4",
@@ -79,6 +83,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "5",
+                xorname: "123",
                 title: "Song 5",
                 description: "Description for 5",
                 artist: "Artist 5",
@@ -88,6 +93,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "6",
+                xorname: "123",
                 title: "Song 6",
                 description: "Description for 6",
                 artist: "Artist 6",
@@ -97,6 +103,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "7",
+                xorname: "123",
                 title: "Song 7",
                 description: "Description for 7",
                 artist: "Artist 7",
@@ -106,6 +113,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "8",
+                xorname: "123",
                 title: "Song 8",
                 description: "Description for 8",
                 artist: "Artist 8",
@@ -115,6 +123,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "9",
+                xorname: "123",
                 title: "Song 9",
                 description: "Description for 9",
                 artist: "Artist 9",
@@ -124,6 +133,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "10",
+                xorname: "123",
                 title: "Song 10",
                 description: "Description for 10",
                 artist: "Artist 10",
@@ -133,6 +143,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "11",
+                xorname: "123",
                 title: "Song 11",
                 description: "Description for 11",
                 artist: "Artist 11",
@@ -142,6 +153,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "12",
+                xorname: "123",
                 title: "Song 12",
                 description: "Description for 12",
                 artist: "Artist 6",
@@ -151,6 +163,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "13",
+                xorname: "123",
                 title: "Song 13",
                 description: "Description for 13",
                 artist: "Artist 13",
@@ -160,6 +173,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "14",
+                xorname: "123",
                 title: "Song 14",
                 description: "Description for 14",
                 artist: "Artist 13",
@@ -169,6 +183,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "15",
+                xorname: "123",
                 title: "Song 15",
                 description: "Description for 15",
                 artist: "Artist 13",
@@ -178,6 +193,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "16",
+                xorname: "123",
                 title: "Song 16",
                 description: "Description for 16",
                 artist: "Artist 13",
@@ -187,6 +203,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "17",
+                xorname: "123",
                 title: "Song 17",
                 description: "Description for 17",
                 artist: "Artist 13",
@@ -196,6 +213,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "18",
+                xorname: "123",
                 title: "Song 18",
                 description: "Description for 18",
                 artist: "Artist 13",
@@ -205,6 +223,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "19",
+                xorname: "123",
                 title: "Song 19",
                 description: "Description for 19",
                 artist: "Artist 13",
@@ -214,6 +233,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             },
             {
                 id: "20",
+                xorname: "123",
                 title: "Song 20",
                 description: "Description for 20",
                 artist: "Artist 13",

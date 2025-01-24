@@ -61,6 +61,10 @@ export function getMenuList(_pathname: string): Group[] {
                             label: t("uploadSongs"),
                             requiresAuth: true,
                         },
+                        {
+                            href: "/add-network-song",
+                            label: "Add Network Song",
+                        },
                     ],
                 },
                 {

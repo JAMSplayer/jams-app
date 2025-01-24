@@ -69,13 +69,7 @@ export function Menu({ isOpen }: MenuProps) {
                                 )}
                                 {filteredMenus.map(
                                     (
-                                        {
-                                            href,
-                                            label,
-                                            icon: Icon,
-                                            submenus,
-                                            requiresAuth, // Check this property
-                                        },
+                                        { href, label, icon: Icon, submenus },
                                         index
                                     ) =>
                                         !submenus || submenus.length === 0 ? (

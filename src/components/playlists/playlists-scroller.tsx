@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { PlayIcon, XIcon } from "lucide-react";
+import { EditIcon, PlayIcon, XIcon } from "lucide-react";
 import { Playlist } from "@/types/playlists/playlist";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -136,7 +136,8 @@ const PlaylistScroller = ({
                                     {playlist.songs ? (
                                         <>
                                             <small>
-                                                {t("songs")}: {playlist.songs.length}
+                                                {t("songs")}:{" "}
+                                                {playlist.songs.length}
                                             </small>
                                             {" - "}
                                         </>
