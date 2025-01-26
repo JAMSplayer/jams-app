@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { editPlaylistSchema } from "@/form-schemas/edit-playlist-schema";
 import { useStorage } from "@/providers/storage-provider";
 import { Song } from "@/types/songs/song";
+import { PlaylistSelectionModal } from "@/components/ui/playlist-selection-modal";
 
 type FormSchema = z.infer<typeof editPlaylistSchema>;
 
@@ -41,6 +42,13 @@ export default function NetworkSongMetadataPanel({
     });
 
     const { store } = useStorage();
+
+    const [song, setSong] = useState<Song | undefined>(undefined);
+
+    const [
+        isPlaylistSelectionModalVisible,
+        setIsPlaylistSelectionModalVisible,
+    ] = useState(false);
 
     if (!id) {
         return <p>No Song Network ID provided.</p>;
@@ -255,14 +263,18 @@ export default function NetworkSongMetadataPanel({
                 location: "test,",
             };
 
+            setSong(updatedSong);
+
             // find which playlist to update to add new song to.
             // await store.set("playlists", updatedPlaylists);
             // await store.save();
 
-            toast("Song Saved Locally", {
-                description:
-                    "Your selected network song has been successfully saved to the ? playlist.",
-            });
+            setIsPlaylistSelectionModalVisible(true);
+
+            // toast("Song Saved Locally", {
+            //     description:
+            //         "Your selected network song has been successfully saved to the ? playlist.",
+            // });
         } catch (ex) {
             console.error("The save operation could not be completed:", ex);
         }
@@ -274,6 +286,21 @@ export default function NetworkSongMetadataPanel({
 
     return (
         <div className="pb-16">
+            {isPlaylistSelectionModalVisible && song && (
+                <PlaylistSelectionModal
+                    onConfirm={(playlistId) => {
+                        console.log(
+                            "Song added to playlist with ID:",
+                            playlistId
+                        );
+                        setIsPlaylistSelectionModalVisible(false); // Close modal after confirming
+                        onReturn();
+                    }}
+                    onCancel={() => setIsPlaylistSelectionModalVisible(false)} // Close modal on cancel
+                    song={song}
+                />
+            )}
+
             {/* Header */}
             <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
