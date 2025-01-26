@@ -17,6 +17,8 @@ export default function Dashboard() {
                         title: "BegBlag",
                         artist: "BegBlag",
                         dateCreated: new Date(),
+                        networkID: "123",
+                        picture: undefined,
                     }}
                 />
             </div>

@@ -8,4 +8,6 @@ export type Song = {
     dateUpdated?: Date;
     location: string;
     tags?: string[];
+    networkID: string;
+    picture: string | undefined;
 };
