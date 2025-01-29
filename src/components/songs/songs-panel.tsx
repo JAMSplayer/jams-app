@@ -273,6 +273,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     songs={songs}
                     filterValue={filterValue}
                     sortOrder={sortOrder}
+                    variant="default"
                 />
             </div>
         </div>

@@ -15,9 +15,15 @@ interface SongScrollerProps {
     songs: Song[];
     filterValue: string;
     sortOrder: "asc" | "desc";
+    variant: string;
 }
 
-const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
+const SongScroller = ({
+    songs,
+    filterValue,
+    sortOrder,
+    variant,
+}: SongScrollerProps) => {
     const { t } = useTranslation();
     const { store } = useStorage();
 //    const navigate = useNavigate();
@@ -174,6 +180,61 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
 
     // end delete confirmation modal ----------------------------------------------------------------
 
+    // start favorite handler ----------------------------------------------------------------
+
+    const [favoriteSongs, setFavoriteSongs] = useState<string[]>([]);
+
+    useEffect(() => {
+        const loadFavoriteSongs = async () => {
+            if (!store) {
+                console.error("Store is not initialized.");
+                return;
+            }
+
+            try {
+                const storedFavoriteSongs: string[] =
+                    (await store.get("favorites")) || [];
+                setFavoriteSongs(storedFavoriteSongs); // Store favorite songs in state
+            } catch (error) {
+                console.error("Failed to fetch favorite songs:", error);
+            }
+        };
+
+        loadFavoriteSongs();
+    }, []); // This runs only once when the component mounts
+
+    const handleFavoriteClicked = async (id: string) => {
+        if (!store) {
+            console.error("Store is not initialized.");
+            return;
+        }
+
+        try {
+            // toggle the song in the favoriteSongs array
+            let updatedFavorites: string[];
+
+            if (favoriteSongs.includes(id)) {
+                // if the song is already a favorite, remove it
+                updatedFavorites = favoriteSongs.filter(
+                    (songId) => songId !== id
+                );
+            } else {
+                // if the song is not a favorite, add it
+                updatedFavorites = [...favoriteSongs, id];
+            }
+
+            // Update state and save to persistent storage
+            setFavoriteSongs(updatedFavorites);
+            await store.set("favorites", updatedFavorites);
+            await store.save();
+            console.log(favoriteSongs);
+        } catch (error) {
+            console.error("Failed to update favorite songs:", error);
+        }
+    };
+
+    // end favorite handler ----------------------------------------------------------------
+
     return (
         <div className="p-4 flex flex-col md:flex-row">
             {isDeleteConfirmationModalVisible && (
@@ -281,30 +342,65 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    handleFavoriteClicked(
+                                                        song.id
+                                                    );
                                                 }}
-                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                                className={`p-2 rounded-full transition-colors duration-200 focus:outline-none "bg-background border border-primary text-primary hover:bg-primary hover:text-background"
+                                                }`}
                                             >
-                                                <HeartIcon className="w-4 h-4" />
+                                                <HeartIcon
+                                                    className={`w-4 h-4 transition-colors duration-200 hover:fill-red-500 hover:stroke-red-500 ${
+                                                        favoriteSongs.includes(
+                                                            song.id
+                                                        )
+                                                            ? "text-red-500"
+                                                            : "text-primary"
+                                                    }`}
+                                                    fill={
+                                                        favoriteSongs.includes(
+                                                            song.id
+                                                        )
+                                                            ? "red"
+                                                            : "none"
+                                                    }
+                                                    stroke={
+                                                        favoriteSongs.includes(
+                                                            song.id
+                                                        )
+                                                            ? "red"
+                                                            : "currentColor"
+                                                    }
+                                                />
                                             </button>
                                             {/* Edit button */}
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    // TODO if song id exists in favorites store show favorited
+                                                    // if song id exists in favorites store this button will remove it
+                                                    // if song id does not exist in favorites store, this button will add it
                                                 }}
                                                 className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
                                             >
                                                 <EditIcon className="w-4 h-4" />
                                             </button>
                                             {/* Delete button */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteClick(song.id); // Pass song.id
-                                                }}
-                                                className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive dark:hover:text-white hover:text-background transition-colors duration-200 focus:outline-none"
-                                            >
-                                                <XIcon className="w-4 h-4" />
-                                            </button>
+                                            {variant == "favorites" ? (
+                                                <></>
+                                            ) : (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteClick(
+                                                            song.id
+                                                        ); // Pass song.id
+                                                    }}
+                                                    className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive dark:hover:text-white hover:text-background transition-colors duration-200 focus:outline-none"
+                                                >
+                                                    <XIcon className="w-4 h-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -316,10 +412,28 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            handleFavoriteClicked(song.id);
                                         }}
-                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
+                                        className={`p-2 rounded-full transition-colors duration-200 focus:outline-none "bg-background border border-primary text-primary hover:bg-primary hover:text-background"
+                                                }`}
                                     >
-                                        <HeartIcon className="w-4 h-4" />
+                                        <HeartIcon
+                                            className={`w-4 h-4 transition-colors duration-200 hover:fill-red-500 hover:stroke-red-500 ${
+                                                favoriteSongs.includes(song.id)
+                                                    ? "text-red-500"
+                                                    : "text-primary"
+                                            }`}
+                                            fill={
+                                                favoriteSongs.includes(song.id)
+                                                    ? "red"
+                                                    : "none"
+                                            }
+                                            stroke={
+                                                favoriteSongs.includes(song.id)
+                                                    ? "red"
+                                                    : "currentColor"
+                                            }
+                                        />
                                     </button>
                                     {/* Edit button */}
                                     <button
@@ -331,15 +445,19 @@ const SongScroller = ({ songs, filterValue, sortOrder }: SongScrollerProps) => {
                                         <EditIcon className="w-4 h-4" />
                                     </button>
                                     {/* Delete button */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteClick(song.id); // Pass song.id
-                                        }}
-                                        className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background dark:hover:text-white transition-colors duration-200 focus:outline-none"
-                                    >
-                                        <XIcon className="w-4 h-4" />
-                                    </button>
+                                    {variant == "favorites" ? (
+                                        <></>
+                                    ) : (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteClick(song.id); // Pass song.id
+                                            }}
+                                            className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-destructive hover:text-background dark:hover:text-white transition-colors duration-200 focus:outline-none"
+                                        >
+                                            <XIcon className="w-4 h-4" />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
