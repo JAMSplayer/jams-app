@@ -53,16 +53,15 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     return;
                 }
 
-                // Flatten all songs from all playlists
-                const allSongs: Song[] = storedPlaylists.flatMap(
-                    (playlist: Playlist) => playlist.songs || []
-                ); // Get songs from each playlist
-
                 // If a specific playlist is selected, display its songs
                 if (playlist && playlist.songs && playlist.songs.length > 0) {
                     setSongs(playlist.songs);
                     handlePlaySong(playlist.songs[0]); // Play first song
                 } else {
+                    // Flatten all songs from all playlists
+                    const allSongs: Song[] = storedPlaylists.flatMap(
+                        (playlist: Playlist) => playlist.songs || []
+                    ); // Get songs from each playlist
                     // If no specific playlist is selected, show all songs
                     setSongs(allSongs);
                 }
