@@ -6,10 +6,13 @@ import { Input } from "./ui/input";
 import { isValidPeerAddress } from "@/lib/utils/network";
 import Networks from "@/enums/networks";
 import { useTranslation } from "react-i18next";
+import { useConnection } from "@/providers/connection-provider";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function DisconnectedPanel() {
     const { t } = useTranslation();
     const [inputValue, setInputValue] = useState("");
+    const { isConnecting, setIsConnecting } = useConnection();
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
@@ -29,14 +32,30 @@ export default function DisconnectedPanel() {
                         {t("mainnet")}
                     </h3>
                     <Button
-                        onClick={() => {
-                            const override = { network: Networks.MAINNET };
-                            connect(override);
+                        onClick={async () => {
+                            setIsConnecting(true);
+
+                            try {
+                                const override = { network: Networks.MAINNET };
+                                await connect(override);
+                            } catch (error) {
+                                console.error("Error connecting:", error);
+                            } finally {
+                                setIsConnecting(false); // always reset the state
+                            }
                         }}
                         className="w-full max-w-sm"
+                        disabled={isConnecting}
                     >
-                        <span>{t("connectToMainnet")}</span>
-                        <GlobeLockIcon className="ml-2" />
+                        {isConnecting ? (
+                            <span className="inline-flex items-center gap-x-2">
+                                Connecting <LoadingSpinner />
+                            </span>
+                        ) : (
+                            <span className="inline-flex items-center gap-x-2">
+                                {t("connectToMainnet")} <GlobeLockIcon />
+                            </span>
+                        )}
                     </Button>
                 </div>
 
