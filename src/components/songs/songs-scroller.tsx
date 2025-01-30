@@ -26,7 +26,7 @@ const SongScroller = ({
 }: SongScrollerProps) => {
     const { t } = useTranslation();
     const { store } = useStorage();
-//    const navigate = useNavigate();
+    //    const navigate = useNavigate();
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
 
@@ -82,13 +82,26 @@ const SongScroller = ({
         );
     };
 
-    // Function to sort songs based on the sort order
     const sortSongs = (songs: Song[], sortOrder: "asc" | "desc") => {
         return songs.sort((a, b) => {
+            // convert dateCreated to a Date object if it's a string
+            const dateA = new Date(a.dateCreated);
+            const dateB = new Date(b.dateCreated);
+
+            // handle invalid date cases (if conversion fails, date will be invalid)
+            if (isNaN(dateA.getTime())) {
+                console.warn(`Invalid date for song: ${a.title}`);
+                return 0; // Treat invalid date as equal
+            }
+            if (isNaN(dateB.getTime())) {
+                console.warn(`Invalid date for song: ${b.title}`);
+                return 0; // treat invalid date as equal
+            }
+
             if (sortOrder === "asc") {
-                return a.dateCreated.getTime() - b.dateCreated.getTime();
+                return dateA.getTime() - dateB.getTime();
             } else {
-                return b.dateCreated.getTime() - a.dateCreated.getTime();
+                return dateB.getTime() - dateA.getTime();
             }
         });
     };
