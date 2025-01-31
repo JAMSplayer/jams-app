@@ -16,3 +16,9 @@ export async function fetchMetadata(
         return []; // Return an empty array to avoid breaking the flow
     }
 }
+
+export async function saveMetadata(
+    file: FileDetail
+): Promise<void> { // throw on error
+    // TODO
+}

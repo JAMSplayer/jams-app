@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon, XIcon } from "lucide-react";
-import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
+import { FileDetail, FilePicture } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { convertToBase64 } from "@/lib/utils/images";
+import { convertToBase64, base64ToImageFile } from "@/lib/utils/images";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import SelectYear from "@/components/select-year";
 import { toast } from "sonner";
 import { uploadSong } from "@/backend/uploading";
+import { saveMetadata } from "@/backend/metadata";
 import { SongUpload } from "@/types/songs/song-upload";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -277,9 +278,28 @@ export default function SingleFilePanel({
 
         try {
             setIsUploading(true);
+
+            let songFile: FileDetail = {
+              ...fileDetail,
+              ...song,
+            };
+            console.log("songFile: ", songFile);
+
+            if (song.picture) {
+              const imageFile: File = base64ToImageFile(song.picture, "coverArt");
+              const picture: FilePicture = {
+                data: imageFile.bytes(),
+                mime_type: imageFile.type,
+              };
+              songFile.picture = picture;
+            }
+            console.log("songFile: ", songFile);
+
+            await saveMetadata(songFile);
+
             // TODO: add a playlist to which the song has to be added
-            const result = await uploadSong(song, fileDetail.fullPath);
-            // TODO: update song object with songXorname and artXorname, update playlist data, sync with network
+            const result = await uploadSong(songFile.fullPath);
+            // TODO: update song object with songXorname, update playlist data, sync with network
             console.log("The song has been uploaded: ", result);
         } catch (ex) {
             console.log("The song could not be uploaded: ", ex);

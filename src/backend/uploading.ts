@@ -1,23 +1,14 @@
-import { SongUpload } from "@/types/songs/song-upload";
-import {
-    uploadFile,
-    putData,
-} from "@/backend/autonomi";
+import { uploadFile } from "@/backend/autonomi";
 
 export async function uploadSong(
-    song: SongUpload,
     filePath: string
-): Promise<{ success: boolean; songXorname?: string; artXorname?: string }> {
-    console.log("starting song upload for: ", song);
+): Promise<{ success: boolean; songXorname?: string }> {
+    console.log("starting song upload for: ", filePath);
 
     const songXorname = await uploadFile(filePath);
-    let artXorname = null;
-    if (song.picture) {
-      artXorname = songXorname && await putData(Uint8Array.fromBase64(song.picture));
-    }
 
     if (songXorname) {
-      return { true, songXorname, artXorname };
+      return { true, songXorname };
     } else {
       return { false };
     }
