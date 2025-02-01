@@ -6,6 +6,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function SelectYear({
     setValue,
@@ -15,6 +16,7 @@ function SelectYear({
     setValue: any;
     height?: string;
 }) {
+    const { t } = useTranslation();
     const [years, setYears] = useState<number[]>([]);
 
     useEffect(() => {
@@ -28,7 +30,9 @@ function SelectYear({
 
     return (
         <div>
-            <label className="block text-sm font-medium mb-1">Year</label>
+            <label className="block text-sm font-medium mb-1">
+                {t("year")}
+            </label>
             <Select
                 onValueChange={(value) =>
                     setValue("year", value ? parseInt(value, 10) : undefined)

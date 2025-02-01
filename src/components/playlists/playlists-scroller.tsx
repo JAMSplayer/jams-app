@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { EditIcon, PlayIcon, XIcon } from "lucide-react";
 import { Playlist } from "@/types/playlists/playlist";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useEditPlaylistIdStore } from "@/store/edit-playlist-id";
 
 interface PlaylistScrollerProps {
@@ -15,6 +16,8 @@ const PlaylistScroller = ({
     filterValue,
     sortOrder,
 }: PlaylistScrollerProps) => {
+    const { t } = useTranslation();
+
     const filterPlaylists = (
         playlists: Playlist[],
         filterValue: string
@@ -133,13 +136,13 @@ const PlaylistScroller = ({
                                     {playlist.songs ? (
                                         <>
                                             <small>
-                                                Songs: {playlist.songs.length}
+                                                {t("songs")}: {playlist.songs.length}
                                             </small>
                                             {" - "}
                                         </>
                                     ) : (
                                         <>
-                                            <small>empty</small> {" - "}
+                                            <small>{t("empty")}</small> {" - "}
                                         </>
                                     )}
                                     <small>
@@ -153,7 +156,7 @@ const PlaylistScroller = ({
                     ))}
                 </div>
             ) : (
-                <p>No playlists found.</p>
+                <p>{t("noPlaylistsFound")}.</p>
             )}
         </div>
     );

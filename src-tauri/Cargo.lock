@@ -4567,12 +4567,12 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "jams-desktop"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aes-gcm",
  "argon2",
  "futures",
- "hex 0.4.3",
+ "hex 0.3.2",
  "lazy_static",
  "lofty",
  "password-hash",
@@ -7913,6 +7913,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 [[package]]
 name = "safe"
 version = "0.1.8"
+source = "git+ssh://git@github.com/JAMSplayer/safe.git#aec23800199f02c15c6b33e962704a96c424401d"
 dependencies = [
  "alloy-primitives",
  "ant-logging",
@@ -7922,7 +7923,7 @@ dependencies = [
  "blsttc",
  "bytes",
  "evmlib",
- "hex 0.4.3",
+ "hex 0.3.2",
  "libp2p 0.53.2",
  "rand 0.8.5",
  "serde",

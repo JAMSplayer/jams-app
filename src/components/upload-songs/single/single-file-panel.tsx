@@ -17,6 +17,8 @@ import { uploadSong } from "@/backend/uploading";
 import { saveMetadata } from "@/backend/metadata";
 import { SongUpload } from "@/types/songs/song-upload";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTranslation } from "react-i18next";
+import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema";
 
 // TODO
 // when the file is uploaded successfully, show dialog to allow the user to put it into a playlist.
@@ -31,49 +33,8 @@ interface SingleFilePanelProps {
     onBack: () => void;
     fileDetail: FileDetail;
 }
-const formSchema = z.object({
-    title: z
-        .string()
-        .min(1, "Title is required")
-        .max(100, "Title cannot exceed 100 characters"),
-    artist: z
-        .string()
-        .min(1, "Artist is required")
-        .max(100, "Artist cannot exceed 100 characters"),
-    album: z.string().max(100, "Album cannot exceed 100 characters").optional(),
-    genre: z.string().max(30, "Genre cannot exceed 30 characters").optional(),
-    year: z
-        .number()
-        .optional()
-        .refine(
-            (value) =>
-                value === null ||
-                value === undefined ||
-                (value >= 1000 && value <= 9999),
-            {
-                message: "Year must be a 4-digit number if provided",
-            }
-        ),
-    trackNumber: z
-        .number()
-        .optional()
-        .refine(
-            (value) =>
-                value === null ||
-                value === undefined ||
-                (value >= 0 && value <= 999),
-            {
-                message:
-                    "Track number must be a numeric value (max 3 digits) if provided",
-            }
-        ),
-    duration: z.number().optional(),
-    channels: z.number().optional(),
-    sampleRate: z.number().optional(),
-    picture: z.string().optional(),
-});
 
-type FormSchema = z.infer<typeof formSchema>;
+type FormSchema = z.infer<typeof singleFileUploadSchema>;
 
 export default function SingleFilePanel({
     onBack,
@@ -85,7 +46,7 @@ export default function SingleFilePanel({
         setValue,
         formState: { errors, isValid },
     } = useForm<FormSchema>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver(singleFileUploadSchema),
         mode: "onChange",
         defaultValues: {
             title: fileDetail.title || "",
@@ -100,6 +61,8 @@ export default function SingleFilePanel({
             picture: "", // this will be set after base64 conversion
         },
     });
+
+    const { t } = useTranslation();
 
     const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -145,8 +108,8 @@ export default function SingleFilePanel({
             });
 
             if (!selectedFile) {
-                toast("File", {
-                    description: "No file selected.",
+                toast(t("file"), {
+                    description: t("noFileSelected"),
                 });
                 return;
             }
@@ -161,9 +124,8 @@ export default function SingleFilePanel({
                 !fileExtension ||
                 !["jpg", "jpeg", "png", "gif"].includes(fileExtension)
             ) {
-                toast("Unsupported", {
-                    description:
-                        "Unsupported file format. Please upload a JPG, JPEG, PNG, or GIF file.",
+                toast(t("unsupported"), {
+                    description: t("unsupportedFileFormatPleaseUpload"),
                 });
                 return;
             }
@@ -191,9 +153,8 @@ export default function SingleFilePanel({
 
             // Check file size
             if (file.size > MAX_FILE_SIZE) {
-                toast("File Size", {
-                    description:
-                        "File size exceeds 1MB. Please select a smaller file.",
+                toast(t("fileSize"), {
+                    description: t("fileSizeExceeds1MB"),
                 });
                 return;
             }
@@ -210,8 +171,8 @@ export default function SingleFilePanel({
             setValue("picture", base64Image);
         } catch (error) {
             console.error("Error processing the selected image:", error);
-            toast("Error Processing Image", {
-                description: "Error processing the selected image.",
+            toast(t("errorProcessingImage"), {
+                description: t("errorProcessingTheSelectedImage"),
             });
         }
     };
@@ -329,7 +290,7 @@ export default function SingleFilePanel({
                         className="mr-3"
                         disabled={!isValid}
                     >
-                        Upload <UploadIcon />
+                        {t("upload")} <UploadIcon />
                     </Button>
                 )}
             </div>
@@ -339,45 +300,45 @@ export default function SingleFilePanel({
                 <div
                     className={`bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center`}
                 >
-                    <h1 className="text-lg font-bold">Information</h1>
+                    <h1 className="text-lg font-bold">{t("information")}</h1>
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
                     {fileDetail.name && (
                         <p className="text-sm text-gray-500">
-                            File Name: {fileDetail.name}
+                            {t("fileName")}: {fileDetail.name}
                         </p>
                     )}
                     {fileDetail.location && (
                         <p className="text-sm text-gray-500">
-                            Location: {fileDetail.location}
+                            {t("location")}: {fileDetail.location}
                         </p>
                     )}
                     {fileDetail.size && (
                         <p className="text-sm text-gray-500">
-                            Size: {formatBytes(fileDetail.size)}
+                            {t("size")}: {formatBytes(fileDetail.size)}
                         </p>
                     )}
                     {fileDetail.extension && (
                         <p className="text-sm text-gray-500">
-                            Extension: {fileDetail.extension}
+                            {t("extension")}: {fileDetail.extension}
                         </p>
                     )}
                     {fileDetail.duration && fileDetail.duration > 0 && (
                         <p className="text-sm text-gray-500">
-                            Duration:{" "}
+                            {t("duration")}:{" "}
                             {formatDurationFromSeconds(fileDetail.duration)}
                         </p>
                     )}
                     {fileDetail.sampleRate && fileDetail.sampleRate > 0 && (
                         <p className="text-sm text-gray-500">
-                            Sample Rate: {fileDetail.sampleRate}
+                            {t("sampleRate")}: {fileDetail.sampleRate}
                         </p>
                     )}
 
                     {fileDetail.channels && fileDetail.channels > 0 && (
                         <p className="text-sm text-gray-500">
-                            Channels: {fileDetail.channels}
+                            {t("channels")}: {fileDetail.channels}
                         </p>
                     )}
                 </div>
@@ -388,7 +349,7 @@ export default function SingleFilePanel({
                 <div
                     className={`bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center`}
                 >
-                    <h1 className="text-lg font-bold">Customize</h1>
+                    <h1 className="text-lg font-bold">{t("customize")}</h1>
                 </div>
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
                     <form id="customizeForm" onSubmit={handleSubmit(onSubmit)}>
@@ -399,7 +360,7 @@ export default function SingleFilePanel({
                                     {/* Title */}
                                     <div className="col-span-2">
                                         <label className="block text-sm font-medium mb-1">
-                                            Title{" "}
+                                            {t("title")}{" "}
                                             <span className="text-red-500">
                                                 *
                                             </span>
@@ -419,7 +380,7 @@ export default function SingleFilePanel({
                                     {/* Artist */}
                                     <div className="col-span-2">
                                         <label className="block text-sm font-medium mb-1">
-                                            Artist{" "}
+                                            {t("artist")}{" "}
                                             <span className="text-red-500">
                                                 *
                                             </span>
@@ -439,7 +400,7 @@ export default function SingleFilePanel({
                                     {/* Album */}
                                     <div>
                                         <label className="block text-sm font-medium mb-1">
-                                            Album
+                                            {t("album")}
                                         </label>
                                         <input
                                             {...register("album")}
@@ -451,7 +412,7 @@ export default function SingleFilePanel({
                                     {/* Genre */}
                                     <div>
                                         <label className="block text-sm font-medium mb-1">
-                                            Genre
+                                            {t("genre")}
                                         </label>
                                         <input
                                             {...register("genre")}
@@ -471,14 +432,14 @@ export default function SingleFilePanel({
                                     {/* Track Number */}
                                     <div>
                                         <label className="block text-sm font-medium mb-1">
-                                            Track Number
+                                            {t("trackNumber")}
                                         </label>
                                         <input
                                             type="text"
                                             value={trackNumber || ""} // Ensure it's either a number or empty string
                                             onChange={handleTrackNumberChange} // Update track number
                                             className="w-full border px-2 py-1 rounded"
-                                            placeholder="Enter track number"
+                                            placeholder={t("enterTrackNumber")}
                                             maxLength={3}
                                         />
                                         {errors.trackNumber && (
@@ -491,7 +452,7 @@ export default function SingleFilePanel({
                                     {/* Tags Input */}
                                     <div>
                                         <label className="block text-sm font-medium mb-1">
-                                            Tags
+                                            {t("tags")}
                                         </label>
                                         <div className="flex gap-2 mb-2">
                                             <Input
@@ -511,7 +472,7 @@ export default function SingleFilePanel({
                                                         addTag(e); // Call addTag function when Enter is pressed
                                                     }
                                                 }}
-                                                placeholder="Add a tag"
+                                                placeholder={t("addATag")}
                                                 className="flex-1"
                                                 disabled={
                                                     tags.length >= MAX_TAGS
@@ -533,19 +494,20 @@ export default function SingleFilePanel({
                                                     ) // Contains invalid characters
                                                 }
                                             >
-                                                Add
+                                                {t("add")}
                                             </Button>
                                         </div>
                                         {tagInput.trim().length >
                                             MAX_TAG_LENGTH && (
                                             <p className="text-red-500 text-xs">
-                                                Tags cannot exceed{" "}
-                                                {MAX_TAG_LENGTH} characters.
+                                                {t("tagsCannotExceed")}{" "}
+                                                {MAX_TAG_LENGTH}{" "}
+                                                {t("characters")}.
                                             </p>
                                         )}
                                         {tags.length === MAX_TAGS && (
                                             <p className="text-red-500 text-xs">
-                                                Max tags reached.
+                                                {t("maxTagsReached")}.
                                             </p>
                                         )}
                                         {tagInput.trim().length > 0 &&
@@ -553,8 +515,10 @@ export default function SingleFilePanel({
                                                 tagInput
                                             ) && (
                                                 <p className="text-red-500 text-xs">
-                                                    Tags can only contain
-                                                    letters and numbers.
+                                                    {t(
+                                                        "tagsCanOnlyContainLettersAndNumbers"
+                                                    )}
+                                                    .
                                                 </p>
                                             )}
                                     </div>
@@ -600,7 +564,7 @@ export default function SingleFilePanel({
                                     />
                                 ) : (
                                     <div className="w-full h-full max-w-sm max-h-sm flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
-                                        No Album Art
+                                        {t("noAlbumArt")}
                                     </div>
                                 )}
                                 <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">

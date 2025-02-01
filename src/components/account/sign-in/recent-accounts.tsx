@@ -3,6 +3,7 @@ import { formatAddress } from "@/lib/utils/address";
 import { Label } from "@/components/ui/label";
 import Avatar from "../avatar";
 import { SimpleAccountUser } from "@/types/account-user";
+import { useTranslation } from "react-i18next";
 
 type RecentAccountsProps = {
     recentAccounts: SimpleAccountUser[];
@@ -13,6 +14,8 @@ const RecentAccounts: React.FC<RecentAccountsProps> = ({
     recentAccounts,
     onSelectRecentAccount,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <ScrollArea className="h-[200px] w-full rounded-md border">
             {recentAccounts.length > 0 ? (
@@ -55,7 +58,7 @@ const RecentAccounts: React.FC<RecentAccountsProps> = ({
                 })
             ) : (
                 <Label className="text-md pt-8 flex justify-center">
-                    No Recent Accounts Exist
+                    {t("noRecentAccountsExist")}
                 </Label>
             )}
 

@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import SubDivider from "./sub-divider";
 import SubDividerLayout from "@/enums/sub-divider-layout";
 import { useStorage } from "@/providers/storage-provider";
+import { useTranslation } from "react-i18next";
 
 export default function NotificationSettings() {
+    const { t } = useTranslation();
+
     const [alertChecked, setAlertChecked] = useState(false);
     const [infoChecked, setInfoChecked] = useState(false);
     const { store } = useStorage();
@@ -78,7 +81,7 @@ export default function NotificationSettings() {
     return (
         <div className="items-center">
             <SubDivider
-                title="Notification Levels"
+                title={t("notificationLevels")}
                 layout={SubDividerLayout.TOP}
             />
 
@@ -96,7 +99,7 @@ export default function NotificationSettings() {
                             htmlFor="alert"
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ml-2"
                         >
-                            Alert
+                            {t("alert")}
                         </label>
                     </div>
                     <div className="flex flex-row pt-2">
@@ -111,7 +114,7 @@ export default function NotificationSettings() {
                             htmlFor="info"
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ml-2"
                         >
-                            Info
+                            {t("info")}
                         </label>
                     </div>
                 </div>
