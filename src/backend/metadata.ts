@@ -20,5 +20,5 @@ export async function fetchMetadata(
 export async function saveMetadata(
     file: FileDetail
 ): Promise<void> { // throw on error
-    // TODO
+    await invoke("save_file_metadata", { songFile: file });
 }

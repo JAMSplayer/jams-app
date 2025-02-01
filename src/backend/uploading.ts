@@ -8,8 +8,8 @@ export async function uploadSong(
     const songXorname = await uploadFile(filePath);
 
     if (songXorname) {
-      return { true, songXorname };
+      return { success: true, songXorname: songXorname };
     } else {
-      return { false };
+      return { success: false };
     }
 }
