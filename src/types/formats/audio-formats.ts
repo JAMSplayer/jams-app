@@ -10,4 +10,6 @@ export const audioFormats = [
     "mp3",
     "wav",
     "ogg",
+    "m4a",
+    "alac",
 ];
