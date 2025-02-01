@@ -10,6 +10,7 @@ import { AgreementModal } from "@/components/agreement-modal";
 import { useStorage } from "@/providers/storage-provider";
 import { useConnection } from "@/providers/connection-provider";
 import DisconnectedPanel from "./disconnected-panel";
+import SplashScreen from "./splash-screen";
 
 interface RootLayoutProps {
     children: ReactNode; // Explicitly type children as ReactNode
@@ -19,6 +20,7 @@ const RootLayout = ({ children }: RootLayoutProps) => {
     const { store } = useStorage();
     const [hasAgreed, setHasAgreed] = useState<boolean | null>(null);
     const { isConnected } = useConnection();
+    const [showSplash, setShowSplash] = useState(true);
 
     const handleAgree = async () => {
         if (!store) return;
@@ -44,6 +46,10 @@ const RootLayout = ({ children }: RootLayoutProps) => {
 
         getSetting();
     }, [store]);
+
+    if (showSplash) {
+        return <SplashScreen onComplete={() => setShowSplash(false)} />;
+    }
 
     return (
         <div className={"antialiased flex flex-col min-h-screen"}>
