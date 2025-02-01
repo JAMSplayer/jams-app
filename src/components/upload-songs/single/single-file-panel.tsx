@@ -237,22 +237,40 @@ export default function SingleFilePanel({
 
         const song: SongUpload = { ...data, tags };
 
+        async function readToArray(file: File): Promise<Uint8Array> {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader();
+            
+                reader.addEventListener("load", () => {
+                    if (reader.result instanceof  ArrayBuffer) {
+                        resolve(new Uint8Array(reader.result));
+                    } else {
+                        reject(reader.result);
+                    }
+                });
+                reader.addEventListener("error", reject);
+            
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
         try {
             setIsUploading(true);
 
             let songFile: FileDetail = {
-              ...fileDetail,
-              ...song,
+                ...fileDetail,
+                ...song,
+                picture: undefined,
             };
-            console.log("songFile: ", songFile);
 
             if (song.picture) {
-              const imageFile: File = base64ToImageFile(song.picture, "coverArt");
-              const picture: FilePicture = {
-                data: imageFile.bytes(),
-                mime_type: imageFile.type,
-              };
-              songFile.picture = picture;
+                const imageFile: File = base64ToImageFile(song.picture, "coverArt");
+  
+                const picture: FilePicture = {
+                    data: await readToArray(imageFile),
+                    mime_type: imageFile.type,
+                };
+                songFile.picture = picture;
             }
             console.log("songFile: ", songFile);
 
