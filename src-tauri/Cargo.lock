@@ -7912,8 +7912,8 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "safe"
-version = "0.1.8"
-source = "git+ssh://git@github.com/JAMSplayer/safe.git#aec23800199f02c15c6b33e962704a96c424401d"
+version = "0.1.9"
+source = "git+ssh://git@github.com/JAMSplayer/safe.git#2f841730b3d470e9388ee8f8f52be176f96ea4d7"
 dependencies = [
  "alloy-primitives",
  "ant-logging",

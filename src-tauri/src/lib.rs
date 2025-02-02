@@ -312,7 +312,7 @@ async fn create_reg(
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .reg_create(data.into_bytes(), &meta)
+        .reg_create(data.as_bytes(), &meta)
         .await?;
 
     println!("\n\nReg created");
@@ -359,7 +359,7 @@ async fn write_reg(
             .await
             .as_mut()
             .ok_or(Error::NotConnected)?
-            .reg_write(data.into_bytes(), &meta)
+            .reg_write(data.as_bytes(), &meta)
             .await?;
 
         println!("\n\nReg updated.");
@@ -596,7 +596,7 @@ async fn put_data(data: Vec<u8>, app: AppHandle) -> Result<String, Error> {
         .await
         .as_mut()
         .ok_or(Error::NotConnected)? // safe
-        .upload(data)
+        .upload(&data)
         .await?;
 
     Ok(hex::encode(data_address))
