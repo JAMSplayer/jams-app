@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, EditIcon, UploadIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, EditIcon, UploadIcon } from "lucide-react";
 import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { useForm } from "react-hook-form";
