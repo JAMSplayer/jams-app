@@ -1,77 +1,59 @@
 import { useState, useEffect } from "react";
-import SongScroller from "./songs-scroller";
 import { Song } from "@/types/songs/song";
-import { Input } from "../ui/input";
+import { Input } from "./ui/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "../ui/select";
-import { Playlist } from "@/types/playlists/playlist";
-import { useAudioPlayer } from "../player/audio-provider";
-import { usePlayerStore } from "@/store/player-store";
+} from "./ui/select";
 import { useTranslation } from "react-i18next";
+import SongScroller from "./songs/songs-scroller";
 import { useStorage } from "@/providers/storage-provider";
+import { Playlist } from "@/types/playlists/playlist";
 
-interface SongsPanelProps {
-    playlist?: Playlist;
-}
-
-const SongsPanel = ({ playlist }: SongsPanelProps) => {
+const FavoritesPanel = () => {
     const { t } = useTranslation();
-    const { store } = useStorage();
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+    const { store } = useStorage();
 
-    const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
-    const player = useAudioPlayer();
-
-    const handlePlaySong = (song: Song) => {
-        setPlayerVisibility(true);
-        setHasLoaded(true);
-        player.play(song);
-    };
-
-    // This will be filled from the fetchedSongs below
+    // This will be filled from the fetchedFavoriteSongs below
     const [songs, setSongs] = useState<Song[]>([]);
 
     useEffect(() => {
-        const fetchAllSongs = async () => {
+        const fetchFavoriteSongs = async () => {
             if (!store) {
                 console.error("Store is not initialized.");
                 return;
             }
 
             try {
-                // Fetch all playlists from the store
-                const storedPlaylists = await store.get("playlists");
+                // get all playlists from the store
+                const playlists: Playlist[] =
+                    (await store.get("playlists")) || [];
+                const favoriteIds: string[] =
+                    (await store.get("favorites")) || [];
 
-                if (!storedPlaylists || !Array.isArray(storedPlaylists)) {
-                    console.error("Playlists not found or invalid format.");
+                if (!playlists || !favoriteIds.length) {
+                    setSongs([]); // No playlists or favorites, set empty list
                     return;
                 }
 
-                // If a specific playlist is selected, display its songs
-                if (playlist && playlist.songs && playlist.songs.length > 0) {
-                    setSongs(playlist.songs);
-                    handlePlaySong(playlist.songs[0]); // Play first song
-                } else {
-                    // Flatten all songs from all playlists
-                    const allSongs: Song[] = storedPlaylists.flatMap(
-                        (playlist: Playlist) => playlist.songs || []
-                    ); // Get songs from each playlist
-                    // If no specific playlist is selected, show all songs
-                    setSongs(allSongs);
-                }
+                // filter songs that match the favorite IDs
+                const fetchedSongs: Song[] = playlists
+                    .flatMap((playlist) => playlist.songs || []) // combine all songs from all playlists
+                    .filter((song) => favoriteIds.includes(song.id)); // filter by favorite IDs
+
+                setSongs(fetchedSongs);
             } catch (error) {
-                console.error("Failed to fetch songs from playlists:", error);
+                console.error("Failed to fetch favorite songs:", error);
             }
         };
 
-        fetchAllSongs();
-    }, [playlist, store]); // Trigger effect when playlist or store changes
+        fetchFavoriteSongs();
+    }, []);
 
     return (
         <div className="w-full">
@@ -112,11 +94,11 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     songs={songs}
                     filterValue={filterValue}
                     sortOrder={sortOrder}
-                    variant="default"
+                    variant={"favorites"}
                 />
             </div>
         </div>
     );
 };
 
-export default SongsPanel;
+export default FavoritesPanel;

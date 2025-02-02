@@ -3,6 +3,7 @@ import { UploadIcon } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Window } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
+import { audioFormats } from "@/types/formats/audio-formats";
 
 interface DropzoneProps {
     onFilesAdded: (filePaths: string[]) => void;
@@ -76,7 +77,12 @@ function Dropzone({ onFilesAdded }: DropzoneProps) {
         const selectedFiles = await open({
             multiple: true, // Set to true if you want to allow multiple file selection
             directory: false,
-            filters: [{ name: "Sound", extensions: ["mp3", "wav", "ogg"] }], // TODO Customize file filters to only allow sound/music files
+            filters: [
+                {
+                    name: "Sound",
+                    extensions: audioFormats,
+                },
+            ],
         });
 
         if (selectedFiles && selectedFiles.length === 1) {
