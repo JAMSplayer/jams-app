@@ -13,7 +13,7 @@ const SplashScreen = () => {
             try {
                 console.log("Attempting to connect...");
                 const override = { network: Networks.MAINNET };
-                connect(override);
+                await connect(override);
             } catch (error) {
                 console.error("Connection failed:", error);
             }
