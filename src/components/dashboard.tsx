@@ -19,6 +19,7 @@ export default function Dashboard() {
                         dateCreated: new Date(),
                         networkID: "123",
                         picture: undefined,
+                        tags: [],
                     }}
                 />
             </div>
