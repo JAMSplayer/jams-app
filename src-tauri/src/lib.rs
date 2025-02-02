@@ -2,7 +2,9 @@ use futures::lock::Mutex;
 use lofty::file::{AudioFile, TaggedFile};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
-use lofty::config::ParseOptions;
+use lofty::config::{WriteOptions, ParseOptions};
+use lofty::picture::{Picture, PictureType, MimeType};
+use lofty::tag::{Tag, Accessor, TagExt};
 use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
@@ -416,7 +418,7 @@ fn check_key(login: String, password: String, mut app: AppHandle) -> Result<Stri
     load_create_import_key(&app_root, login, password, None, false)
 }
 
-#[derive(Default, Debug, serde::Serialize)]
+#[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
 struct FileMetadata {
     file_path: String,
     title: Option<String>,
@@ -449,7 +451,7 @@ fn truncate_number(value: u32, max_length: usize) -> u32 {
     }
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct FilePicture {
     data: Vec<u8>,             // Image data
     mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
@@ -553,6 +555,39 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
 }
 
 #[tauri::command]
+async fn save_file_metadata(
+    song_file: FileMetadata,
+    app: AppHandle,
+) -> Result<(), Error> {
+
+    let mut tagged_file = read_from_path(&song_file.file_path)
+        .map_err(|e| Error::Common(format!("Cannot read tags from file {}", song_file.file_path)))?;
+    tagged_file.clear();
+    let mut new_tag = Tag::new(tagged_file.primary_tag_type());
+
+    song_file.title.inspect(|title| new_tag.set_title(title.clone()));
+    song_file.artist.inspect(|artist| new_tag.set_artist(artist.clone()));
+    song_file.album.inspect(|album| new_tag.set_album(album.clone()));
+    song_file.genre.inspect(|genre| new_tag.set_genre(genre.clone()));
+    song_file.year.inspect(|year| new_tag.set_year(*year));
+    song_file.track_number.inspect(|track_number| new_tag.set_track(*track_number));
+
+    if let Some(pic) = song_file.picture {
+        let new_pic = Picture::new_unchecked(
+            PictureType::CoverFront,
+            pic.mime_type.map(|mime| MimeType::from_str(&mime)),
+            None, // description
+            pic.data
+        );
+        new_tag.push_picture(new_pic);
+    }
+
+    new_tag.save_to_path(&song_file.file_path, WriteOptions::default())
+        .map_err(|e| Error::Common(format!("Cannot save tags to file {}", song_file.file_path)))?;
+    Ok(())
+}
+
+#[tauri::command]
 async fn read_metadata(path: String, safe: State<'_, Mutex<Option<Safe>>>) -> Result<FileMetadata, Error> {
     let (xorname, _file_name) = server::autonomi(&path)?;
 
@@ -621,6 +656,7 @@ pub fn run() {
             gas_balance,
             check_key,
             get_file_metadata,
+            save_file_metadata,
             read_metadata,
             upload,
             put_data,

@@ -17,6 +17,12 @@ export async function fetchMetadata(
     }
 }
 
+export async function saveMetadata(
+    file: FileDetail
+): Promise<void> { // throw on error
+    await invoke("save_file_metadata", { songFile: file });
+}
+
 export async function readMetadata(
     locationPath: string // like 08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962__BegBlag.mp3
 ): Promise<FileDetail | null> {

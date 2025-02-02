@@ -1,19 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon, XIcon } from "lucide-react";
-import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
+import { FileDetail, FilePicture } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { convertToBase64 } from "@/lib/utils/images";
+import { convertToBase64, base64ToImageFile } from "@/lib/utils/images";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SelectYear from "@/components/select-year";
 import { toast } from "sonner";
-import { UploadSong } from "@/backend/uploading";
+import { uploadSong } from "@/backend/uploading";
+import { saveMetadata } from "@/backend/metadata";
 import { SongUpload } from "@/types/songs/song-upload";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useTranslation } from "react-i18next";
@@ -236,10 +237,48 @@ export default function SingleFilePanel({
 
         const song: SongUpload = { ...data, tags };
 
+        async function readToArray(file: File): Promise<Uint8Array> {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader();
+            
+                reader.addEventListener("load", () => {
+                    if (reader.result instanceof  ArrayBuffer) {
+                        resolve(new Uint8Array(reader.result));
+                    } else {
+                        reject(reader.result);
+                    }
+                });
+                reader.addEventListener("error", reject);
+            
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
         try {
             setIsUploading(true);
+
+            let songFile: FileDetail = {
+                ...fileDetail,
+                ...song,
+                picture: undefined,
+            };
+
+            if (song.picture) {
+                const imageFile: File = base64ToImageFile(song.picture, "coverArt");
+  
+                const picture: FilePicture = {
+                    data: await readToArray(imageFile),
+                    mime_type: imageFile.type,
+                };
+                songFile.picture = picture;
+            }
+            console.log("songFile: ", songFile);
+
+            await saveMetadata(songFile);
+
             // TODO: add a playlist to which the song has to be added
-            const result = await UploadSong(song);
+            const result = await uploadSong(songFile.fullPath);
+            // TODO: update song object with songXorname, update playlist data, sync with network
             console.log("The song has been uploaded: ", result);
         } catch (ex) {
             console.log("The song could not be uploaded: ", ex);
