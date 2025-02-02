@@ -4,23 +4,23 @@ import { isValidXorname } from "@/lib/utils/validation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 
-interface EnterNetworkIDProps {
+interface EnterXornameProps {
     onSearch: (id: string) => void;
 }
 
-const EnterNetworkID: React.FC<EnterNetworkIDProps> = ({ onSearch }) => {
-    const [networkId, setNetworkId] = useState("");
+const EnterXorname: React.FC<EnterXornameProps> = ({ onSearch }) => {
+    const [xorname, setXorname] = useState("");
     const [isValid, setIsValid] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setNetworkId(value);
+        setXorname(value);
         setIsValid(isValidXorname(value));
     };
 
     const handleSearch = async () => {
-        if (networkId.trim() !== "") {
-            onSearch(networkId);
+        if (xorname.trim() !== "") {
+            onSearch(xorname);
         }
     };
 
@@ -33,7 +33,7 @@ const EnterNetworkID: React.FC<EnterNetworkIDProps> = ({ onSearch }) => {
                 <div className="flex flex-row items-center space-x-2">
                     <Input
                         type="text"
-                        value={networkId}
+                        value={xorname}
                         onChange={handleInputChange}
                         placeholder="Enter Song Network ID"
                         autoCapitalize="off"
@@ -47,7 +47,7 @@ const EnterNetworkID: React.FC<EnterNetworkIDProps> = ({ onSearch }) => {
                         Search <MagnifyingGlassIcon />
                     </Button>
                 </div>
-                {!isValid && networkId && (
+                {!isValid && xorname && (
                     <p className="text-red-500 text-sm mt-2">
                         Please enter a valid 64-character network ID consisting
                         of lowercase letters and numbers.
@@ -58,4 +58,4 @@ const EnterNetworkID: React.FC<EnterNetworkIDProps> = ({ onSearch }) => {
     );
 };
 
-export default EnterNetworkID;
+export default EnterXorname;

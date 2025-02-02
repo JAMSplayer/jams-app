@@ -1,29 +1,29 @@
 import { useState } from "react";
-import EnterNetworkID from "./enter-network-id";
+import EnterXorname from "./enter-xorname";
 import NetworkSongMetadataPanel from "./network-song-metadata";
 
 const AddNetworkSongPanel = () => {
     const [activePanel, setActivePanel] = useState<
-        "enter-network-id" | "network-song-metadata"
-    >("enter-network-id");
-    const [networkId, setNetworkId] = useState<string | null>(null);
+        "enter-xorname" | "network-song-metadata"
+    >("enter-xorname");
+    const [xorname, setXorname] = useState<string | null>(null);
 
     const handleSearch = (id: string) => {
-        setNetworkId(id); // store the songs network ID
+        setXorname(id); // store the songs network ID
         setActivePanel("network-song-metadata"); // switch to the metadata panel
     };
 
     const handleReturn = () => {
-        setActivePanel("enter-network-id"); // switch to the metadata panel
+        setActivePanel("enter-xorname"); // switch to the metadata panel
     };
 
     return (
         <div className="w-full">
-            {activePanel === "enter-network-id" ? (
-                <EnterNetworkID onSearch={handleSearch} />
+            {activePanel === "enter-xorname" ? (
+                <EnterXorname onSearch={handleSearch} />
             ) : (
                 <NetworkSongMetadataPanel
-                    id={networkId}
+                    id={xorname}
                     onReturn={handleReturn}
                 />
             )}
