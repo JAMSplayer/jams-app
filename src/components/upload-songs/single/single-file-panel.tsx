@@ -1,23 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon } from "lucide-react";
 import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
-import { ArrowLeftIcon, EditIcon, UploadIcon, XIcon } from "lucide-react";
-import { FileDetail, FilePicture } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
+import { FilePicture } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import SelectYear from "@/components/select-year";
-import { UploadSong } from "@/backend/uploading";
-import { useEffect, useState } from "react";
-import { convertToBase64, base64ToImageFile } from "@/lib/utils/images";
-import { open } from "@tauri-apps/plugin-dialog";
-import { readFile } from "@tauri-apps/plugin-fs";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import SelectYear from "@/components/select-year";
-import { toast } from "sonner";
+import { base64ToImageFile } from "@/lib/utils/images";
 import { uploadSong } from "@/backend/uploading";
 import { saveMetadata } from "@/backend/metadata";
 import { SongUpload } from "@/types/songs/song-upload";
@@ -89,25 +80,22 @@ export default function SingleFilePanel({
         async function readToArray(file: File): Promise<Uint8Array> {
             return new Promise((resolve, reject) => {
                 let reader = new FileReader();
-            
+
                 reader.addEventListener("load", () => {
-                    if (reader.result instanceof  ArrayBuffer) {
+                    if (reader.result instanceof ArrayBuffer) {
                         resolve(new Uint8Array(reader.result));
                     } else {
                         reject(reader.result);
                     }
                 });
                 reader.addEventListener("error", reject);
-            
+
                 reader.readAsArrayBuffer(file);
             });
         }
 
         try {
             setIsUploading(true);
-
-            const result = await UploadSong(song);
-
 
             let songFile: FileDetail = {
                 ...fileDetail,
@@ -116,8 +104,11 @@ export default function SingleFilePanel({
             };
 
             if (song.picture) {
-                const imageFile: File = base64ToImageFile(song.picture, "coverArt");
-  
+                const imageFile: File = base64ToImageFile(
+                    song.picture,
+                    "coverArt"
+                );
+
                 const picture: FilePicture = {
                     data: await readToArray(imageFile),
                     mime_type: imageFile.type,
