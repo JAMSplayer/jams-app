@@ -62,7 +62,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
             try {
                 const song: Song = {
                     id: "123",
-                    networkID: "123",
+                    xorname: "123",
                     title: "test",
                     artist: "test",
                     dateCreated: new Date(),
@@ -121,7 +121,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 ...data,
                 id,
                 tags: [],
-                networkID: "123",
+                xorname: "123",
                 artist: "test",
                 dateCreated: new Date(),
                 location: "test,",
