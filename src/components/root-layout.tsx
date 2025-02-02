@@ -47,8 +47,15 @@ const RootLayout = ({ children }: RootLayoutProps) => {
         getSetting();
     }, [store]);
 
+    useEffect(() => {
+        console.log("isconnected: ", isConnected);
+        if (isConnected) {
+            setShowSplash(false);
+        }
+    }, [isConnected]);
+
     if (showSplash) {
-        return <SplashScreen onComplete={() => setShowSplash(false)} />;
+        return <SplashScreen />;
     }
 
     return (

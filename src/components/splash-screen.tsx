@@ -1,43 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "motion/react";
 import { useConnection } from "@/providers/connection-provider";
 import { connect } from "@/backend/logic";
 import Networks from "@/enums/networks";
 
-const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
+const SplashScreen = () => {
     const { isConnected } = useConnection();
-    const [hasAttemptedConnection, setHasAttemptedConnection] = useState(false);
 
     useEffect(() => {
+        console.log("isConnected changed:", isConnected);
         const attemptConnection = async () => {
             try {
                 console.log("Attempting to connect...");
                 const override = { network: Networks.MAINNET };
-                await connect(override);
-                // TODO - the await above isn't working it's instantly writing out the following log
-                console.log("Connection successful");
+                connect(override);
             } catch (error) {
                 console.error("Connection failed:", error);
-            } finally {
-                setHasAttemptedConnection(true); // mark the connection attempt as finished
             }
         };
 
-        // check if already connected to the network
         if (!isConnected) {
             attemptConnection(); // if not connected, attempt to connect
-        } else {
-            setHasAttemptedConnection(true); // already connected, move to next screen
         }
-    }, []);
-
-    useEffect(() => {
-        if (hasAttemptedConnection) {
-            setTimeout(() => {
-                onComplete(); // notify parent component to hide splash screen
-            }, 500); // wait for fade-out animation to complete
-        }
-    }, [hasAttemptedConnection, onComplete]);
+    }, [isConnected]);
 
     return (
         <motion.div
