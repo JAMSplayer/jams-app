@@ -27,7 +27,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
         formState: { errors, isValid },
     } = useForm<FormSchema>({
         resolver: zodResolver(editSongSchema),
-        mode: "onChange",
+        mode: "onBlur",
         defaultValues: {
             title: undefined,
             description: undefined,
