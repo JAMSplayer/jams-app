@@ -5,7 +5,7 @@ import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SelectYear from "@/components/select-year";
 import { UploadSong } from "@/backend/uploading";
 import { SongUpload } from "@/types/songs/song-upload";
@@ -14,7 +14,6 @@ import { useTranslation } from "react-i18next";
 import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../../tag-input";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 interface SingleFilePanelProps {
     onBack: () => void;
@@ -69,10 +68,6 @@ export default function SingleFilePanel({
     };
 
     // end image ----------------------------------------------------------------
-
-    // track number ------------------------------------------------------------
-
-    // end track number ------------------------------------------------------------
 
     const onSubmit = async (data: FormSchema) => {
         console.log("Submitted Values:", { ...data });
