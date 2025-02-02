@@ -18,7 +18,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import Networks from "@/enums/networks";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { isValidPeerAddress } from "@/lib/utils/network";
 import { useTranslation } from "react-i18next";
 
@@ -134,7 +134,7 @@ export default function StorageSettings() {
             />
             <div className="p-4">
                 <Label>{t("testnetPeerAddress")}</Label>
-                <div className="flex-col space-y-4 mt-2">
+                <div className="flex-col space-y-4 mt-2 pb-16">
                     <input
                         id="input"
                         type="text"
