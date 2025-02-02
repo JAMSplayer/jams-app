@@ -1,8 +1,10 @@
 use futures::lock::Mutex;
-use lofty::file::AudioFile;
-use lofty::prelude::ItemKey;
-use lofty::prelude::TaggedFileExt;
+use lofty::file::{AudioFile, TaggedFile};
+use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
+use lofty::config::{WriteOptions, ParseOptions};
+use lofty::picture::{Picture, PictureType, MimeType};
+use lofty::tag::{Tag, Accessor, TagExt};
 use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
@@ -33,6 +35,12 @@ impl std::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+impl From<String> for Error {
+    fn from(err: String) -> Self {
+        Self::Common(err)
+    }
+}
 
 impl From<tauri::Error> for Error {
     fn from(tauri_error: tauri::Error) -> Self {
@@ -309,7 +317,7 @@ async fn create_reg(
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .reg_create(data.into_bytes(), &meta)
+        .reg_create(data.as_bytes(), &meta)
         .await?;
 
     println!("\n\nReg created");
@@ -356,7 +364,7 @@ async fn write_reg(
             .await
             .as_mut()
             .ok_or(Error::NotConnected)?
-            .reg_write(data.into_bytes(), &meta)
+            .reg_write(data.as_bytes(), &meta)
             .await?;
 
         println!("\n\nReg updated.");
@@ -410,7 +418,7 @@ fn check_key(login: String, password: String, mut app: AppHandle) -> Result<Stri
     load_create_import_key(&app_root, login, password, None, false)
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
 struct FileMetadata {
     file_path: String,
     title: Option<String>,
@@ -443,100 +451,161 @@ fn truncate_number(value: u32, max_length: usize) -> u32 {
     }
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct FilePicture {
     data: Vec<u8>,             // Image data
     mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
 }
 
-#[tauri::command]
-async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>, String> {
-    // TODO: change error type to Error
-    const MAX_TITLE_LENGTH: usize = 100;
-    const MAX_ARTIST_LENGTH: usize = 100;
-    const MAX_ALBUM_LENGTH: usize = 100;
-    const MAX_GENRE_LENGTH: usize = 30;
-    const MAX_YEAR_LENGTH: usize = 4;
-    const MAX_TRACK_NUMBER_LENGTH: usize = 3;
+impl FileMetadata {
+    fn from_tagged_file(tagged_file: TaggedFile, file_path: String) -> Self {
+        const MAX_TITLE_LENGTH: usize = 100;
+        const MAX_ARTIST_LENGTH: usize = 100;
+        const MAX_ALBUM_LENGTH: usize = 100;
+        const MAX_GENRE_LENGTH: usize = 30;
+        const MAX_YEAR_LENGTH: usize = 4;
+        const MAX_TRACK_NUMBER_LENGTH: usize = 3;
 
-    let mut metadata_list = Vec::new();
+        // TODO: try to parse file_path in case of missing tags
+        // (especially track_number, artist and title), because if reading only
+        // beginning of a file, some tags can be cut because of big album art
+        
+        let properties = tagged_file.properties();
 
-    for file_path in file_paths {
-        match read_from_path(&file_path) {
-            Ok(tagged_file) => {
-                let properties = tagged_file.properties();
+        // Safely attempt to read each metadata field, skipping any that fail
+        let title = tagged_file
+            .primary_tag()
+            .and_then(|tag| tag.get_string(&ItemKey::TrackTitle).map(String::from))
+            .map(|t| truncate_to_max_length(t, MAX_TITLE_LENGTH));
 
-                // Safely attempt to read each metadata field, skipping any that fail
-                let title = tagged_file
-                    .primary_tag()
-                    .and_then(|tag| tag.get_string(&ItemKey::TrackTitle).map(String::from))
-                    .map(|t| truncate_to_max_length(t, MAX_TITLE_LENGTH));
+        let artist = tagged_file
+            .primary_tag()
+            .and_then(|tag| tag.get_string(&ItemKey::TrackArtist).map(String::from))
+            .map(|a| truncate_to_max_length(a, MAX_ARTIST_LENGTH));
 
-                let artist = tagged_file
-                    .primary_tag()
-                    .and_then(|tag| tag.get_string(&ItemKey::TrackArtist).map(String::from))
-                    .map(|a| truncate_to_max_length(a, MAX_ARTIST_LENGTH));
+        let album = tagged_file
+            .primary_tag()
+            .and_then(|tag| tag.get_string(&ItemKey::AlbumTitle).map(String::from))
+            .map(|a| truncate_to_max_length(a, MAX_ALBUM_LENGTH));
 
-                let album = tagged_file
-                    .primary_tag()
-                    .and_then(|tag| tag.get_string(&ItemKey::AlbumTitle).map(String::from))
-                    .map(|a| truncate_to_max_length(a, MAX_ALBUM_LENGTH));
+        let genre = tagged_file
+            .primary_tag()
+            .and_then(|tag| tag.get_string(&ItemKey::Genre).map(String::from))
+            .map(|g| truncate_to_max_length(g, MAX_GENRE_LENGTH));
 
-                let genre = tagged_file
-                    .primary_tag()
-                    .and_then(|tag| tag.get_string(&ItemKey::Genre).map(String::from))
-                    .map(|g| truncate_to_max_length(g, MAX_GENRE_LENGTH));
+        let year = tagged_file
+            .primary_tag()
+            .and_then(|tag| tag.get_string(&ItemKey::Year))
+            .and_then(|s| s.parse::<u32>().ok())
+            .map(|value| truncate_number(value, MAX_YEAR_LENGTH)); // Truncate if needed
 
-                let year = tagged_file
-                    .primary_tag()
-                    .and_then(|tag| tag.get_string(&ItemKey::Year))
-                    .and_then(|s| s.parse::<u32>().ok())
-                    .map(|value| truncate_number(value, MAX_YEAR_LENGTH)); // Truncate if needed
+        let track_number = tagged_file
+            .primary_tag()
+            .and_then(|tag| tag.get_string(&ItemKey::TrackNumber))
+            .and_then(|s| s.parse::<u32>().ok())
+            .map(|value| truncate_number(value, MAX_TRACK_NUMBER_LENGTH)); // Truncate if needed
 
-                let track_number = tagged_file
-                    .primary_tag()
-                    .and_then(|tag| tag.get_string(&ItemKey::TrackNumber))
-                    .and_then(|s| s.parse::<u32>().ok())
-                    .map(|value| truncate_number(value, MAX_TRACK_NUMBER_LENGTH)); // Truncate if needed
+        let duration = Some(properties.duration().as_secs());
+        let channels = properties.channels();
+        let sample_rate = properties.sample_rate();
 
-                let duration = Some(properties.duration().as_secs());
-                let channels = properties.channels();
-                let sample_rate = properties.sample_rate();
+        let picture = tagged_file
+            .primary_tag()
+            .and_then(|tag| tag.pictures().first()) // Get the first picture
+            .map(|pic| {
+                (
+                    pic.data().to_vec(),                          // Access the picture data
+                    pic.mime_type().map(|mime| mime.to_string()), // Map the MIME type to an Option<String>
+                )
+            });
 
-                let picture = tagged_file
-                    .primary_tag()
-                    .and_then(|tag| tag.pictures().first()) // Get the first picture
-                    .map(|pic| {
-                        (
-                            pic.data().to_vec(),                          // Access the picture data
-                            pic.mime_type().map(|mime| mime.to_string()), // Map the MIME type to an Option<String>
-                        )
-                    });
-
-                // Add file metadata to the list
-                metadata_list.push(FileMetadata {
-                    file_path,
-                    title,
-                    artist,
-                    album,
-                    genre,
-                    year,
-                    track_number,
-                    duration,
-                    channels,
-                    sample_rate,
-                    picture: picture.map(|(data, mime_type)| FilePicture { data, mime_type }),
-                });
-            }
-            Err(err) => {
-                // Log the error and skip the problematic file
-                eprintln!("Failed to read metadata for {}: {}", file_path, err);
-            }
+        FileMetadata {
+            file_path,
+            title,
+            artist,
+            album,
+            genre,
+            year,
+            track_number,
+            duration,
+            channels,
+            sample_rate,
+            picture: picture.map(|(data, mime_type)| FilePicture { data, mime_type }),
         }
     }
+}
+
+#[tauri::command]
+async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>, Error> {
+    let metadata_list: Vec<FileMetadata> = file_paths.into_iter().map(|file_path| {
+        match read_from_path(&file_path) {
+            Ok(tagged_file) => {
+                FileMetadata::from_tagged_file(tagged_file, file_path)
+            }
+            Err(_) => {
+                FileMetadata {
+                    file_path,
+                    ..Default::default() // other fields will be None (serialized to null)
+                }
+            }
+        }
+    }).collect();
 
     Ok(metadata_list)
 }
+
+#[tauri::command]
+async fn save_file_metadata(
+    song_file: FileMetadata,
+    app: AppHandle,
+) -> Result<(), Error> {
+
+    let mut tagged_file = read_from_path(&song_file.file_path)
+        .map_err(|e| Error::Common(format!("Cannot read tags from file {}", song_file.file_path)))?;
+    tagged_file.clear();
+    let mut new_tag = Tag::new(tagged_file.primary_tag_type());
+
+    song_file.title.inspect(|title| new_tag.set_title(title.clone()));
+    song_file.artist.inspect(|artist| new_tag.set_artist(artist.clone()));
+    song_file.album.inspect(|album| new_tag.set_album(album.clone()));
+    song_file.genre.inspect(|genre| new_tag.set_genre(genre.clone()));
+    song_file.year.inspect(|year| new_tag.set_year(*year));
+    song_file.track_number.inspect(|track_number| new_tag.set_track(*track_number));
+
+    if let Some(pic) = song_file.picture {
+        let new_pic = Picture::new_unchecked(
+            PictureType::CoverFront,
+            pic.mime_type.map(|mime| MimeType::from_str(&mime)),
+            None, // description
+            pic.data
+        );
+        new_tag.push_picture(new_pic);
+    }
+
+    new_tag.save_to_path(&song_file.file_path, WriteOptions::default())
+        .map_err(|e| Error::Common(format!("Cannot save tags to file {}", song_file.file_path)))?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn read_metadata(path: String, safe: State<'_, Mutex<Option<Safe>>>) -> Result<FileMetadata, Error> {
+    let (xorname, _file_name) = server::autonomi(&path)?;
+
+    let data = safe
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error::NotConnected)?
+        .download(&xorname)
+        .await?;
+
+    let mut reader = std::io::Cursor::new(data);
+    let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
+        .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
+
+    Ok(FileMetadata::from_tagged_file(tagged_file, path))
+}
+
 
 // returns hex-encoded xorname
 #[tauri::command]
@@ -560,7 +629,7 @@ async fn put_data(data: Vec<u8>, app: AppHandle) -> Result<String, Error> {
         .await
         .as_mut()
         .ok_or(Error::NotConnected)? // safe
-        .upload(data)
+        .upload(&data)
         .await?;
 
     Ok(hex::encode(data_address))
@@ -587,6 +656,8 @@ pub fn run() {
             gas_balance,
             check_key,
             get_file_metadata,
+            save_file_metadata,
+            read_metadata,
             upload,
             put_data,
         ])
