@@ -10,4 +10,5 @@ export type Song = {
     location: string;
     tags?: string[];
     picture?: string;
+    trackNumber?: number;
 };
