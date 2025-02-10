@@ -140,6 +140,17 @@ export async function secretKey(
     return null;
 }
 
+export async function sessionRead(key: string): Promise<string | null> {
+    return await invoke("session_read", { key: key });
+}
+
+export async function sessionSet(
+    key: string,
+    value: string | null, // null if we want to remove the record.
+): Promise<string | null> { // returns previous value, or null if the value was not present
+    return await invoke("session_set", { key: key, value : value });
+}
+
 function prepareMeta(name: string[]): string[] {
     name.unshift(REG_META_PREFIX);
     return name;
