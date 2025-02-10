@@ -6,10 +6,10 @@ const AddNetworkSongPanel = () => {
     const [activePanel, setActivePanel] = useState<
         "enter-xorname" | "network-song-metadata"
     >("enter-xorname");
-    const [networkId, setNetworkId] = useState<string | null>(null);
+    const [xorname, setXorname] = useState<string | null>(null);
 
     const handleSearch = (id: string) => {
-        setNetworkId(id); // store the songs network ID
+        setXorname(id); // store the songs network ID
         setActivePanel("network-song-metadata"); // switch to the metadata panel
     };
 
@@ -23,7 +23,7 @@ const AddNetworkSongPanel = () => {
                 <EnterXorname onSearch={handleSearch} />
             ) : (
                 <NetworkSongMetadataPanel
-                    id={networkId}
+                    id={xorname}
                     onReturn={handleReturn}
                 />
             )}

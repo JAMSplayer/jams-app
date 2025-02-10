@@ -136,7 +136,8 @@ const PlaylistScroller = ({
                                     {playlist.songs ? (
                                         <>
                                             <small>
-                                                {t("songs")}: {playlist.songs.length}
+                                                {t("songs")}:{" "}
+                                                {playlist.songs.length}
                                             </small>
                                             {" - "}
                                         </>

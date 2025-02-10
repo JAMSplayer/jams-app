@@ -1,6 +1,6 @@
 import Player from "../player/player";
 import { usePlayerStore } from "@/store/player-store";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 const accordionVariants = {
     hidden: { height: 0, opacity: 0 },

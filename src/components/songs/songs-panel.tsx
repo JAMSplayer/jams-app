@@ -45,6 +45,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                 return;
             }
 
+
             try {
                 // Fetch all playlists from the store
                 const storedPlaylists = await store.get("playlists");

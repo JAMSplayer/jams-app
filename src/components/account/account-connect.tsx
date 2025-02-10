@@ -45,7 +45,6 @@ export default function AccountConnect() {
             ) // Ensure it doesn't close when clicking the button
         ) {
             setCurrentPanel(SignedOutPanelState.NONE);
-            toggleSignInPanel();
         }
     };
 
