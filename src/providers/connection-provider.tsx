@@ -9,12 +9,14 @@ import { listen } from "@tauri-apps/api/event";
 import { getConnectedUserAccount } from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
 import { isConnected as checkNetworkConnection } from "@/backend/autonomi";
+import { disconnect } from "@/backend/autonomi";
 
 interface ConnectionContextType {
     isConnected: boolean;
     isConnecting: boolean;
     account: AccountUser | null;
     setIsConnecting: (value: boolean) => void;
+    disconnectNetwork: () => Promise<void>;
 }
 
 const ConnectionContext = createContext<ConnectionContextType>({
@@ -22,6 +24,7 @@ const ConnectionContext = createContext<ConnectionContextType>({
     isConnecting: false,
     account: null,
     setIsConnecting: () => {},
+    disconnectNetwork: async () => {},
 });
 
 interface ConnectionProviderProps {
@@ -34,6 +37,20 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     const [isConnected, setIsConnected] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false); // state for connection in progress
     const [account, setAccount] = useState<AccountUser | null>(null);
+
+    const disconnectNetwork = async () => {
+        try {
+            console.log("Attempting to disconnect...");
+            const success = await disconnect();
+            if (success) {
+                setIsConnected(false);
+                setAccount(null);
+                console.log("Successfully disconnected.");
+            }
+        } catch (error) {
+            console.error("Failed to disconnect:", error);
+        }
+    };
 
     // fetch account information when connected
     const fetchAccount = async () => {
@@ -108,7 +125,8 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
                 isConnected,
                 isConnecting,
                 account,
-                setIsConnecting, // expose the setter for external use
+                setIsConnecting,
+                disconnectNetwork,
             }}
         >
             {children}
