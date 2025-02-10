@@ -80,42 +80,40 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
         }
     };
 
-    // set up event listeners for connection updates
     useEffect(() => {
-        initializeConnection(); // perform initial connection check
+        initializeConnection();
 
-        const unlistenSignIn = listen("sign_in", async () => {
+        const unlistenSignInPromise = listen("sign_in", async () => {
             console.log("Sign In event received");
             setIsConnecting(true);
             try {
-                await fetchAccount(); // fetch account on sign-in
+                await fetchAccount();
             } finally {
-                setIsConnecting(false); // done connecting
+                setIsConnecting(false);
             }
         });
 
-        const unlistenConnected = listen("connected", async () => {
+        const unlistenConnectedPromise = listen("connected", async () => {
             console.log("Connected event received");
             setIsConnecting(true);
             try {
                 setIsConnected(true);
-                await fetchAccount(); // try to fetch account on connection
+                await fetchAccount();
             } finally {
-                setIsConnecting(false); // done connecting
+                setIsConnecting(false);
             }
         });
 
-        const unlistenDisconnected = listen("disconnected", () => {
+        const unlistenDisconnectedPromise = listen("disconnected", () => {
             console.log("Disconnected event received");
             setIsConnected(false);
-            setAccount(null); // clear account on disconnection
+            setAccount(null);
         });
 
-        // clean up listeners on unmount
         return () => {
-            unlistenSignIn.then((unlisten) => unlisten());
-            unlistenConnected.then((unlisten) => unlisten());
-            unlistenDisconnected.then((unlisten) => unlisten());
+            unlistenSignInPromise.then((unlisten) => unlisten());
+            unlistenConnectedPromise.then((unlisten) => unlisten());
+            unlistenDisconnectedPromise.then((unlisten) => unlisten());
         };
     }, []);
 
