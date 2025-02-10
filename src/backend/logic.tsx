@@ -12,6 +12,7 @@ import {
     AccountUser,
     RegisterAccountUser,
     SimpleAccountUser,
+    RecoverAccountUser,
 } from "@/types/account-user";
 import {
     getSelectedNetwork,
@@ -65,13 +66,18 @@ export async function connect(override?: {
 }
 
 export async function registerUser(
-    newUser: RegisterAccountUser
+    newUser: RegisterAccountUser | RecoverAccountUser
 ): Promise<AccountUser | null> {
     console.log(`Attempting to create a new user: ${newUser.username}`);
 
     try {
         // Register and connect the user
-        const success = await register(newUser.username, newUser.password);
+        let success = false;
+        if ((newUser as RecoverAccountUser).secretKey !== undefined) {
+            success = await register(newUser.username, newUser.password, (newUser as RecoverAccountUser).secretKey);
+        } else {
+            success = await register(newUser.username, newUser.password);
+        }
         if (!success) {
             return null;
         }
