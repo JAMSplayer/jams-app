@@ -69,12 +69,13 @@ export function Menu({ isOpen }: MenuProps) {
                                 )}
                                 {filteredMenus.map(
                                     (
+
                                         {
                                             href,
                                             label,
                                             icon: Icon,
                                             submenus,
-//                                            requiresAuth, // Check this property
+                                            requiresAuth,
                                         },
                                         index
                                     ) =>

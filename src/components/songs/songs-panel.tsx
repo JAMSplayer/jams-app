@@ -38,11 +38,13 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
     const [songs, setSongs] = useState<Song[]>([]);
 
     useEffect(() => {
+
         const fetchAllSongs = async () => {
             if (!store) {
                 console.error("Store is not initialized.");
                 return;
             }
+
 
             try {
                 // Fetch all playlists from the store
