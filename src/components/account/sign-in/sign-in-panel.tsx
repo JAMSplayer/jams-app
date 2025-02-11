@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { formatAddress } from "@/lib/utils/address";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./recent-accounts";
-import { signIn as autonomiSignIn } from "@/backend/autonomi";
+import { signIn as autonomiLogicSignIn } from "@/backend/logic";
 import { registeredAccounts } from "@/backend/logic";
 import { SimpleAccountUser } from "@/types/account-user";
 import { useTranslation } from "react-i18next";
@@ -128,7 +128,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                 description: t("thisUsernameDoesNotExist"),
             });
         } else {
-            autonomiSignIn(values.username, values.password);
+            autonomiLogicSignIn(values.username, values.password);
         }
     };
 

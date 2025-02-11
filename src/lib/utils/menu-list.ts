@@ -6,6 +6,7 @@ import {
     LucideIcon,
     Music,
     List,
+    Heart,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -61,6 +62,10 @@ export function getMenuList(_pathname: string): Group[] {
                             label: t("uploadSongs"),
                             requiresAuth: true,
                         },
+                        {
+                            href: "/add-network-song",
+                            label: "Add Network Song",
+                        },
                     ],
                 },
                 {
@@ -81,7 +86,7 @@ export function getMenuList(_pathname: string): Group[] {
                 {
                     href: "/favorites",
                     label: t("favorites"),
-                    icon: Bookmark,
+                    icon: Heart,
                 },
                 {
                     href: "/tags",

@@ -285,6 +285,36 @@ async fn disconnect(app: AppHandle) -> Result<(), Error> {
     Ok(())
 }
 
+type Session = std::collections::HashMap<String, String>;
+
+#[tauri::command]
+async fn session_set(
+    key: String,
+    value: Option<String>,
+    app: AppHandle,
+) -> Option<String> {
+    let state = app.try_state::<Mutex<Session>>().expect("Session not managed.");
+    let mut session = state.lock().await;
+
+    if let Some(v) = value {
+        session.insert(key, v)
+    } else {
+        session.remove(&key)
+    }
+}
+
+#[tauri::command]
+async fn session_read(
+    key: String,
+    app: AppHandle,
+) -> Option<String> {
+    let state = app.try_state::<Mutex<Session>>().expect("Session not managed.");
+    let session = state.lock().await;
+
+    session.get(&key).cloned()
+}
+
+
 fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
     if name.is_empty() {
         return Err(Error::Common(String::from("Empty name.")));
@@ -642,12 +672,15 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
+        .manage(Mutex::new(Session::new()))
         .invoke_handler(tauri::generate_handler![
             list_accounts,
             connect,
             sign_in,
             is_connected,
             disconnect,
+            session_set,
+            session_read,
             create_reg,
             read_reg,
             write_reg,

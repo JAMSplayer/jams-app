@@ -17,9 +17,8 @@ export async function fetchMetadata(
     }
 }
 
-export async function saveMetadata(
-    file: FileDetail
-): Promise<void> { // throw on error
+export async function saveMetadata(file: FileDetail): Promise<void> {
+    // throw on error
     await invoke("save_file_metadata", { songFile: file });
 }
 
@@ -33,7 +32,11 @@ export async function readMetadata(
         });
         return metadata;
     } catch (error) {
-        console.error("Failed to fetch metadata from network: ", locationPath, error);
+        console.error(
+            "Failed to fetch metadata from network: ",
+            locationPath,
+            error
+        );
     }
     return null;
 }
