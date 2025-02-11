@@ -13,13 +13,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { RegisterAccountUser, SimpleAccountUser } from "@/types/account-user";
-import { registerUser } from "@/backend/logic";
+import { useState } from "react";
+import { RegisterAccountUser } from "@/types/account-user";
+import { registerUser, signIn } from "@/backend/logic";
 import { useTranslation } from "react-i18next";
-import { useStorage } from "@/providers/storage-provider";
 import { listAccounts } from "@/backend/autonomi";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { toast } from "sonner";
 
 interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -72,9 +72,40 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
             dateUpdated: new Date(),
         };
 
-        await registerUser(newUser);
+        try {
+            setIsLoading(true);
 
-        setIsLoading(false);
+            const result = await registerUser(newUser);
+
+            if (!result) {
+                toast("Register Error", {
+                    description: "Failed to register. Please try again.",
+                });
+                return;
+            }
+
+            try {
+                const result = await signIn(newUser.username, newUser.password);
+                if (!result) {
+                    toast("Sign In Error", {
+                        description: "Failed to sign in. Please try again.",
+                    });
+                    return;
+                }
+            } catch (error) {
+                toast("Sign In Error", { description: "Sign-in failed:" });
+            }
+        } catch (error) {
+            console.log("Register Error", {
+                description: "Registration or Sign-in failed:",
+                error,
+            });
+            toast("Register Error", {
+                description: "Registration failed. Please try again",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const isUsernameValid = async (username: string) => {
