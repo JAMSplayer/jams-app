@@ -123,7 +123,7 @@ export async function signIn(
     if (success) {
         const address = await clientAddress();
         if (address) {
-            sessionSet(USER_SESSION_KEY, JSON.stringify({
+            await sessionSet(USER_SESSION_KEY, JSON.stringify({
                 username: username,
                 address: address,
             }));
