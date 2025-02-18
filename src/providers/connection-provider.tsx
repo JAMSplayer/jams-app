@@ -6,7 +6,11 @@ import React, {
     useState,
 } from "react";
 import { listen } from "@tauri-apps/api/event";
-import { connect, getConnectedUserAccount, signOut as backendSignOut } from "@/backend/logic";
+import {
+    connect,
+    getConnectedUserAccount,
+    signOut as backendSignOut,
+} from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
 import { isConnected as checkNetworkConnection } from "@/backend/autonomi";
 import { disconnect } from "@/backend/autonomi";

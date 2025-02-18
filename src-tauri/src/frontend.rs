@@ -1,4 +1,4 @@
-use crate::{ Serialize, Deserialize };
+use crate::{Deserialize, Serialize};
 
 // stuff that has to be in sync with frontend code.
 

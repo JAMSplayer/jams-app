@@ -1,6 +1,6 @@
 import { formatAddress } from "@/lib/utils/address";
 import { formatBalance } from "@/lib/utils/balance";
-import { copyToClipboard } from "@/lib/utils/clipboard";
+import { useClipboard } from "@/hooks/use-clipboard";
 import { Copy } from "lucide-react";
 import { balance as autonomiBalance } from "@/backend/autonomi";
 import { useEffect, useState } from "react";
@@ -18,6 +18,7 @@ const SignedInPanel: React.FC<SignedInPanelProps> = ({ account }) => {
     // ====================================================================================
 
     const [balanceValue, setBalanceValue] = useState<string | null>(null);
+    const { copyToClipboard } = useClipboard();
 
     useEffect(() => {
         // Fetch the balance asynchronously and update state
@@ -52,7 +53,7 @@ const SignedInPanel: React.FC<SignedInPanelProps> = ({ account }) => {
         );
 
     return (
-        <div className="border-b border-dashed px-4 py-5 border-secondary">
+        <div className="flex flex-col w-full border-b border-dashed px-4 py-5 border-secondary">
             {account.username}
             <div className="flex w-full mt-3">
                 <div className="flex-grow rounded-lg bg-secondary px-2 py-1 text-sm tracking-tighter">
@@ -64,6 +65,7 @@ const SignedInPanel: React.FC<SignedInPanelProps> = ({ account }) => {
                     className="ml-2 flex cursor-pointer items-center transition"
                     onClick={() => {
                         if (account) {
+                            console.log(account.address);
                             copyToClipboard(account.address);
                         }
                     }}

@@ -36,7 +36,7 @@
     "songs": "Songs",
     "music": "Music",
     "dashboard": "Dashboard",
-    "yourTextIsNowReadyForPasing": "Your text is now ready for pasting.",
+    "yourTextIsNowReadyForPasting": "Your text is now ready for pasting.",
     "textCopied": "Text Copied",
     "secretKeyMustBeAtLeastCharacters": "Secret key must be at least {{count}} characters.",
     "secretKeyCannotExceedCharacters": "Secret key cannot exceed {{count}} characters.",
