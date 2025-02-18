@@ -86,7 +86,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                             </span>{" "}
                                         </div>
                                         <div
-                                            title="Copy Secret Key"
+                                            title="Copy Private Key"
                                             className="flex cursor-pointer items-center transition"
                                             onClick={() => {
                                                 if (secret) {
