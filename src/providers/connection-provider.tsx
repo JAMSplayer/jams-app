@@ -6,7 +6,7 @@ import React, {
     useState,
 } from "react";
 import { listen } from "@tauri-apps/api/event";
-import { connect, getConnectedUserAccount } from "@/backend/logic";
+import { connect, getConnectedUserAccount, signOut as backendSignOut } from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
 import { isConnected as checkNetworkConnection } from "@/backend/autonomi";
 import { disconnect } from "@/backend/autonomi";
@@ -50,6 +50,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
             if (success) {
                 setIsConnected(false);
                 setAccount(null);
+                await backendSignOut();
                 console.log("Successfully disconnected.");
             }
         } catch (error) {
@@ -60,6 +61,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     const signOut = async () => {
         console.log("Signing out user sign out user...");
         setAccount(null);
+        await backendSignOut();
     };
 
     // connect to network
@@ -131,10 +133,11 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
                 await fetchAccount();
             });
 
-            unlistenDisconnected = await listen("disconnected", () => {
+            unlistenDisconnected = await listen("disconnected", async () => {
                 console.log("Disconnected event received");
                 setIsConnected(false);
                 setAccount(null);
+                await backendSignOut();
             });
         };
 

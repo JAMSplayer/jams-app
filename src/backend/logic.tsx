@@ -134,6 +134,14 @@ export async function signIn(
     return success;
 }
 
+export async function signOut(): Promise<void> {
+    try {
+        await sessionSet(USER_SESSION_KEY, null);
+    } catch(e) {
+        console.error("signOut: ", e);
+    }
+}
+
 export async function saveUser(user: AccountUser) {
     console.log("saving user: ", user);
     await sessionSet(USER_SESSION_KEY, JSON.stringify(user));

@@ -12,6 +12,9 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 mod secure_sk;
 mod server;
+mod frontend;
+
+use frontend::*;
 
 const ACCOUNTS_DIR: &str = "accounts";
 const SK_FILENAME: &str = "sk.key";
@@ -261,6 +264,11 @@ async fn sign_in(
         ))
     })?;
 
+    session_set(String::from(USER_SESSION_KEY), Some(serde_json::to_string(&SimpleAccountUser {
+        username: login,
+        address: address,
+    }).expect("Object values should be able to serialize.")), app.clone()).await;
+
     let _ = app.emit("sign_in", ()).inspect_err(|e| eprintln!("{}", e));
 
     Ok(())
@@ -448,21 +456,6 @@ fn check_key(login: String, password: String, mut app: AppHandle) -> Result<Stri
     load_create_import_key(&app_root, login, password, None, false)
 }
 
-#[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
-struct FileMetadata {
-    file_path: String,
-    title: Option<String>,
-    artist: Option<String>,
-    album: Option<String>,
-    genre: Option<String>,
-    year: Option<u32>,
-    track_number: Option<u32>,
-    duration: Option<u64>,        // Duration in seconds
-    channels: Option<u8>,         // Optional
-    sample_rate: Option<u32>,     // Optional
-    picture: Option<FilePicture>, // Use FilePicture struct for image and MIME type
-}
-
 fn truncate_to_max_length(value: String, max_length: usize) -> String {
     if value.len() > max_length {
         value.chars().take(max_length).collect() // Truncate string to the maximum length
@@ -479,12 +472,6 @@ fn truncate_number(value: u32, max_length: usize) -> u32 {
     } else {
         value
     }
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-struct FilePicture {
-    data: Vec<u8>,             // Image data
-    mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
 }
 
 impl FileMetadata {
