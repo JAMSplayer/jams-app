@@ -73,8 +73,12 @@ export async function registerUser(
     try {
         // Register and connect the user
         let success = false;
-        if ((newUser as RecoverAccountUser).secretKey !== undefined) {
-            success = await register(newUser.username, newUser.password, (newUser as RecoverAccountUser).secretKey);
+        if ((newUser as RecoverAccountUser).privateKey !== undefined) {
+            success = await register(
+                newUser.username,
+                newUser.password,
+                (newUser as RecoverAccountUser).privateKey
+            );
         } else {
             success = await register(newUser.username, newUser.password);
         }
@@ -117,16 +121,19 @@ export async function registerUser(
 
 export async function signIn(
     username: string,
-    password: string,
+    password: string
 ): Promise<boolean> {
     let success = await autonomiSignIn(username, password);
     if (success) {
         const address = await clientAddress();
         if (address) {
-            await sessionSet(USER_SESSION_KEY, JSON.stringify({
-                username: username,
-                address: address,
-            }));
+            await sessionSet(
+                USER_SESSION_KEY,
+                JSON.stringify({
+                    username: username,
+                    address: address,
+                })
+            );
         } else {
             success = false;
         }
@@ -137,7 +144,7 @@ export async function signIn(
 export async function signOut(): Promise<void> {
     try {
         await sessionSet(USER_SESSION_KEY, null);
-    } catch(e) {
+    } catch (e) {
         console.error("signOut: ", e);
     }
 }

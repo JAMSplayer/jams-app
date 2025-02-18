@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { RegisterAccountUser } from "@/types/account-user";
 import { registerUser, signIn } from "@/backend/logic";
 import { useTranslation } from "react-i18next";
-import { listAccounts, secretKey } from "@/backend/autonomi";
+import { listAccounts, privateKey } from "@/backend/autonomi";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "sonner";
 import {
@@ -165,7 +165,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                 return;
             }
 
-            const secret = await secretKey(result.username, data.password);
+            const secret = await privateKey(result.username, data.password);
             await showSecretDialog(secret);
 
             try {
