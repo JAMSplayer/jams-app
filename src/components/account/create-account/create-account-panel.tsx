@@ -14,9 +14,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { RegisterAccountUser, SimpleAccountUser } from "@/types/account-user";
-import { registerUser } from "@/backend/logic";
+import { RegisterAccountUser } from "@/types/account-user";
+import { registerUser, signIn } from "@/backend/logic";
 import { useTranslation } from "react-i18next";
+import { listAccounts } from "@/backend/autonomi";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { toast } from "sonner";
 
 interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -52,8 +55,15 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
 
     type CreateAccountFormData = z.infer<typeof createAccountSchema>;
 
-    const onSubmit = (data: CreateAccountFormData) => {
-        console.log(data);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const onSubmit = async (data: CreateAccountFormData) => {
+        console.log(data.username);
+        if (!isUsernameValid(data.username)) {
+            return;
+        }
+
+        setIsLoading(true);
 
         const newUser: RegisterAccountUser = {
             username: data.username,
@@ -62,23 +72,65 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
             dateUpdated: new Date(),
         };
 
-        // Proceed with account creation
-        registerUser(newUser);
+        try {
+            setIsLoading(true);
+
+            const result = await registerUser(newUser);
+
+            if (!result) {
+                toast("Register Error", {
+                    description: "Failed to register. Please try again.",
+                });
+                return;
+            }
+
+            try {
+                const result = await signIn(newUser.username, newUser.password);
+                if (!result) {
+                    toast("Sign In Error", {
+                        description: "Failed to sign in. Please try again.",
+                    });
+                    return;
+                }
+            } catch (error) {
+                toast("Sign In Error", { description: "Sign-in failed:" });
+            }
+        } catch (error) {
+            console.log("Register Error", {
+                description: "Registration or Sign-in failed:",
+                error,
+            });
+            toast("Register Error", {
+                description: "Registration failed. Please try again",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    // TODO currently we are using this as a way to store all existing accounts - get from the hook
-    // recentAccountList, setRecentAccountList
-    const [recentAccountList] = useState<SimpleAccountUser[]>([]);
+    const isUsernameValid = async (username: string) => {
+        try {
+            const accounts = await listAccounts();
 
-    const validateUsername = (username: string) => {
-        const foundAccount = recentAccountList.find(
-            (account) => account.username === username
-        );
+            if (!accounts) {
+                setUsernameAlreadyExistsError(null);
+                return false;
+            }
 
-        if (foundAccount) {
-            setUsernameAlreadyExistsError(t("thisUsernameAlreadyExists"));
-        } else {
-            setUsernameAlreadyExistsError(null);
+            const foundAccount = accounts.find(
+                ([accountUsername]) => accountUsername === username
+            );
+
+            if (foundAccount) {
+                setUsernameAlreadyExistsError(t("thisUsernameAlreadyExists"));
+                return false;
+            } else {
+                setUsernameAlreadyExistsError(null);
+                return true;
+            }
+        } catch (error) {
+            console.error("Error checking username:", error);
+            return false;
         }
     };
 
@@ -120,7 +172,7 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                                                 {...field} // Spread field instead of using register directly
                                                 onChange={(e) => {
                                                     field.onChange(e); // Update field value
-                                                    validateUsername(
+                                                    isUsernameValid(
                                                         e.target.value
                                                     ); // Validate on change
                                                 }}
@@ -189,9 +241,20 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                             <Button
                                 type="submit"
                                 className="mt-4 w-full"
-                                disabled={!isValid}
+                                disabled={
+                                    isLoading ||
+                                    !isValid ||
+                                    usernameAlreadyExistsError !== null
+                                }
                             >
-                                {t("createAccount")}
+                                {isLoading ? (
+                                    <span className="inline-flex items-center gap-x-2">
+                                        {"Loading"}
+                                        <LoadingSpinner />
+                                    </span>
+                                ) : (
+                                    t("createAccount")
+                                )}
                             </Button>
                         </div>
                     </form>

@@ -1,17 +1,20 @@
 use futures::lock::Mutex;
+use lofty::config::{ParseOptions, WriteOptions};
 use lofty::file::{AudioFile, TaggedFile};
+use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
-use lofty::config::{WriteOptions, ParseOptions};
-use lofty::picture::{Picture, PictureType, MimeType};
-use lofty::tag::{Tag, Accessor, TagExt};
+use lofty::tag::{Accessor, Tag, TagExt};
 use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 use tauri::{AppHandle, Emitter, Manager, State};
 
+mod frontend;
 mod secure_sk;
 mod server;
+
+use frontend::*;
 
 const ACCOUNTS_DIR: &str = "accounts";
 const SK_FILENAME: &str = "sk.key";
@@ -261,6 +264,19 @@ async fn sign_in(
         ))
     })?;
 
+    session_set(
+        String::from(USER_SESSION_KEY),
+        Some(
+            serde_json::to_string(&SimpleAccountUser {
+                username: login,
+                address: address,
+            })
+            .expect("Object values should be able to serialize."),
+        ),
+        app.clone(),
+    )
+    .await;
+
     let _ = app.emit("sign_in", ()).inspect_err(|e| eprintln!("{}", e));
 
     Ok(())
@@ -288,12 +304,10 @@ async fn disconnect(app: AppHandle) -> Result<(), Error> {
 type Session = std::collections::HashMap<String, String>;
 
 #[tauri::command]
-async fn session_set(
-    key: String,
-    value: Option<String>,
-    app: AppHandle,
-) -> Option<String> {
-    let state = app.try_state::<Mutex<Session>>().expect("Session not managed.");
+async fn session_set(key: String, value: Option<String>, app: AppHandle) -> Option<String> {
+    let state = app
+        .try_state::<Mutex<Session>>()
+        .expect("Session not managed.");
     let mut session = state.lock().await;
 
     if let Some(v) = value {
@@ -304,16 +318,14 @@ async fn session_set(
 }
 
 #[tauri::command]
-async fn session_read(
-    key: String,
-    app: AppHandle,
-) -> Option<String> {
-    let state = app.try_state::<Mutex<Session>>().expect("Session not managed.");
+async fn session_read(key: String, app: AppHandle) -> Option<String> {
+    let state = app
+        .try_state::<Mutex<Session>>()
+        .expect("Session not managed.");
     let session = state.lock().await;
 
     session.get(&key).cloned()
 }
-
 
 fn meta_builder(name: Vec<String>) -> Result<XorNameBuilder, Error> {
     if name.is_empty() {
@@ -342,8 +354,7 @@ async fn create_reg(
     println!("Meta: {}", &meta);
 
     //    let (mut reg, cost, royalties) = safe
-    safe
-        .lock()
+    safe.lock()
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
@@ -389,8 +400,7 @@ async fn write_reg(
 
     println!("Writing data: {}", &data);
     if !data.is_empty() {
-        safe
-            .lock()
+        safe.lock()
             .await
             .as_mut()
             .ok_or(Error::NotConnected)?
@@ -425,7 +435,7 @@ async fn balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Error> 
         .ok_or(Error::NotConnected)?
         .balance()
         .await?;
-//    Ok(format!("{:x}", balance)) // hex string
+    //    Ok(format!("{:x}", balance)) // hex string
     Ok(format!("{}", balance.0))
 }
 
@@ -438,7 +448,7 @@ async fn gas_balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Err
         .ok_or(Error::NotConnected)?
         .balance()
         .await?;
-//    Ok(format!("{:x}", balance)) // hex string
+    //    Ok(format!("{:x}", balance)) // hex string
     Ok(format!("{}", balance.1))
 }
 
@@ -446,21 +456,6 @@ async fn gas_balance(safe: State<'_, Mutex<Option<Safe>>>) -> Result<String, Err
 fn check_key(login: String, password: String, mut app: AppHandle) -> Result<String, Error> {
     let app_root = make_root(&mut app)?;
     load_create_import_key(&app_root, login, password, None, false)
-}
-
-#[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
-struct FileMetadata {
-    file_path: String,
-    title: Option<String>,
-    artist: Option<String>,
-    album: Option<String>,
-    genre: Option<String>,
-    year: Option<u32>,
-    track_number: Option<u32>,
-    duration: Option<u64>,        // Duration in seconds
-    channels: Option<u8>,         // Optional
-    sample_rate: Option<u32>,     // Optional
-    picture: Option<FilePicture>, // Use FilePicture struct for image and MIME type
 }
 
 fn truncate_to_max_length(value: String, max_length: usize) -> String {
@@ -481,12 +476,6 @@ fn truncate_number(value: u32, max_length: usize) -> u32 {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-struct FilePicture {
-    data: Vec<u8>,             // Image data
-    mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
-}
-
 impl FileMetadata {
     fn from_tagged_file(tagged_file: TaggedFile, file_path: String) -> Self {
         const MAX_TITLE_LENGTH: usize = 100;
@@ -499,7 +488,7 @@ impl FileMetadata {
         // TODO: try to parse file_path in case of missing tags
         // (especially track_number, artist and title), because if reading only
         // beginning of a file, some tags can be cut because of big album art
-        
+
         let properties = tagged_file.properties();
 
         // Safely attempt to read each metadata field, skipping any that fail
@@ -567,58 +556,73 @@ impl FileMetadata {
 
 #[tauri::command]
 async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>, Error> {
-    let metadata_list: Vec<FileMetadata> = file_paths.into_iter().map(|file_path| {
-        match read_from_path(&file_path) {
-            Ok(tagged_file) => {
-                FileMetadata::from_tagged_file(tagged_file, file_path)
-            }
-            Err(_) => {
-                FileMetadata {
-                    file_path,
-                    ..Default::default() // other fields will be None (serialized to null)
+    let metadata_list: Vec<FileMetadata> = file_paths
+        .into_iter()
+        .map(|file_path| {
+            match read_from_path(&file_path) {
+                Ok(tagged_file) => FileMetadata::from_tagged_file(tagged_file, file_path),
+                Err(_) => {
+                    FileMetadata {
+                        file_path,
+                        ..Default::default() // other fields will be None (serialized to null)
+                    }
                 }
             }
-        }
-    }).collect();
+        })
+        .collect();
 
     Ok(metadata_list)
 }
 
 #[tauri::command]
-async fn save_file_metadata(
-    song_file: FileMetadata,
-    app: AppHandle,
-) -> Result<(), Error> {
-
-    let mut tagged_file = read_from_path(&song_file.file_path)
-        .map_err(|e| Error::Common(format!("Cannot read tags from file {}", song_file.file_path)))?;
+async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(), Error> {
+    let mut tagged_file = read_from_path(&song_file.file_path).map_err(|e| {
+        Error::Common(format!(
+            "Cannot read tags from file {}",
+            song_file.file_path
+        ))
+    })?;
     tagged_file.clear();
     let mut new_tag = Tag::new(tagged_file.primary_tag_type());
 
-    song_file.title.inspect(|title| new_tag.set_title(title.clone()));
-    song_file.artist.inspect(|artist| new_tag.set_artist(artist.clone()));
-    song_file.album.inspect(|album| new_tag.set_album(album.clone()));
-    song_file.genre.inspect(|genre| new_tag.set_genre(genre.clone()));
+    song_file
+        .title
+        .inspect(|title| new_tag.set_title(title.clone()));
+    song_file
+        .artist
+        .inspect(|artist| new_tag.set_artist(artist.clone()));
+    song_file
+        .album
+        .inspect(|album| new_tag.set_album(album.clone()));
+    song_file
+        .genre
+        .inspect(|genre| new_tag.set_genre(genre.clone()));
     song_file.year.inspect(|year| new_tag.set_year(*year));
-    song_file.track_number.inspect(|track_number| new_tag.set_track(*track_number));
+    song_file
+        .track_number
+        .inspect(|track_number| new_tag.set_track(*track_number));
 
     if let Some(pic) = song_file.picture {
         let new_pic = Picture::new_unchecked(
             PictureType::CoverFront,
             pic.mime_type.map(|mime| MimeType::from_str(&mime)),
             None, // description
-            pic.data
+            pic.data,
         );
         new_tag.push_picture(new_pic);
     }
 
-    new_tag.save_to_path(&song_file.file_path, WriteOptions::default())
+    new_tag
+        .save_to_path(&song_file.file_path, WriteOptions::default())
         .map_err(|e| Error::Common(format!("Cannot save tags to file {}", song_file.file_path)))?;
     Ok(())
 }
 
 #[tauri::command]
-async fn read_metadata(path: String, safe: State<'_, Mutex<Option<Safe>>>) -> Result<FileMetadata, Error> {
+async fn read_metadata(
+    path: String,
+    safe: State<'_, Mutex<Option<Safe>>>,
+) -> Result<FileMetadata, Error> {
     let (xorname, _file_name) = server::autonomi(&path)?;
 
     let data = safe
@@ -635,7 +639,6 @@ async fn read_metadata(path: String, safe: State<'_, Mutex<Option<Safe>>>) -> Re
 
     Ok(FileMetadata::from_tagged_file(tagged_file, path))
 }
-
 
 // returns hex-encoded xorname
 #[tauri::command]
@@ -668,6 +671,7 @@ async fn put_data(data: Vec<u8>, app: AppHandle) -> Result<String, Error> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())

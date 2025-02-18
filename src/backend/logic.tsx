@@ -123,7 +123,7 @@ export async function signIn(
     if (success) {
         const address = await clientAddress();
         if (address) {
-            sessionSet(USER_SESSION_KEY, JSON.stringify({
+            await sessionSet(USER_SESSION_KEY, JSON.stringify({
                 username: username,
                 address: address,
             }));
@@ -132,6 +132,14 @@ export async function signIn(
         }
     }
     return success;
+}
+
+export async function signOut(): Promise<void> {
+    try {
+        await sessionSet(USER_SESSION_KEY, null);
+    } catch(e) {
+        console.error("signOut: ", e);
+    }
 }
 
 export async function saveUser(user: AccountUser) {

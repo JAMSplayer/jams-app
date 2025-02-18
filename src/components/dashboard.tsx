@@ -18,7 +18,6 @@ export default function Dashboard() {
                         title: "BegBlag",
                         artist: "BegBlag",
                         dateCreated: new Date(),
-                        xorname: "123",
                         picture: undefined,
                         tags: [],
                     }}

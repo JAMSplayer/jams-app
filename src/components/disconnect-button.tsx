@@ -10,7 +10,7 @@ const DisconnectButton = () => {
     return (
         <Button
             onClick={() => disconnectNetwork()}
-            className="flex items-center justify-center px-3 rounded-full hover:bg-opacity-70 transition"
+            className="px-3 rounded-full hover:bg-opacity-70 transition"
         >
             <PowerIcon size={24} />
         </Button>
