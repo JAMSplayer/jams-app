@@ -7,19 +7,30 @@ import {
     FormLabel,
     FormMessage,
 } from "../../ui/form";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Copy } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createAccountSchema } from "@/form-schemas/create-account-schema";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RegisterAccountUser } from "@/types/account-user";
 import { registerUser, signIn } from "@/backend/logic";
 import { useTranslation } from "react-i18next";
-import { listAccounts } from "@/backend/autonomi";
+import { listAccounts, privateKey } from "@/backend/autonomi";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import ReactDOM from "react-dom";
+import { useClipboard } from "@/hooks/use-clipboard";
 
 interface CreateAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -32,6 +43,76 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
     // Create Account Form Functionality
     // ====================================================================================
     const { t } = useTranslation();
+    const { copyToClipboard } = useClipboard();
+
+    function showSecretDialog(secret: string | null) {
+        return new Promise<void>((resolve) => {
+            const dialogContainer = document.createElement("div");
+            document.body.appendChild(dialogContainer);
+
+            const Dialog = () => {
+                const [isOpen, setIsOpen] = useState(true);
+
+                const handleClose = () => {
+                    setIsOpen(false);
+                    resolve();
+                };
+
+                useEffect(() => {
+                    if (!isOpen) {
+                        ReactDOM.unmountComponentAtNode(dialogContainer);
+                        document.body.removeChild(dialogContainer);
+                    }
+                }, [isOpen]);
+
+                return (
+                    <AlertDialog
+                        open={isOpen}
+                        onOpenChange={(newState) => setIsOpen(newState)}
+                    >
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Private Key</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    <p className="pb-4">
+                                        Your private key can be used to recover
+                                        your account. Please save it to a secure
+                                        place.
+                                    </p>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="flex-grow rounded-lg bg-secondary px-2 py-1 text-sm tracking-tighter">
+                                            <span className="text-xs">
+                                                {secret}
+                                            </span>{" "}
+                                        </div>
+                                        <div
+                                            title="Copy Private Key"
+                                            className="flex cursor-pointer items-center transition"
+                                            onClick={() => {
+                                                if (secret) {
+                                                    copyToClipboard(secret);
+                                                }
+                                            }}
+                                        >
+                                            <Copy className="h-auto w-3.5" />
+                                        </div>
+                                    </div>
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction onClick={handleClose}>
+                                    {t("close")}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                );
+            };
+
+            // Render the dialog inside the container div
+            ReactDOM.render(<Dialog />, dialogContainer);
+        });
+    }
 
     const createAccountForm = useForm<z.infer<typeof createAccountSchema>>({
         resolver: zodResolver(createAccountSchema),
@@ -83,6 +164,9 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                 });
                 return;
             }
+
+            const secret = await privateKey(result.username, data.password);
+            await showSecretDialog(secret);
 
             try {
                 const result = await signIn(newUser.username, newUser.password);

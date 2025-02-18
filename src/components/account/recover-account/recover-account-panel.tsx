@@ -34,7 +34,7 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
         resolver: zodResolver(recoverAccountSchema),
         mode: "onChange",
         defaultValues: {
-            secretKey: "",
+            privateKey: "",
             username: "",
             password: "",
             confirmPassword: "",
@@ -53,7 +53,7 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
         console.log(data);
 
         const newUser: RecoverAccountUser = {
-            secretKey: data.secretKey,
+            privateKey: data.privateKey,
             username: data.username,
             password: data.password,
             dateCreated: new Date(),
@@ -86,19 +86,19 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                     >
                         <FormField
                             control={control}
-                            name="secretKey"
+                            name="privateKey"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>{t("secretKey")}</FormLabel>
+                                    <FormLabel>{t("privateKey")}</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder={t(
-                                                "enterYourSecretKey"
+                                                "enterYourPrivateKey"
                                             )}
                                             autoCapitalize="off"
                                             autoComplete="off"
                                             autoCorrect="off"
-                                            {...register("secretKey")}
+                                            {...register("privateKey")}
                                         />
                                     </FormControl>
 
