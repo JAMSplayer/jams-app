@@ -458,6 +458,16 @@ fn check_key(login: String, password: String, mut app: AppHandle) -> Result<Stri
     load_create_import_key(&app_root, login, password, None, false)
 }
 
+#[tauri::command]
+fn delete_account(login: String, mut app: AppHandle) -> Result<(), Error> {
+    let app_root = make_root(&mut app)?;
+    let sk_dir = user_root(&app_root, login);
+    if sk_dir.try_exists().map_err(|_| Error::Common(format!("Could not check existence of {}.", sk_dir.display())))? {
+        fs::remove_dir_all(&sk_dir).map_err(|e| Error::Common(format!("Could not remove {}: {}", sk_dir.display(), e)))?
+    }
+    Ok(())
+}
+
 fn truncate_to_max_length(value: String, max_length: usize) -> String {
     if value.len() > max_length {
         value.chars().take(max_length).collect() // Truncate string to the maximum length
@@ -692,6 +702,7 @@ pub fn run() {
             balance,
             gas_balance,
             check_key,
+            delete_account,
             get_file_metadata,
             save_file_metadata,
             read_metadata,
