@@ -4,15 +4,18 @@ import { Label } from "@/components/ui/label";
 import Avatar from "../avatar";
 import { SimpleAccountUser } from "@/types/account-user";
 import { useTranslation } from "react-i18next";
+import { TrashIcon } from "lucide-react";
 
 type RecentAccountsProps = {
     recentAccounts: SimpleAccountUser[];
     onSelectRecentAccount: (recentAccount: SimpleAccountUser) => void;
+    deleteSelectedAccount: (username: string) => void;
 };
 
 const RecentAccounts: React.FC<RecentAccountsProps> = ({
     recentAccounts,
     onSelectRecentAccount,
+    deleteSelectedAccount,
 }) => {
     const { t } = useTranslation();
 
@@ -23,7 +26,6 @@ const RecentAccounts: React.FC<RecentAccountsProps> = ({
                     const username = recentAccount.username;
                     const address = recentAccount.address;
 
-                    // If the address is invalid or empty, display the username instead
                     const displayAddress =
                         address && address !== "<error>"
                             ? formatAddress(address)
@@ -31,28 +33,45 @@ const RecentAccounts: React.FC<RecentAccountsProps> = ({
 
                     return (
                         <div
-                            key={username} // Use username as the unique key
-                            className="flex items-center space-x-2 p-2 px-4 border-b border-muted cursor-pointer hover:bg-secondary transition-colors duration-200"
-                            onClick={() => onSelectRecentAccount(recentAccount)}
+                            key={username}
+                            className="flex items-center justify-between space-x-2 p-2 px-4 border-b border-muted cursor-pointer hover:bg-secondary transition-colors duration-200"
                         >
-                            {address != "<error>" && (
-                                <div className="shrink-0">
-                                    {/* Show Avatar only if there's a valid address */}
-                                    <Avatar
-                                        address={displayAddress ? address : ""}
-                                    />
-                                </div>
-                            )}
-                            <div className="flex flex-col overflow-hidden">
-                                <div className="font-medium">
-                                    {/* Show formatted address or username */}
-                                    {displayAddress || username}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                    {/* Always show the username */}
-                                    {username}
+                            <div
+                                className="flex items-center space-x-2"
+                                onClick={() =>
+                                    onSelectRecentAccount(recentAccount)
+                                }
+                            >
+                                {address !== "<error>" && (
+                                    <div className="shrink-0">
+                                        <Avatar
+                                            address={
+                                                displayAddress ? address : ""
+                                            }
+                                        />
+                                    </div>
+                                )}
+                                <div className="flex flex-col overflow-hidden">
+                                    <div className="font-medium">
+                                        {displayAddress || username}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {username}
+                                    </div>
                                 </div>
                             </div>
+                            {/* Delete Button */}
+                            <button
+                                type="button"
+                                className="ml-2 p-2 bg-red-500 hover:bg-red-700 rounded-full"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteSelectedAccount(username);
+                                }}
+                                title={t("deleteAccount")}
+                            >
+                                <TrashIcon className="h-5 w-5 text-muted" />
+                            </button>
                         </div>
                     );
                 })
