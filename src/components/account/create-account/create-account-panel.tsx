@@ -72,10 +72,10 @@ const CreateAccountPanel: React.FC<CreateAccountPanelProps> = ({
                     >
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Secret Key</AlertDialogTitle>
+                                <AlertDialogTitle>Private Key</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     <p className="pb-4">
-                                        Your secret key can be used to recover
+                                        Your private key can be used to recover
                                         your account. Please save it to a secure
                                         place.
                                     </p>
