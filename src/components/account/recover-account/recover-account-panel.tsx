@@ -16,6 +16,9 @@ import { Input } from "@/components/ui/input";
 import { RecoverAccountUser } from "@/types/account-user";
 import { registerUser } from "@/backend/logic";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { listAccounts } from "@/backend/autonomi";
+import { isValidPrivateKey } from "@/lib/utils/validation";
 
 interface RecoverAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;
@@ -49,6 +52,10 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
     } = recoverAccountForm;
 
     type RecoverAccountFormData = z.infer<typeof recoverAccountSchema>;
+
+    const [usernameAlreadyExistsError, setUsernameAlreadyExistsError] =
+        useState<string | null>(null);
+
     const onSubmit = (data: RecoverAccountFormData) => {
         console.log(data);
 
@@ -66,6 +73,32 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
 
     const handleReturnToSignInPanelClicked = () => {
         onReturnToSignInPanelClicked();
+    };
+
+    const isUsernameValid = async (username: string) => {
+        try {
+            const accounts = await listAccounts();
+
+            if (!accounts) {
+                setUsernameAlreadyExistsError(null);
+                return false;
+            }
+
+            const foundAccount = accounts.find(
+                ([accountUsername]) => accountUsername === username
+            );
+
+            if (foundAccount) {
+                setUsernameAlreadyExistsError(t("thisUsernameAlreadyExists"));
+                return false;
+            } else {
+                setUsernameAlreadyExistsError(null);
+                return true;
+            }
+        } catch (error) {
+            console.error("Error checking username:", error);
+            return false;
+        }
     };
 
     return (
@@ -87,7 +120,7 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                         <FormField
                             control={control}
                             name="privateKey"
-                            render={() => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{t("privateKey")}</FormLabel>
                                     <FormControl>
@@ -98,7 +131,10 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                                             autoCapitalize="off"
                                             autoComplete="off"
                                             autoCorrect="off"
-                                            {...register("privateKey")}
+                                            {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e);
+                                            }}
                                         />
                                     </FormControl>
 
@@ -110,19 +146,33 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                         <FormField
                             control={control}
                             name="username"
-                            render={() => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{t("username")}</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder={t("enterYourUsername")}
-                                            autoCapitalize="off"
-                                            autoComplete="off"
-                                            autoCorrect="off"
-                                            {...register("username")}
-                                        />
-                                    </FormControl>
-
+                                    <>
+                                        <FormControl>
+                                            <Input
+                                                placeholder={t(
+                                                    "enterYourUsername"
+                                                )}
+                                                autoCapitalize="off"
+                                                autoComplete="off"
+                                                autoCorrect="off"
+                                                {...field}
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    isUsernameValid(
+                                                        e.target.value
+                                                    );
+                                                }}
+                                            />
+                                        </FormControl>
+                                        {usernameAlreadyExistsError && (
+                                            <p className="text-destructive text-sm text-left">
+                                                {usernameAlreadyExistsError}
+                                            </p>
+                                        )}
+                                    </>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -180,7 +230,10 @@ const RecoverAccountPanel: React.FC<RecoverAccountPanelProps> = ({
                             <Button
                                 type="submit"
                                 className="mt-4 w-full"
-                                disabled={!isValid}
+                                disabled={
+                                    !isValid ||
+                                    usernameAlreadyExistsError !== null
+                                }
                             >
                                 {t("recoverAccount")}
                             </Button>
