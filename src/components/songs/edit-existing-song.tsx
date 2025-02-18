@@ -62,11 +62,13 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
             try {
                 const song: Song = {
                     id: "123",
-                    xorname: "123",
                     title: "test",
                     artist: "test",
                     dateCreated: new Date(),
-                    location: "test",
+                    xorname: "test",
+                    fileName: "test",
+                    extension: "test",
+                    downloadFolder: "test",
                     picture: undefined,
                     tags: [],
                     trackNumber: undefined,
@@ -121,10 +123,12 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 ...data,
                 id,
                 tags: [],
-                xorname: "123",
                 artist: "test",
                 dateCreated: new Date(),
-                location: "test,",
+                xorname: "test",
+                fileName: "test",
+                extension: "test",
+                downloadFolder: "test",
                 picture: undefined,
             };
 

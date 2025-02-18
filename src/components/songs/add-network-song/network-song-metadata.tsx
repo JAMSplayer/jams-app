@@ -71,11 +71,13 @@ export default function NetworkSongMetadataPanel({
             try {
                 const song: Song = {
                     id: "123",
-                    xorname: "123",
                     title: "test",
                     artist: "test",
                     dateCreated: new Date(),
-                    location: "test",
+                    xorname: "test",
+                    extension: "test",
+                    fileName: "test",
+                    downloadFolder: "test",
                     picture: "test",
                 };
 
@@ -257,10 +259,12 @@ export default function NetworkSongMetadataPanel({
                 ...data,
                 id,
                 tags,
-                xorname: "123",
                 artist: "test",
                 dateCreated: new Date(),
-                location: "test,",
+                xorname: "test,",
+                fileName: "test,",
+                extension: "test,",
+                downloadFolder: "test,",
             };
 
             setSong(updatedSong);

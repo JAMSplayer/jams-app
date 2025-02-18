@@ -1,3 +1,4 @@
+import { generateLocation } from "@/lib/utils/location";
 import { Song } from "@/types/songs/song";
 import { createContext, useContext, useMemo, useReducer, useRef } from "react";
 
@@ -81,12 +82,19 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 if (song) {
                     dispatch({ type: ActionKind.SET_META, payload: song });
 
+                    const songLocation = generateLocation(
+                        song.xorname,
+                        song.fileName,
+                        song.extension,
+                        song.downloadFolder
+                    );
+
                     // If the song location changes, load the new song
                     if (
                         playerRef.current &&
-                        playerRef.current.currentSrc !== song.location
+                        playerRef.current.currentSrc !== songLocation
                     ) {
-                        playerRef.current.src = song.location;
+                        playerRef.current.src = songLocation;
                         playerRef.current.load();
                         playerRef.current.currentTime = 0;
                     }
@@ -98,9 +106,18 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 playerRef.current?.pause();
             },
             toggle(song) {
+                if (song) {
+                }
+
                 const isPlaying = song
                     ? state.playing &&
-                      playerRef.current?.currentSrc === song.location
+                      playerRef.current?.currentSrc ===
+                          generateLocation(
+                              song.xorname,
+                              song.fileName,
+                              song.extension,
+                              song.downloadFolder
+                          )
                     : state.playing;
 
                 if (isPlaying) {
@@ -136,7 +153,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
             isPlaying(song) {
                 return song
                     ? state.playing &&
-                          playerRef.current?.currentSrc === song.location
+                          playerRef.current?.currentSrc ===
+                              generateLocation(
+                                  song.xorname,
+                                  song.fileName,
+                                  song.extension,
+                                  song.downloadFolder
+                              )
                     : state.playing;
             },
         };

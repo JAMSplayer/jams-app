@@ -12,9 +12,11 @@ export default function Dashboard() {
                 <SongLoadButton
                     song={{
                         id: "123",
-                        xorname: "124",
-                        location:
-                            "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962__BegBlag.mp3",
+                        xorname:
+                            "08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962",
+                        fileName: "BegBlag",
+                        extension: "mp3",
+                        downloadFolder: "http://localhost:12345",
                         title: "BegBlag",
                         artist: "BegBlag",
                         dateCreated: new Date(),

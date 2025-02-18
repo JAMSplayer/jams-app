@@ -7,7 +7,9 @@ export type Song = {
     artUrl?: string;
     dateCreated: Date;
     dateUpdated?: Date;
-    location: string;
+    fileName: string;
+    downloadFolder: string;
+    extension: string;
     tags?: string[];
     picture?: string;
     trackNumber?: number;
