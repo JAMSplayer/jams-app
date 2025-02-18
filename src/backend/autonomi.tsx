@@ -125,8 +125,8 @@ export async function balance(): Promise<string | null> {
     return null;
 }
 
-export async function secretKey(
-    username: string,              // which user SK to get
+export async function privateKey(
+    username: string,              // which user PK to get
     password: string,           // user password to decrypt the key
 ): Promise<string | null> {     // if password is bad or other error occured, null will be returned
     try {
@@ -135,7 +135,7 @@ export async function secretKey(
             password: password,
         });
     } catch (e) {
-        console.error("secretKey: ", e);
+        console.error("privateKey: ", e);
     }
     return null;
 }
