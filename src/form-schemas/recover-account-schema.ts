@@ -1,19 +1,23 @@
 import { z } from "zod";
 import i18n from "i18next";
+import { isValidPrivateKey } from "@/lib/utils/validation";
 
 export const recoverAccountSchema = z
     .object({
-        secretKey: z
+        privateKey: z
             .string()
             .min(2, {
-                message: i18n.t("secretKeyMustBeAtLeastCharacters", {
+                message: i18n.t("privateKeyMustBeAtLeastCharacters", {
                     count: 2,
                 }),
             })
             .max(64, {
-                message: i18n.t("secretKeyCannotExceedCharacters", {
+                message: i18n.t("privateKeyCannotExceedCharacters", {
                     count: 64,
                 }),
+            })
+            .refine((input) => isValidPrivateKey(input), {
+                message: "Private key must be a valid 64-character hex string",
             }),
         username: z
             .string()

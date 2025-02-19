@@ -6,15 +6,24 @@ import React, {
     useState,
 } from "react";
 import { listen } from "@tauri-apps/api/event";
-import { getConnectedUserAccount } from "@/backend/logic";
+import {
+    connect,
+    getConnectedUserAccount,
+    signOut as backendSignOut,
+} from "@/backend/logic";
 import { AccountUser } from "@/types/account-user";
 import { isConnected as checkNetworkConnection } from "@/backend/autonomi";
+import { disconnect } from "@/backend/autonomi";
+import Networks from "@/enums/networks";
 
 interface ConnectionContextType {
     isConnected: boolean;
     isConnecting: boolean;
     account: AccountUser | null;
     setIsConnecting: (value: boolean) => void;
+    disconnectNetwork: () => Promise<void>;
+    connectToNetwork: () => Promise<void>;
+    signOut: () => Promise<void>;
 }
 
 const ConnectionContext = createContext<ConnectionContextType>({
@@ -22,6 +31,9 @@ const ConnectionContext = createContext<ConnectionContextType>({
     isConnecting: false,
     account: null,
     setIsConnecting: () => {},
+    disconnectNetwork: async () => {},
+    connectToNetwork: async () => {},
+    signOut: async () => {},
 });
 
 interface ConnectionProviderProps {
@@ -32,8 +44,44 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     children,
 }) => {
     const [isConnected, setIsConnected] = useState(false);
-    const [isConnecting, setIsConnecting] = useState(false); // state for connection in progress
+    const [isConnecting, setIsConnecting] = useState(false);
     const [account, setAccount] = useState<AccountUser | null>(null);
+
+    const disconnectNetwork = async () => {
+        try {
+            console.log("Attempting to disconnect...");
+            const success = await disconnect();
+            if (success) {
+                setIsConnected(false);
+                setAccount(null);
+                await backendSignOut();
+                console.log("Successfully disconnected.");
+            }
+        } catch (error) {
+            console.error("Failed to disconnect:", error);
+        }
+    };
+
+    const signOut = async () => {
+        console.log("Signing out user sign out user...");
+        setAccount(null);
+        await backendSignOut();
+    };
+
+    // connect to network
+    const connectToNetwork = async () => {
+        setIsConnecting(true);
+
+        try {
+            // TODO update here based on what network is selected in app
+            const override = { network: Networks.MAINNET };
+            await connect(override);
+        } catch (error) {
+            console.error("Error connecting:", error);
+        } finally {
+            setIsConnecting(false);
+        }
+    };
 
     // fetch account information when connected
     const fetchAccount = async () => {
@@ -50,7 +98,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     const initializeConnection = async () => {
         setIsConnecting(true); // start connecting
         try {
-            const connected = await checkNetworkConnection(); // Replace with actual connection-checking logic
+            const connected = await checkNetworkConnection();
             setIsConnected(connected);
 
             if (connected) {
@@ -58,6 +106,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
             }
         } catch (error) {
             console.error("Failed to initialize connection", error);
+            setIsConnected(false);
         } finally {
             setIsConnecting(false); // done connecting
         }
@@ -65,40 +114,43 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
 
     // set up event listeners for connection updates
     useEffect(() => {
-        initializeConnection(); // perform initial connection check
+        initializeConnection();
 
-        const unlistenSignIn = listen("sign_in", async () => {
-            console.log("Sign In event received");
-            setIsConnecting(true);
-            try {
-                await fetchAccount(); // fetch account on sign-in
-            } finally {
-                setIsConnecting(false); // done connecting
-            }
-        });
+        let unlistenSignIn: (() => void) | null = null;
+        let unlistenConnected: (() => void) | null = null;
+        let unlistenDisconnected: (() => void) | null = null;
 
-        const unlistenConnected = listen("connected", async () => {
-            console.log("Connected event received");
-            setIsConnecting(true);
-            try {
+        const setupListeners = async () => {
+            unlistenSignIn = await listen("sign_in", async () => {
+                console.log("Sign In event received");
+
+                try {
+                    await fetchAccount();
+                } catch (error) {
+                    console.log("fetch account error: ", error);
+                }
+            });
+
+            unlistenConnected = await listen("connected", async () => {
+                console.log("Connected event received");
                 setIsConnected(true);
-                await fetchAccount(); // try to fetch account on connection
-            } finally {
-                setIsConnecting(false); // done connecting
-            }
-        });
+                await fetchAccount();
+            });
 
-        const unlistenDisconnected = listen("disconnected", () => {
-            console.log("Disconnected event received");
-            setIsConnected(false);
-            setAccount(null); // clear account on disconnection
-        });
+            unlistenDisconnected = await listen("disconnected", async () => {
+                console.log("Disconnected event received");
+                setIsConnected(false);
+                setAccount(null);
+                await backendSignOut();
+            });
+        };
 
-        // clean up listeners on unmount
+        setupListeners();
+
         return () => {
-            unlistenSignIn.then((unlisten) => unlisten());
-            unlistenConnected.then((unlisten) => unlisten());
-            unlistenDisconnected.then((unlisten) => unlisten());
+            unlistenSignIn?.();
+            unlistenConnected?.();
+            unlistenDisconnected?.();
         };
     }, []);
 
@@ -108,7 +160,10 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
                 isConnected,
                 isConnecting,
                 account,
-                setIsConnecting, // expose the setter for external use
+                setIsConnecting,
+                disconnectNetwork,
+                connectToNetwork,
+                signOut,
             }}
         >
             {children}

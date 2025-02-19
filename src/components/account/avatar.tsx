@@ -10,7 +10,7 @@ const Avatar = ({ address }: { address: string }) => {
             if (ctx) {
                 const blockie = blockies.create({
                     seed: address,
-                    size: 8,
+                    size: 9,
                 });
                 canvasRef.current.width = blockie.width;
                 canvasRef.current.height = blockie.height;

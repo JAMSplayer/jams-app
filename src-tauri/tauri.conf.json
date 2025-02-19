@@ -37,6 +37,8 @@
     "resources": ["resources/A_Lazy_Farmer_Boy_by_Buster_Carter_And_Preston_Young.mp3"]
   },
   "plugins": {
-
+    "clipboard": {
+      "enabled": true
+    }
   }
 }

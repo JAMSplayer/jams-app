@@ -1,16 +1,15 @@
-import { SongUpload } from "@/types/songs/song-upload";
+import { uploadFile } from "@/backend/autonomi";
 
-export async function UploadSong(
-    song: SongUpload
-): Promise<{ success: boolean; xorname?: string }> {
-    console.log("starting song upload for: ", song);
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+export async function uploadSong(
+    filePath: string
+): Promise<{ success: boolean; songXorname?: string }> {
+    console.log("starting song upload for: ", filePath);
 
-    const success = false;
-    const xorname = "xorname-here";
-    return { success, xorname };
+    const songXorname = await uploadFile(filePath);
 
-    // let songXorname = uploadFile(path); // TODO: handle await, null
-    // let artXorname = putData(artBytes); // TODO: handle await, null
-    // TODO: update song object with songXorname and artXorname, update playlist data, sync with network
+    if (songXorname) {
+      return { success: true, songXorname: songXorname };
+    } else {
+      return { success: false };
+    }
 }

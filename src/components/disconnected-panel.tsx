@@ -12,7 +12,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 export default function DisconnectedPanel() {
     const { t } = useTranslation();
     const [inputValue, setInputValue] = useState("");
-    const { isConnecting, setIsConnecting } = useConnection();
+    const { isConnecting, connectToNetwork } = useConnection();
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
@@ -32,18 +32,7 @@ export default function DisconnectedPanel() {
                         {t("mainnet")}
                     </h3>
                     <Button
-                        onClick={async () => {
-                            setIsConnecting(true);
-
-                            try {
-                                const override = { network: Networks.MAINNET };
-                                await connect(override);
-                            } catch (error) {
-                                console.error("Error connecting:", error);
-                            } finally {
-                                setIsConnecting(false); // always reset the state
-                            }
-                        }}
+                        onClick={connectToNetwork}
                         className="w-full max-w-sm"
                         disabled={isConnecting}
                     >

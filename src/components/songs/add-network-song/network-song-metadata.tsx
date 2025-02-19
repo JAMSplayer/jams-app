@@ -11,22 +11,21 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { editPlaylistSchema } from "@/form-schemas/edit-playlist-schema";
-import { Playlist } from "@/types/playlists/playlist";
 import { useStorage } from "@/providers/storage-provider";
-import { ArrowLeftRightIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
-import { ScrollArea } from "../ui/scroll-area";
-import { useNavigate } from "react-router-dom";
-import { AlertConfirmationModal } from "../alert-confirmation-modal";
-// import Portal from "../portal";
+import { PlaylistSelectionModal } from "@/components/ui/playlist-selection-modal";
 
 type FormSchema = z.infer<typeof editPlaylistSchema>;
 
-interface EditPlaylistPanelProps {
-    id: string;
+interface NetworkSongMetadataPanelProps {
+    id: string | null;
+    onReturn: () => void;
 }
 
-export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
+export default function NetworkSongMetadataPanel({
+    id,
+    onReturn,
+}: NetworkSongMetadataPanelProps) {
     const {
         register,
         handleSubmit,
@@ -43,100 +42,64 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
     });
 
     const { store } = useStorage();
-    const navigate = useNavigate();
 
-    const [leftSongs, setLeftSongs] = useState<Song[]>([]);
-    const [rightSongs, setRightSongs] = useState<Song[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [song, setSong] = useState<Song | undefined>(undefined);
 
-    // Load playlist data and populate form fields and songs ----------------------------------------------------------------
+    const [
+        isPlaylistSelectionModalVisible,
+        setIsPlaylistSelectionModalVisible,
+    ] = useState(false);
+
+    if (!id) {
+        return <p>No Song Network ID provided.</p>;
+    }
+
+    // Load song metadata and populate form fields and songs ----------------------------------------------------------------
 
     useEffect(() => {
-        const fetchPlaylistData = async () => {
+        const fetchSongData = async () => {
             if (!store) {
                 console.error("Store is not initialized.");
                 return;
             }
 
             if (!id) {
-                console.error("Playlist ID is missing.");
+                console.error("Song network ID is missing.");
                 return;
             }
 
             try {
-                const playlists = await store.get("playlists");
+                const song: Song = {
+                    id: "123",
+                    xorname: "123",
+                    title: "test",
+                    artist: "test",
+                    dateCreated: new Date(),
+                    location: "test",
+                    picture: "test",
+                };
 
-                // Ensure playlists is an array
-                const storedPlaylists = Array.isArray(playlists)
-                    ? (playlists as Playlist[])
-                    : [];
-
-                const playlist = storedPlaylists.find(
-                    (p: Playlist) => p.id === id
-                );
-
-                if (!playlist) {
-                    console.error("Playlist not found.");
+                if (!song) {
+                    console.error("Song Metadata not found.");
                     return;
                 }
 
-                // Set tags from the playlist if available
-                setTags(playlist.tags || []);
+                // Set tags from the song if available
+                setTags(song.tags || []);
 
                 // Populate form fields
-                setValue("title", playlist.title);
-                setValue("description", playlist.description);
-                setValue("picture", playlist.picture);
-
-                // Populate rightSongs with playlist songs
-                setRightSongs(playlist.songs || []);
-
-                // Populate leftSongs with all songs excluding those in the playlist
-                const allSongsMap = new Map();
-                storedPlaylists.forEach((p) => {
-                    if (p.songs) {
-                        p.songs.forEach((song: Song) => {
-                            if (!allSongsMap.has(song.id)) {
-                                allSongsMap.set(song.id, song);
-                            }
-                        });
-                    }
-                });
-
-                const rightSongIds = new Set(
-                    (playlist.songs || []).map((song) => song.id)
-                );
-
-                const filteredLeftSongs = Array.from(
-                    allSongsMap.values()
-                ).filter((song) => !rightSongIds.has(song.id));
-
-                setLeftSongs(filteredLeftSongs);
+                setValue("title", song.title);
+                setValue("description", song.description);
+                setValue("picture", song.picture);
             } catch (error) {
-                console.error("Failed to load playlist data:", error);
+                console.error("Failed to load song data:", error);
             }
         };
 
-        fetchPlaylistData();
+        fetchSongData();
     }, [store, id, setValue]);
 
-    // end Load playlist data and populate form fields and songs ----------------------------------------------------------------
-
-    // Handle moving songs between boxes
-    const handleMoveToRight = (song: Song) => {
-        setLeftSongs((prev) => prev.filter((s) => s.id !== song.id));
-        setRightSongs((prev) => [...prev, song]);
-    };
-
-    const handleMoveToLeft = (song: Song) => {
-        setRightSongs((prev) => prev.filter((s) => s.id !== song.id));
-        setLeftSongs((prev) => [...prev, song]);
-    };
-
-    // Filter left songs based on search term
-    const filteredLeftSongs = leftSongs.filter((song) =>
-        song.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // end Load song data and populate form fields and songs ----------------------------------------------------------------
 
     // image ----------------------------------------------------------------
 
@@ -282,60 +245,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
 
     // end tags ----------------------------------------------------------------
 
-    // delete confirmation modal ----------------------------------------------------------------
-
-    const [
-        isDeleteConfirmationModalVisible,
-        setDeleteConfirmationModalVisible,
-    ] = useState(false);
-
-    const handleConfirm = async () => {
-        if (!store) {
-            console.error("Store is not initialized.");
-            return;
-        }
-
-        try {
-            // Retrieve existing playlists from the store
-            const storedPlaylists: Playlist[] =
-                (await store.get("playlists")) || [];
-
-            // Ensure playlists is an array
-            if (!Array.isArray(storedPlaylists)) {
-                console.error(
-                    "Playlists are not in the expected array format."
-                );
-                return;
-            }
-
-            // Filter out the playlist with the given ID
-            const updatedPlaylists = storedPlaylists.filter(
-                (playlist) => playlist.id !== id
-            );
-
-            // Save the updated playlists back to the store
-            await store.set("playlists", updatedPlaylists);
-            await store.save();
-
-            toast("Playlist Deleted", {
-                description: "Your playlist has been deleted.",
-            });
-
-            // Navigate away after deletion (e.g., back to playlist list)
-            navigate("/playlists");
-        } catch (error) {
-            console.error("Failed to delete the playlist:", error);
-        }
-        setDeleteConfirmationModalVisible(false);
-    };
-
-    const handleCancel = () => {
-        setDeleteConfirmationModalVisible(false);
-    };
-
-    // end delete confirmation modal ----------------------------------------------------------------
-
-    // Update the existing playlist in storage
+    // submit handler
     const onSubmit = async (data: FormSchema) => {
         if (!store) {
             console.error("Store is not initialized.");
@@ -343,55 +253,51 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
         }
 
         try {
-            const storedPlaylists: Playlist[] =
-                (await store.get("playlists")) || [];
-
-            const originalPlaylist = storedPlaylists.find(
-                (p: Playlist) => p.id === id
-            );
-
-            if (!originalPlaylist) {
-                console.error("Original playlist not found.");
-                return;
-            }
-
-            const updatedPlaylist: Playlist = {
+            const updatedSong: Song = {
                 ...data,
                 id,
                 tags,
-                createdAt: originalPlaylist.createdAt, // Retain the original createdAt value
-                updatedAt: new Date(),
-                songs: rightSongs,
+                xorname: "123",
+                artist: "test",
+                dateCreated: new Date(),
+                location: "test,",
             };
 
-            const updatedPlaylists = storedPlaylists.map((p: Playlist) =>
-                p.id === id ? updatedPlaylist : p
-            );
+            setSong(updatedSong);
 
-            await store.set("playlists", updatedPlaylists);
-            await store.save();
+            // find which playlist to update to add new song to.
+            // await store.set("playlists", updatedPlaylists);
+            // await store.save();
 
-            toast("Playlist Updated", {
-                description: "Your playlist has been successfully updated.",
-            });
+            setIsPlaylistSelectionModalVisible(true);
+
+            // toast("Song Saved Locally", {
+            //     description:
+            //         "Your selected network song has been successfully saved to the ? playlist.",
+            // });
         } catch (ex) {
-            console.error("The playlist could not be updated:", ex);
+            console.error("The save operation could not be completed:", ex);
         }
     };
 
-    // Handler for the back button
-    const handleBackButtonClick = () => {
-        navigate(-1); // Go back to the previous page in history
+    const handleReturn = async () => {
+        onReturn(); // Pass the ID to the parent component
     };
 
     return (
         <div className="pb-16">
-            {isDeleteConfirmationModalVisible && (
-                <AlertConfirmationModal
-                    title="Confirm Deletion"
-                    description="Are you sure you want to delete this playlist?"
-                    onConfirm={handleConfirm}
-                    onCancel={handleCancel}
+            {isPlaylistSelectionModalVisible && song && (
+                <PlaylistSelectionModal
+                    onConfirm={(playlistId) => {
+                        console.log(
+                            "Song added to playlist with ID:",
+                            playlistId
+                        );
+                        setIsPlaylistSelectionModalVisible(false); // Close modal after confirming
+                        onReturn();
+                    }}
+                    onCancel={() => setIsPlaylistSelectionModalVisible(false)} // Close modal on cancel
+                    song={song}
                 />
             )}
 
@@ -399,23 +305,16 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
             <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                     {/* Back Button */}
-                    <Button variant={"ghost"} onClick={handleBackButtonClick}>
+                    <Button variant={"ghost"} onClick={handleReturn}>
                         <ArrowLeftIcon size={20} />
                     </Button>
                 </div>
             </div>
 
-            {/* Edit Playlist Card */}
+            {/* Edit Song Metadata Card */}
             <div className="p-4">
                 <div className="bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center">
-                    <h1 className="text-lg font-bold">Edit Playlist</h1>
-                    <Button
-                        onClick={() => setDeleteConfirmationModalVisible(true)}
-                        variant="destructive"
-                        className=" text-white hover:bg-red-700 transition-colors duration-200 focus:outline-none"
-                    >
-                        Delete
-                    </Button>
+                    <h1 className="text-lg font-bold">Edit Song Metadata</h1>
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
@@ -566,90 +465,10 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                             ))}
                                         </div>
                                     </div>
-
-                                    <div className="col-span-3">
-                                        {/* Songs Input */}
-                                        <div className="flex items-center gap-4">
-                                            {/* Left Scroll Area */}
-                                            <div className="flex-1">
-                                                <div className="mb-2">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Search songs"
-                                                        value={searchTerm}
-                                                        onChange={(e) =>
-                                                            setSearchTerm(
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                        className="w-full p-2 border rounded"
-                                                    />
-                                                </div>
-                                                <ScrollArea className="h-80 border rounded">
-                                                    {filteredLeftSongs.map(
-                                                        (song) => (
-                                                            <div
-                                                                key={song.id}
-                                                                onClick={() =>
-                                                                    handleMoveToRight(
-                                                                        song
-                                                                    )
-                                                                }
-                                                                className="p-2 border-b hover:bg-gray-100 cursor-pointer"
-                                                            >
-                                                                <p className="font-medium break-words">
-                                                                    {song.title}
-                                                                </p>
-                                                                <p className="text-sm text-gray-500 break-words">
-                                                                    {
-                                                                        song.artist
-                                                                    }
-                                                                </p>
-                                                            </div>
-                                                        )
-                                                    )}
-                                                </ScrollArea>
-                                            </div>
-
-                                            {/* Arrow Icon */}
-                                            <div className="flex items-center justify-center">
-                                                <ArrowLeftRightIcon className="w-6 h-6 text-gray-500" />
-                                            </div>
-
-                                            {/* Right Scroll Area */}
-                                            <div className="flex-1">
-                                                <div className="mb-2">
-                                                    <h3 className="text-lg font-semibold text-gray-700">
-                                                        Songs
-                                                    </h3>
-                                                </div>
-                                                <ScrollArea className="h-80 border rounded">
-                                                    {rightSongs.map((song) => (
-                                                        <div
-                                                            key={song.id}
-                                                            onClick={() =>
-                                                                handleMoveToLeft(
-                                                                    song
-                                                                )
-                                                            }
-                                                            className="p-2 border-b hover:bg-gray-100 cursor-pointer"
-                                                        >
-                                                            <p className="font-medium break-words">
-                                                                {song.title}
-                                                            </p>
-                                                            <p className="text-sm text-gray-500 break-words">
-                                                                {song.artist}
-                                                            </p>
-                                                        </div>
-                                                    ))}
-                                                </ScrollArea>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
-                            {/* Platlist Art */}
+                            {/* Song Art */}
                             <div className="flex justify-center items-center relative">
                                 {selectedImage || base64Picture ? (
                                     <img
@@ -660,7 +479,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                     />
                                 ) : (
                                     <div className="w-full h-full max-w-sm max-h-sm min-h-44 max-h-96 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
-                                        No Playlist Art
+                                        No Song Art
                                     </div>
                                 )}
                                 <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">
@@ -680,7 +499,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                             className="mr-3"
                             disabled={!isValid}
                         >
-                            Update <CirclePlusIcon />
+                            Save <CirclePlusIcon />
                         </Button>
                     </div>
                 </div>

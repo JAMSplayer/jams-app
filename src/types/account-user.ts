@@ -1,7 +1,7 @@
 import { Playlist } from "./playlists/playlist";
 
 export type RecoverAccountUser = {
-    secretKey: string;
+    privateKey: string;
     username: string;
     password: string;
     dateCreated: Date;

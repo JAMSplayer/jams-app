@@ -1,17 +1,18 @@
 import {
     connectInner,
+    signIn as autonomiSignIn,
     register,
     clientAddress,
-    createReg,
     isConnected,
-    readReg,
-    writeReg,
     listAccounts,
+    sessionSet,
+    sessionRead,
 } from "@/backend/autonomi";
 import {
     AccountUser,
     RegisterAccountUser,
     SimpleAccountUser,
+    RecoverAccountUser,
 } from "@/types/account-user";
 import {
     getSelectedNetwork,
@@ -23,6 +24,8 @@ import { isEthereumAddress } from "@/lib/utils/address";
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
 // =======
+
+const USER_SESSION_KEY = "user";
 
 export async function connect(override?: {
     network: Networks;
@@ -63,13 +66,22 @@ export async function connect(override?: {
 }
 
 export async function registerUser(
-    newUser: RegisterAccountUser
+    newUser: RegisterAccountUser | RecoverAccountUser
 ): Promise<AccountUser | null> {
     console.log(`Attempting to create a new user: ${newUser.username}`);
 
     try {
         // Register and connect the user
-        const success = await register(newUser.username, newUser.password);
+        let success = false;
+        if ((newUser as RecoverAccountUser).privateKey !== undefined) {
+            success = await register(
+                newUser.username,
+                newUser.password,
+                (newUser as RecoverAccountUser).privateKey
+            );
+        } else {
+            success = await register(newUser.username, newUser.password);
+        }
         if (!success) {
             return null;
         }
@@ -96,15 +108,6 @@ export async function registerUser(
         const registeredUser = { ...newUser, address };
         registeredUser.password = ""; // we cannot save passwords
 
-        // Create a new Reg for the user
-        const regCreated = await createReg(["user"], registeredUser);
-        if (!regCreated) {
-            console.error(
-                `Failed to create a new user Reg for: ${newUser.username}`
-            );
-            return null;
-        }
-
         console.log(`User ${newUser.username} created successfully.`);
         return registeredUser;
     } catch (error) {
@@ -116,9 +119,39 @@ export async function registerUser(
     }
 }
 
+export async function signIn(
+    username: string,
+    password: string
+): Promise<boolean> {
+    let success = await autonomiSignIn(username, password);
+    if (success) {
+        const address = await clientAddress();
+        if (address) {
+            await sessionSet(
+                USER_SESSION_KEY,
+                JSON.stringify({
+                    username: username,
+                    address: address,
+                })
+            );
+        } else {
+            success = false;
+        }
+    }
+    return success;
+}
+
+export async function signOut(): Promise<void> {
+    try {
+        await sessionSet(USER_SESSION_KEY, null);
+    } catch (e) {
+        console.error("signOut: ", e);
+    }
+}
+
 export async function saveUser(user: AccountUser) {
     console.log("saving user: ", user);
-    await writeReg(["user"], user);
+    await sessionSet(USER_SESSION_KEY, JSON.stringify(user));
 }
 
 // Returns user account object if account is connected, null if not.
@@ -129,10 +162,10 @@ export async function getConnectedUserAccount(): Promise<AccountUser | null> {
         if (connected) {
             console.log("getting user...");
 
-            const user = await readReg(["user"]);
+            const user = await sessionRead(USER_SESSION_KEY);
+            console.log("user: ", user);
             if (user) {
-                console.log("user: ", user);
-                return user as AccountUser;
+                return JSON.parse(user) as AccountUser;
             }
 
             console.log("User not found.");

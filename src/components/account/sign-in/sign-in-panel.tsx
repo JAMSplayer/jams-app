@@ -18,10 +18,11 @@ import { useEffect, useState } from "react";
 import { formatAddress } from "@/lib/utils/address";
 import { UserRoundPlusIcon } from "lucide-react";
 import RecentAccounts from "./recent-accounts";
-import { signIn as autonomiSignIn } from "@/backend/autonomi";
+import { signIn as autonomiLogicSignIn } from "@/backend/logic";
 import { registeredAccounts } from "@/backend/logic";
 import { SimpleAccountUser } from "@/types/account-user";
 import { useTranslation } from "react-i18next";
+import { deleteAccount } from "@/backend/autonomi";
 
 interface SignInPanelProps {
     onCreateAccountClicked: () => void;
@@ -106,7 +107,6 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
             try {
                 const accounts: SimpleAccountUser[] =
                     await registeredAccounts(); // Fetch accounts
-
                 setRecentAccountList(accounts); // Set state with fetched accounts
             } catch (err) {
                 console.log("Failed to fetch recent accounts");
@@ -115,6 +115,16 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
 
         fetchRecentAccounts();
     }, []);
+
+    const deleteSelectedAccount = (username: string) => {
+        deleteAccount(username);
+        setRecentAccountList((prevAccounts) =>
+            prevAccounts.filter((account) => account.username !== username)
+        );
+        toast("Account Deleted", {
+            description: `${username} has been deleted`,
+        });
+    };
 
     // (values: z.infer<typeof signInSchema>)
     const signIn = (values: z.infer<typeof signInSchema>) => {
@@ -128,7 +138,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                 description: t("thisUsernameDoesNotExist"),
             });
         } else {
-            autonomiSignIn(values.username, values.password);
+            autonomiLogicSignIn(values.username, values.password);
         }
     };
 
@@ -270,6 +280,7 @@ const SignInPanel: React.FC<SignInPanelProps> = ({
                 <RecentAccounts
                     recentAccounts={recentAccountList}
                     onSelectRecentAccount={handleSelectAccount}
+                    deleteSelectedAccount={deleteSelectedAccount}
                 />
             </TabsContent>
         </Tabs>

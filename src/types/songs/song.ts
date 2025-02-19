@@ -1,5 +1,6 @@
 export type Song = {
     id: string;
+    xorname: string;
     title: string;
     description?: string;
     artist: string;
@@ -8,4 +9,6 @@ export type Song = {
     dateUpdated?: Date;
     location: string;
     tags?: string[];
+    picture?: string;
+    trackNumber?: number;
 };

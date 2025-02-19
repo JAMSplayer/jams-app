@@ -125,8 +125,8 @@ export async function balance(): Promise<string | null> {
     return null;
 }
 
-export async function secretKey(
-    username: string,              // which user SK to get
+export async function privateKey(
+    username: string,              // which user PK to get
     password: string,           // user password to decrypt the key
 ): Promise<string | null> {     // if password is bad or other error occured, null will be returned
     try {
@@ -135,9 +135,32 @@ export async function secretKey(
             password: password,
         });
     } catch (e) {
-        console.error("secretKey: ", e);
+        console.error("privateKey: ", e);
     }
     return null;
+}
+
+export async function deleteAccount(username: string): Promise<boolean> {
+    console.log("deleting account...");
+    try {
+        await invoke("delete_account", { login: username });
+        console.log("account deleted.");
+        return true;
+    } catch (e) {
+        console.error("deleteAccount: ", e);
+    }
+    return false;
+}
+
+export async function sessionRead(key: string): Promise<string | null> {
+    return await invoke("session_read", { key: key });
+}
+
+export async function sessionSet(
+    key: string,
+    value: string | null, // null if we want to remove the record.
+): Promise<string | null> { // returns previous value, or null if the value was not present
+    return await invoke("session_set", { key: key, value : value });
 }
 
 function prepareMeta(name: string[]): string[] {
