@@ -140,6 +140,18 @@ export async function privateKey(
     return null;
 }
 
+export async function deleteAccount(username: string): Promise<boolean> {
+    console.log("deleting account...");
+    try {
+        await invoke("delete_account", { login: username });
+        console.log("account deleted.");
+        return true;
+    } catch (e) {
+        console.error("deleteAccount: ", e);
+    }
+    return false;
+}
+
 export async function sessionRead(key: string): Promise<string | null> {
     return await invoke("session_read", { key: key });
 }

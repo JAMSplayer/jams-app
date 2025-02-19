@@ -144,7 +144,8 @@
     "networkSelection": "Network Selection",
     "mainnet": "mainnet",
     "testnet": "testnet",
-    "update": "Update"
+    "update": "Update",
+    "deleteAccount": "Delete Account"
 
 
 }
