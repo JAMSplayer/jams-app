@@ -18,7 +18,6 @@ import { registerUser } from "@/backend/logic";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { listAccounts } from "@/backend/autonomi";
-import { isValidPrivateKey } from "@/lib/utils/validation";
 
 interface RecoverAccountPanelProps {
     onReturnToSignInPanelClicked: () => void;

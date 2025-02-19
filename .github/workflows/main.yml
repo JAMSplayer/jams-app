@@ -69,7 +69,7 @@ jobs:
         with:
           tagName: release-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "JAMS MVP v__VERSION__"
-          releaseBody: "An initial version of JAMS Player. Changes: **Delete song layout fix** #54, **Translations** #41, **secret-key-ui**, **ability to hide menu items depending on if user is signed in** #53, **Delete song layout fix** #54, **connecting indicator for disconnection panel and new is-connecting prop for connection provider** #55"
+          releaseBody: "An initial version of JAMS Player. Changes: Song favoriting #57, Load songs from store #56, Extra audio formats #63, Read song metadata from network  #62, Song upload (backend) #52, edit existing song #61, Add existing network song #60, update to replace animation package #65, Remove account storage from backend #67, disconnect button and logic #68, Fix account recovery #70, create account functionality #71, secret key info panel #73, Delete account #74, private key validation UI #75"
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}

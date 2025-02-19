@@ -33,7 +33,6 @@ export default function SingleFilePanel({
         register,
         handleSubmit,
         setValue,
-        getValues,
         watch,
         formState: { errors, isValid },
     } = useForm<FormSchema>({
