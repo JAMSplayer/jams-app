@@ -30,9 +30,12 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
         mode: "onBlur",
         defaultValues: {
             title: undefined,
-            description: undefined,
+            artist: undefined,
             picture: undefined,
             tags: [],
+            album: undefined,
+            genre: undefined,
+            year: undefined,
             trackNumber: undefined,
         },
     });
@@ -66,7 +69,9 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                     title: "test",
                     artist: "test",
                     dateCreated: new Date(),
-                    location: "test",
+                    fileName: "test",
+                    extension: "test",
+                    downloadFolder: "test",
                     picture: undefined,
                     tags: [],
                     trackNumber: undefined,
@@ -85,7 +90,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
 
                 // Populate form fields
                 setValue("title", song.title);
-                setValue("description", song.description);
+                setValue("artist", song.artist);
                 setValue("picture", song.picture);
             } catch (error) {
                 console.error("Failed to load song data:", error);
@@ -124,7 +129,9 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 xorname: "123",
                 artist: "test",
                 dateCreated: new Date(),
-                location: "test,",
+                fileName: "test",
+                extension: "test",
+                downloadFolder: "test",
                 picture: undefined,
             };
 
@@ -191,19 +198,19 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                                         )}
                                     </div>
 
-                                    {/* Description */}
+                                    {/* Artist */}
                                     <div className="col-span-3">
                                         <label className="block text-sm font-medium mb-1">
                                             Description{" "}
                                         </label>
                                         <input
-                                            {...register("description")}
+                                            {...register("artist")}
                                             className="w-full border px-2 py-1 rounded"
                                             maxLength={100}
                                         />
-                                        {errors.description && (
+                                        {errors.artist && (
                                             <div className="text-red-500 text-xs mt-1">
-                                                {errors.description.message}
+                                                {errors.artist.message}
                                             </div>
                                         )}
                                     </div>
@@ -247,7 +254,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
 
                             {/* Song Art */}
                             <div className="flex justify-center items-center relative">
-                                {selectedImage ? ( // ✅ Only check for selectedImage
+                                {selectedImage ? (
                                     <img
                                         src={selectedImage}
                                         alt="Playlist Art"
