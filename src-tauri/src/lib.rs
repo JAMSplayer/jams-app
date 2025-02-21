@@ -7,7 +7,7 @@ use lofty::picture::{Picture, PictureType, MimeType};
 use lofty::tag::{Tag, Accessor, TagExt};
 use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, io::Cursor};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 mod secure_sk;
@@ -584,6 +584,30 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
     Ok(metadata_list)
 }
 
+fn normalize_cover_art(input: FilePicture) -> Result<FilePicture, image::error::ImageError> {
+    let img = image::ImageReader::new(Cursor::new(input.data.clone())).with_guessed_format()?.decode()?;
+
+    if img.width() > 200 || img.height() > 200 {
+
+        let img = if img.width() > 200 && img.height() > 200 {
+            img.resize_to_fill(200, 200, image::imageops::FilterType::CatmullRom)
+        } else {
+            img.resize(200, 200, image::imageops::FilterType::CatmullRom)
+        };
+
+    } else if input.data.len() < 40_000 {
+        return Ok(input);
+    }
+
+    let mut output: Vec<u8> = vec![];
+    let mut encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(&mut output, 70);
+    encoder.encode_image(&img)?;
+    Ok(FilePicture {
+        data: output,
+        mime_type: Some(String::from("image/jpeg")),
+    })
+}
+
 #[tauri::command]
 async fn save_file_metadata(
     song_file: FileMetadata,
@@ -603,6 +627,7 @@ async fn save_file_metadata(
     song_file.track_number.inspect(|track_number| new_tag.set_track(*track_number));
 
     if let Some(pic) = song_file.picture {
+        let pic = normalize_cover_art(pic).map_err(|e| Error::Common(format!("Could not resize cover art for {}. {}", song_file.file_path, e)))?;
         let new_pic = Picture::new_unchecked(
             PictureType::CoverFront,
             pic.mime_type.map(|mime| MimeType::from_str(&mime)),
@@ -629,7 +654,7 @@ async fn read_metadata(path: String, safe: State<'_, Mutex<Option<Safe>>>) -> Re
         .download(&xorname)
         .await?;
 
-    let mut reader = std::io::Cursor::new(data);
+    let mut reader = Cursor::new(data);
     let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
         .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
 
