@@ -118,7 +118,7 @@ const PlaylistScroller = ({
     const { setEditPlaylistId } = useEditPlaylistIdStore();
 
     return (
-        <div className="p-4">
+        <div className="p-4 pb-20">
             {filteredAndSortedPlaylists.length > 0 ? (
                 <div className="grid grid-cols-1 xxs:grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {filteredAndSortedPlaylists.map((playlist) => (
