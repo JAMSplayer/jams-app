@@ -1,4 +1,6 @@
 import { getExternalStore } from "@/providers/storage-provider";
+import { join } from "@tauri-apps/api/path";
+import { downloadDir } from "@tauri-apps/api/path";
 
 export const getSelectedNetwork = async () => {
     try {
@@ -36,12 +38,29 @@ export const getTestnetPeerAddress = async (): Promise<string | null> => {
 
 export const getDownloadFolder = async (): Promise<string | null> => {
     try {
+        // check if a custom download folder is stored
         const store = await getExternalStore();
-        const donwloadFolder = await store.get<string>("download-folder");
+        const downloadFolder = await store.get<string>("download-folder");
 
-        return donwloadFolder || null;
+        // if a custom folder is set, return it
+        if (downloadFolder) {
+            return downloadFolder;
+        }
+
+        // if no custom folder, fall back to system's default download folder
+        const defaultDownloadFolder = await downloadDir();
+
+        return defaultDownloadFolder || null;
     } catch (error) {
         console.error("Failed to fetch download folder:", error);
-        return null;
+
+        // fallback in case of error: return system download folder
+        try {
+            const defaultDownloadFolder = await downloadDir();
+            return defaultDownloadFolder || null;
+        } catch (e) {
+            console.error("Error fetching system download folder:", e);
+            return null;
+        }
     }
 };

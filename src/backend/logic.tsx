@@ -241,6 +241,9 @@ export async function download(
             return null;
         }
 
+        console.log(response.file_path);
+        console.log(response.fullPath);
+
         // TODO get these from autonomi.tsx download function object
         const fileDetail: FileDetail = {
             fullPath: response.fullPath,
