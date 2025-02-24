@@ -16,6 +16,7 @@ import {
     RecoverAccountUser,
 } from "@/types/account-user";
 import {
+    getDownloadFolder,
     getSelectedNetwork,
     getTestnetPeerAddress,
 } from "@/backend/backend-store";
@@ -204,13 +205,43 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
 
 export async function download(
     xorname: string,
-    destinationDir: string,
+    destinationDir?: string
 ): Promise<FileDetail | null> {
-    console.log("downloading song: " + xorname + " to " + destinationDir + " ...");
+    console.log(
+        `downloading song: ${xorname} to ${
+            destinationDir || "default folder"
+        }...`
+    );
+
     try {
-        return await autonomiDownload(xorname, destinationDir) as FileDetail;
+        const targetDir = destinationDir || (await getDownloadFolder());
+
+        if (!targetDir) {
+            console.error("no valid download directory found.");
+            return null;
+        }
+
+        console.log(`downloading to: ${targetDir}`);
+
+        const response = (await autonomiDownload(
+            xorname,
+            targetDir
+        )) as Partial<FileDetail>;
+
+        console.log("download response:", response);
+
+        // TODO get these from autonomi.tsx download function object
+        const fileDetail: FileDetail = {
+            fullPath: "",
+            name: "",
+            extension: "",
+            location: "",
+            size: null,
+        };
+
+        return fileDetail;
     } catch (e) {
-        console.error("download error: ", e);
+        console.error("Download error:", e);
+        return null;
     }
-    return null;
 }

@@ -33,3 +33,15 @@ export const getTestnetPeerAddress = async (): Promise<string | null> => {
         return null;
     }
 };
+
+export const getDownloadFolder = async (): Promise<string | null> => {
+    try {
+        const store = await getExternalStore();
+        const donwloadFolder = await store.get<string>("download-folder");
+
+        return donwloadFolder || null;
+    } catch (error) {
+        console.error("Failed to fetch download folder:", error);
+        return null;
+    }
+};

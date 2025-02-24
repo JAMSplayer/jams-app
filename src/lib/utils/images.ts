@@ -1,3 +1,5 @@
+import { FilePicture } from "@/types/file-detail";
+
 export const convertToBase64 = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -34,3 +36,8 @@ export const base64ToImageFile = (
     // Convert Blob to File
     return new File([blob], fileName, { type: mimeType });
 };
+
+export function filePictureToDataURL(filePicture: FilePicture): string {
+    const base64String = Buffer.from(filePicture.data).toString("base64");
+    return `data:${filePicture.mime_type};base64,${base64String}`;
+}

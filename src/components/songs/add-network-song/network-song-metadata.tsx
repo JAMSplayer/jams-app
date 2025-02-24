@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { convertToBase64 } from "@/lib/utils/images";
+import { convertToBase64, filePictureToDataURL } from "@/lib/utils/images";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { Input } from "@/components/ui/input";
@@ -25,14 +25,16 @@ import {
 import { TagInput } from "@/components/tag-input";
 import SelectYear from "@/components/select-year";
 import { useImageSelector } from "@/hooks/use-image-selector";
+import { download } from "@/backend/logic";
+import { FileDetail } from "@/types/file-detail";
 
 interface NetworkSongMetadataPanelProps {
-    id: string | null;
+    fileDetail: FileDetail | null;
     onReturn: () => void;
 }
 
 export default function NetworkSongMetadataPanel({
-    id,
+    fileDetail,
     onReturn,
 }: NetworkSongMetadataPanelProps) {
     const networkSongForm = useForm<z.infer<typeof editSongSchema>>({
@@ -63,11 +65,8 @@ export default function NetworkSongMetadataPanel({
 
     const { store } = useStorage();
 
-    // set this from the returned song from the network request
+    // this song object will be saved once populated
     const [song, setSong] = useState<Song | undefined>(undefined);
-
-    // while waiting for the song data from the backend we should show a full page spinner here
-    const [isLoading, setIsLoading] = useState(false);
 
     // this playlist selector modal will show when the user clicks save. It allow the user to decide what playlist to place the song.
     const [
@@ -75,83 +74,45 @@ export default function NetworkSongMetadataPanel({
         setIsPlaylistSelectionModalVisible,
     ] = useState(false);
 
-    // this should ideally never be reached.
-    if (!id) {
-        return <p>No Song Network ID provided.</p>;
+    // should never be reached
+    if (!fileDetail) {
+        return (
+            <div>
+                <p className="text-red-500">No file metadata available.</p>
+                <Button onClick={onReturn}>Go Back</Button>
+            </div>
+        );
     }
 
     // Load song metadata and populate form fields and songs ----------------------------------------------------------------
 
     // this should only happen when the component mounts and the store and id is present
     useEffect(() => {
-        const fetchSongData = async () => {
-            if (!store) {
-                console.error("Store is not initialized.");
-                return;
-            }
-
-            if (!id) {
-                console.error("Song network ID is missing.");
-                return;
-            }
-
+        const updateFields = async () => {
             try {
-                // TODO get metadata for network song here
-                setIsLoading(true);
+                // tags will be empty as they don't exist on a files metadata
+                setValue("tags", []);
 
-                // const song = await getSongFromBackend(xorname);
-
-                // example of what song should look like
-                // const song: Song = {
-                //     id: string;
-                //     xorname: string;
-                //     title: string;
-                //     description?: string;
-                //     artist: string;
-                //     artUrl?: string;
-                //     dateCreated: Date;
-                //     dateUpdated?: Date;
-                //     fileName: string,
-                //     extension: string,
-                //     downloadFolder: string
-                //     tags?: string[];
-                //     picture?: string;
-                //     trackNumber?: number
-                // };
-
-                const song: Song = {
-                    id: uuidv4(),
-                    xorname:
-                        "a0f6fa2b08e868060fe6e57018e3f73294821feaf3fdcf9cd636ac3d11e7e2ac",
-                    title: "test",
-                    artist: "test",
-                    dateCreated: new Date(),
-                    fileName: "test",
-                    extension: "mp4",
-                    downloadFolder: "test",
-                };
-
-                if (!song) {
-                    console.error("Song Metadata not found.");
-                    return;
-                }
-
-                // Set tags from the song if available
-                setValue("tags", song.tags || []);
-
-                // Populate form fields
-                setValue("title", song.title);
-                //setValue("description", song.description);
-                //setValue("picture", song.picture);
+                // Populate form fields from metadata
+                setValue("title", fileDetail.title ?? "");
+                setValue("artist", fileDetail.artist ?? "");
+                setValue("album", fileDetail.album ?? "");
+                setValue("genre", fileDetail.genre ?? "");
+                setValue("year", fileDetail.year ?? 1800);
+                setValue("trackNumber", fileDetail.trackNumber ?? 0);
+                setValue(
+                    "picture",
+                    fileDetail.picture
+                        ? filePictureToDataURL(fileDetail.picture)
+                        : undefined
+                );
             } catch (error) {
                 console.error("Failed to load song data:", error);
-            } finally {
-                setIsLoading(false);
             }
         };
 
-        fetchSongData();
-    }, [store, id]);
+        updateFields();
+    }, [fileDetail]);
 
     // end Load song data and populate form fields and songs ----------------------------------------------------------------
 
@@ -173,6 +134,36 @@ export default function NetworkSongMetadataPanel({
             console.error("Store is not initialized.");
             return;
         }
+
+        // example of what song should look like
+        // const song: Song = {
+        //     id: string;
+        //     xorname: string;
+        //     title: string;
+        //     description?: string;
+        //     artist: string;
+        //     artUrl?: string;
+        //     dateCreated: Date;
+        //     dateUpdated?: Date;
+        //     fileName: string,
+        //     extension: string,
+        //     downloadFolder: string
+        //     tags?: string[];
+        //     picture?: string;
+        //     trackNumber?: number
+        // };
+
+        // const song: Song = {
+        //     id: uuidv4(),
+        //     xorname:
+        //         "a0f6fa2b08e868060fe6e57018e3f73294821feaf3fdcf9cd636ac3d11e7e2ac",
+        //     title: "test",
+        //     artist: "test",
+        //     dateCreated: new Date(),
+        //     fileName: "test",
+        //     extension: "mp4",
+        //     downloadFolder: "test",
+        // };
 
         console.log(data);
 
