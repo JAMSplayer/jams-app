@@ -7,6 +7,7 @@ import {
     listAccounts,
     sessionSet,
     sessionRead,
+    download as autonomiDownload,
 } from "@/backend/autonomi";
 import {
     AccountUser,
@@ -20,6 +21,7 @@ import {
 } from "@/backend/backend-store";
 import Networks from "@/enums/networks";
 import { isEthereumAddress } from "@/lib/utils/address";
+import { FileDetail } from "@/types/file-detail";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
@@ -198,4 +200,17 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
     } else {
         return [];
     }
+}
+
+export async function download(
+    xorname: string,
+    destinationDir: string,
+): Promise<FileDetail | null> {
+    console.log("downloading song: " + xorname + " to " + destinationDir + " ...");
+    try {
+        return await autonomiDownload(xorname, destinationDir) as FileDetail;
+    } catch (e) {
+        console.error("download error: ", e);
+    }
+    return null;
 }

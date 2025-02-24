@@ -5,7 +5,8 @@ use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
 use lofty::tag::{Accessor, Tag, TagExt};
-use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey};
+use lofty::file::{FileType};
+use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey, XorName};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 use tauri::{AppHandle, Emitter, Manager, State};
@@ -487,7 +488,7 @@ fn truncate_number(value: u32, max_length: usize) -> u32 {
 }
 
 impl FileMetadata {
-    fn from_tagged_file(tagged_file: TaggedFile, file_path: String) -> Self {
+    fn from_tagged_file(tagged_file: &TaggedFile, file_path: String) -> Self {
         const MAX_TITLE_LENGTH: usize = 100;
         const MAX_ARTIST_LENGTH: usize = 100;
         const MAX_ALBUM_LENGTH: usize = 100;
@@ -570,7 +571,7 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
         .into_iter()
         .map(|file_path| {
             match read_from_path(&file_path) {
-                Ok(tagged_file) => FileMetadata::from_tagged_file(tagged_file, file_path),
+                Ok(tagged_file) => FileMetadata::from_tagged_file(&tagged_file, file_path),
                 Err(_) => {
                     FileMetadata {
                         file_path,
@@ -647,7 +648,76 @@ async fn read_metadata(
     let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
         .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
 
-    Ok(FileMetadata::from_tagged_file(tagged_file, path))
+    Ok(FileMetadata::from_tagged_file(&tagged_file, path))
+}
+
+#[tauri::command]
+async fn download(
+    xorname: String,
+    destination: String, // directory to download to
+    app: AppHandle,
+) -> Result<FileMetadata, Error> {
+    let xorname_bytes: [u8; 32] = hex::decode(xorname)
+        .map_err(|e| Error::Common(format!("Invalid xorname: {}", e)))?[0..32]
+        .try_into()
+        .unwrap();
+    let xorname = XorName(xorname_bytes);
+
+    let data = app
+        .try_state::<Mutex<Option<Safe>>>()
+        .ok_or(Error::NotConnected)?
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error::NotConnected)?
+        .download(&xorname)
+        .await?;
+
+    let mut reader = std::io::Cursor::new(data);
+    let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
+        .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
+    let data = reader.into_inner(); // get ownership back, avoid cloning data
+
+    let mut metadata = FileMetadata::from_tagged_file(&tagged_file, String::new());
+
+    let filename_meta = metadata.clone();
+    let mut filename_parts: Vec<String> = vec![];
+    let mut songname_parts: Vec<String> = vec![];
+    filename_meta.track_number.inspect(|track| songname_parts.push(format!("{:0>3}", track)));
+    filename_meta.artist.inspect(|artist| songname_parts.push(artist.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
+    filename_meta.title.inspect(|title| songname_parts.push(title.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
+
+    let mut path = PathBuf::from(destination);
+    filename_parts.push(hex::encode(xorname));
+    filename_parts.push("__".into());
+    filename_parts.push(songname_parts.join(" - "));
+    filename_parts.push(String::from(match tagged_file.file_type() {
+        FileType::Aac => ".aac",
+        FileType::Ape => ".ape",
+        FileType::Aiff => ".aiff",
+        FileType::Mpeg => ".mp3",
+        FileType::Flac => ".flac",
+        FileType::Mpc => ".mpc",
+        FileType::Opus => ".opus",
+        FileType::Speex => ".spx",
+        FileType::WavPack => ".wv",
+        FileType::Wav => ".wav",
+        FileType::Vorbis => ".ogg",
+        FileType::Mp4 => ".m4a",
+        _ => "",
+    }));
+    path.push(filename_parts.join(""));
+
+    fs::write(&path, data).map_err(|_| {
+        Error::Common(format!(
+            "Could not save song: {}",
+            path.display()
+        ))
+    })?;
+
+    metadata.file_path = String::from(path.to_string_lossy());
+
+    Ok(metadata)
 }
 
 // returns hex-encoded xorname

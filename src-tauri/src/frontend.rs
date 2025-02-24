@@ -10,7 +10,7 @@ pub(crate) struct SimpleAccountUser {
     pub(crate) address: String,
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub(crate) struct FileMetadata {
     pub(crate) file_path: String,
     pub(crate) title: Option<String>,
@@ -25,7 +25,7 @@ pub(crate) struct FileMetadata {
     pub(crate) picture: Option<FilePicture>, // Use FilePicture struct for image and MIME type
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub(crate) struct FilePicture {
     pub(crate) data: Vec<u8>,             // Image data
     pub(crate) mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
