@@ -230,11 +230,23 @@ export async function download(
 
         console.log("download response:", response);
 
+        // ensure response is correctly structured
+        if (
+            !response ||
+            !response.fullPath ||
+            typeof response !== "object" ||
+            !("file_path" in response)
+        ) {
+            console.error("Invalid response received from autonomiDownload.");
+            return null;
+        }
+
         // TODO get these from autonomi.tsx download function object
         const fileDetail: FileDetail = {
-            fullPath: "",
-            name: "",
-            extension: "",
+            fullPath: response.fullPath,
+            title: response.title,
+            name: response.name ?? "",
+            extension: response.extension ?? "",
             location: "",
             size: null,
         };
