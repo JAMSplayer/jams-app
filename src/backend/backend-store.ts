@@ -37,9 +37,10 @@ export const getTestnetPeerAddress = async (): Promise<string | null> => {
 export const getDownloadFolder = async (): Promise<string | null> => {
     try {
         const store = await getExternalStore();
-        const donwloadFolder = await store.get<string>("download-folder");
+        const downloadFolder = await store.get<string>("download-folder");
+        console.log("df", downloadFolder);
 
-        return donwloadFolder || null;
+        return downloadFolder ? downloadFolder.value : null;
     } catch (error) {
         console.error("Failed to fetch download folder:", error);
         return null;

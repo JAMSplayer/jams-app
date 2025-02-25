@@ -5,9 +5,10 @@ export type FilePicture = {
 
 export type FileDetail = {
     fullPath: string;
-    name: string;
+    fileName: string;
     extension: string;
-    location: string;
+    location: string; // generated on frontend
+    xorname: string | null;
     size: number | null;
     title?: string;
     artist?: string;

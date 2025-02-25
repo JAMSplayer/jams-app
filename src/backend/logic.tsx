@@ -205,6 +205,7 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
 
 export async function download(
     xorname: string,
+    fileName?: string,
     destinationDir?: string
 ): Promise<FileDetail | null> {
     console.log(
@@ -214,17 +215,18 @@ export async function download(
     );
 
     try {
-        const targetDir = destinationDir || (await getDownloadFolder());
+        const targetDir: string | null = destinationDir || await getDownloadFolder();
 
         if (!targetDir) {
             console.error("no valid download directory found.");
             return null;
         }
 
-        console.log(`downloading to: ${targetDir}`);
+        console.log(`downloading to: `, targetDir);
 
         const response = (await autonomiDownload(
             xorname,
+            fileName,
             targetDir
         )) as Partial<FileDetail>;
 
@@ -232,23 +234,18 @@ export async function download(
 
         // ensure response is correctly structured
         if (
-            !response ||
-            !response.fullPath ||
-            typeof response !== "object" ||
-            !("file_path" in response)
+            !response
+            || typeof response !== "object"
+            || !response.fullPath
         ) {
             console.error("Invalid response received from autonomiDownload.");
             return null;
         }
 
-        // TODO get these from autonomi.tsx download function object
         const fileDetail: FileDetail = {
-            fullPath: response.fullPath,
-            title: response.title,
-            name: response.name ?? "",
-            extension: response.extension ?? "",
-            location: "",
-            size: null,
+            ...response,
+            xorname: xorname,
+            location: "", // TODO: what do we want here? where it will be used?
         };
 
         return fileDetail;

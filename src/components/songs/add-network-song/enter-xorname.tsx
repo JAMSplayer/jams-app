@@ -31,6 +31,7 @@ const EnterXorname: React.FC<EnterXornameProps> = ({ onSearchSuccess }) => {
 
         try {
             const fileDetail = await download(xorname);
+            console.log("fileDetail: ", fileDetail);
 
             if (!fileDetail) {
                 console.error("File metadata not found.");

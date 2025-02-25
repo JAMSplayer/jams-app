@@ -251,10 +251,12 @@ export async function putData(
 
 export async function download(
     xorname: string,
+    fileName?: string,
     destinationDir: string,
 ): Promise<object> {
     return await invoke("download", {
         xorname: xorname,
+        fileName: fileName,
         destination: destinationDir
     });
 }
