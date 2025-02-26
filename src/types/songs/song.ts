@@ -1,14 +1,16 @@
 export type Song = {
     id: string;
     xorname: string;
+    location: string;
+
     title: string;
-    description?: string;
     artist: string;
-    artUrl?: string;
+    trackNumber?: number;
+    picture?: string;
+    tags?: string[];
+
+    description?: string;
+
     dateCreated: Date;
     dateUpdated?: Date;
-    location: string;
-    tags?: string[];
-    picture?: string;
-    trackNumber?: number;
 };

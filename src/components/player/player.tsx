@@ -40,6 +40,11 @@ const Player = () => {
         return null;
     }
 
+    // TODO: to be replaced by lib/utils/images.ts implementation from add-network-song-integration branch
+    const filePictureToDataURL = (fp: FilePicture): string => {
+        return "data:???";
+    };
+
     return (
         <div className="flex items-center gap-6 bg-card px-4 py-4 border-y md:px-6">
             <button
@@ -53,7 +58,7 @@ const Player = () => {
             </button>
 
             {/* Artwork on Medium and Above */}
-            {player.song.artUrl && (
+            {player.song.picture && (
                 <div
                     className={`hidden md:block absolute left-0 flex-shrink-0 overflow-hidden transition-all duration-500 ease-in-out ${
                         !isPlayerVisible ? "translate-y-5" : "translate-y-0"
@@ -61,7 +66,7 @@ const Player = () => {
                     style={{ height: "6.95rem", width: "6.75rem" }}
                 >
                     <img
-                        src={player.song.artUrl}
+                        src={filePictureToDataURL(player.song.picture)}
                         alt={player.song.title || "Album Art"}
                         className="w-full h-full object-cover"
                     />
