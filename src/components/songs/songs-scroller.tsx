@@ -108,6 +108,11 @@ const SongScroller = ({
         });
     };
 
+    // TODO: to be replaced by lib/utils/images.ts implementation from add-network-song-integration branch
+    const filePictureToDataURL = (fp: FilePicture): string => {
+        return "data:???";
+    };
+
     // Apply filter and sort to the songs
     const filteredAndSortedSongs = useMemo(() => {
         let filteredSongs = filterSongs(songs, filterValue);
@@ -273,9 +278,9 @@ const SongScroller = ({
                         >
                             {/* Album art */}
                             <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
-                                {song.artUrl ? (
+                                {song.picture ? (
                                     <img
-                                        src={song.artUrl}
+                                        src={filePictureToDataURL(song.picture)}
                                         alt="Album Art"
                                         className="w-full h-full object-cover"
                                     />
