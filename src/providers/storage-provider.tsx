@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { load, Store } from "@tauri-apps/plugin-store";
+import { downloadDir } from "@tauri-apps/api/path";
 
 // Create a context for the store
 const StorageContext = createContext<{ store: Store | null }>({ store: null });
@@ -11,21 +12,51 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
     const [store, setStore] = useState<Store | null>(null);
 
+    const initializeStore = async () => {
+        try {
+            const storeInstance = await load("store.bin", {
+                autoSave: true,
+            });
+            setStore(storeInstance);
+            sharedStore = storeInstance; // Assign to the shared variable
+        } catch (error) {
+            console.error("Failed to initialize store:", error);
+        }
+    };
+
+    const setDefaults = async () => {
+        try {
+            if (!store) {
+                console.error("Store is not initialized.");
+                return;
+            }
+
+            const downloadFolder = await store.get<string>("download-folder");
+
+            if (downloadFolder) {
+                return;
+            }
+
+            // if not set, use the default download directory
+            const defaultDownloadFolder = await downloadDir();
+            await store.set("download-folder", defaultDownloadFolder);
+            await store.save();
+        } catch (error) {
+            console.error(
+                "Failed to set default download folder in store:",
+                error
+            );
+        }
+    };
+
     // Initialize the store
     useEffect(() => {
-        const initializeStore = async () => {
-            try {
-                const storeInstance = await load("store.bin", {
-                    autoSave: true,
-                });
-                setStore(storeInstance);
-                sharedStore = storeInstance; // Assign to the shared variable
-            } catch (error) {
-                console.error("Failed to initialize store:", error);
-            }
+        const setupStore = async () => {
+            await initializeStore();
+            await setDefaults();
         };
 
-        initializeStore();
+        setupStore();
     }, []);
 
     return (
