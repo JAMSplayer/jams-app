@@ -1,15 +1,17 @@
 import { useState } from "react";
 import EnterXorname from "./enter-xorname";
 import NetworkSongMetadataPanel from "./network-song-metadata";
-import { FileDetail } from "@/types/file-detail";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 
 const AddNetworkSongPanel = () => {
     const [activePanel, setActivePanel] = useState<
         "enter-xorname" | "network-song-metadata"
     >("enter-xorname");
-    const [fileDetail, setFileDetail] = useState<FileDetail | null>(null);
+    const [fileDetail, setFileDetail] = useState<NetworkFileDetail | null>(
+        null
+    );
 
-    const handleSearchSuccess = (fileDetail: FileDetail) => {
+    const handleSearchSuccess = (fileDetail: NetworkFileDetail) => {
         setFileDetail(fileDetail);
         setActivePanel("network-song-metadata"); // switch to the metadata panel
     };

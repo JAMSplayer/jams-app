@@ -7,14 +7,15 @@ import {
     ChevronUpIcon,
     UploadIcon,
 } from "lucide-react";
-import { useState } from "react";
-import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
+import { useEffect, useState } from "react";
 import { formatBytes } from "@/lib/utils/formatting";
 import { useTranslation } from "react-i18next";
+import { LocalFileDetail } from "@/types/local-file-detail";
+import { extractFromFullPath } from "@/lib/utils/location";
 
 interface MultipleFilePanelProps {
     onBack: () => void;
-    fileDetails: FileDetail[]; // List of file details
+    fileDetails: LocalFileDetail[]; // List of file details
 }
 
 export default function MultipleFilePanel({
@@ -110,15 +111,16 @@ export default function MultipleFilePanel({
                 </div>
                 {!isMinimized && (
                     <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                        {fileDetails[currentIndex].name && (
+                        {fileDetails[currentIndex].fileName && (
                             <p className="text-sm text-gray-500 mb-1">
-                                {t("name")}: {fileDetails[currentIndex].name}
+                                {t("name")}:{" "}
+                                {fileDetails[currentIndex].fileName}
                             </p>
                         )}
-                        {fileDetails[currentIndex].location && (
+                        {fileDetails[currentIndex].fullPath && (
                             <p className="text-sm text-gray-500 mb-1">
                                 {t("location")}:{" "}
-                                {fileDetails[currentIndex].location}
+                                {fileDetails[currentIndex].fullPath}
                             </p>
                         )}
                         {fileDetails[currentIndex].size && (

@@ -26,10 +26,10 @@ import { TagInput } from "@/components/tag-input";
 import SelectYear from "@/components/select-year";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { download } from "@/backend/logic";
-import { FileDetail } from "@/types/file-detail";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 
 interface NetworkSongMetadataPanelProps {
-    fileDetail: FileDetail | null;
+    fileDetail: NetworkFileDetail | null;
     onReturn: () => void;
 }
 

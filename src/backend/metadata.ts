@@ -1,15 +1,19 @@
 // metadata.ts
-import { FileDetail } from "@/types/file-detail";
+import { LocalFileDetail } from "@/types/local-file-detail";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 import { invoke } from "@tauri-apps/api/core";
 
 export async function fetchMetadata(
     filePaths: string[]
-): Promise<FileDetail[]> {
+): Promise<NetworkFileDetail[]> {
     try {
         // Fetch metadata for all files
-        const metadata: FileDetail[] = await invoke("get_file_metadata", {
-            filePaths,
-        });
+        const metadata: NetworkFileDetail[] = await invoke(
+            "get_file_metadata",
+            {
+                filePaths,
+            }
+        );
         return metadata;
     } catch (error) {
         console.error("Failed to fetch metadata for files:", filePaths, error);
@@ -17,17 +21,18 @@ export async function fetchMetadata(
     }
 }
 
-export async function saveMetadata(file: FileDetail): Promise<void> {
+export async function saveMetadata(file: LocalFileDetail): Promise<void> {
     // throw on error
     await invoke("save_file_metadata", { songFile: file });
 }
 
+// read metadata for a local file
 export async function readMetadata(
     locationPath: string // like 08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962__BegBlag.mp3
-): Promise<FileDetail | null> {
+): Promise<LocalFileDetail | null> {
     try {
         // Fetch metadata for all files
-        const metadata: FileDetail = await invoke("read_metadata", {
+        const metadata: LocalFileDetail = await invoke("read_metadata", {
             locationPath,
         });
         return metadata;

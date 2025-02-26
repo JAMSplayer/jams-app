@@ -3,21 +3,21 @@ export type FilePicture = {
     mime_type: string; // Corresponds to String returned from rust
 };
 
-export type FileDetail = {
+// this is the file type when we drag/drop files to upload
+export type LocalFileDetail = {
     fullPath: string;
     fileName: string;
     extension: string;
-    location: string; // generated on frontend
-    xorname: string | null;
-    size: number | null;
+    folderPath: string;
+    size: number;
     title?: string;
     artist?: string;
     album?: string;
     genre?: string;
     year?: number;
     trackNumber?: number;
-    duration?: number; // Duration in seconds
-    channels?: number; // Optional
-    sampleRate?: number; // Optional
+    duration?: number; // duration in seconds
+    channels?: number;
+    sampleRate?: number;
     picture?: FilePicture;
 };

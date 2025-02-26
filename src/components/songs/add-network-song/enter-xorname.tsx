@@ -3,11 +3,11 @@ import { Input } from "@/components/ui/input";
 import { isValidXorname } from "@/lib/utils/validation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-import { FileDetail } from "@/types/file-detail";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 import { download } from "@/backend/logic";
 
 interface EnterXornameProps {
-    onSearchSuccess: (fileDetail: FileDetail) => void;
+    onSearchSuccess: (fileDetail: NetworkFileDetail) => void;
 }
 
 const EnterXorname: React.FC<EnterXornameProps> = ({ onSearchSuccess }) => {

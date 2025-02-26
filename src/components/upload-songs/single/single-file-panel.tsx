@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon } from "lucide-react";
-import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
-import { FilePicture } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
+import { FilePicture } from "@/types/network-file-detail";
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,10 +16,11 @@ import { useTranslation } from "react-i18next";
 import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../../tag-input";
+import { LocalFileDetail } from "@/types/local-file-detail";
 
 interface SingleFilePanelProps {
     onBack: () => void;
-    fileDetail: FileDetail;
+    fileDetail: LocalFileDetail;
 }
 
 type FormSchema = z.infer<typeof singleFileUploadSchema>;
@@ -97,7 +97,7 @@ export default function SingleFilePanel({
         try {
             setIsUploading(true);
 
-            let songFile: FileDetail = {
+            let songFile: LocalFileDetail = {
                 ...fileDetail,
                 ...song,
                 picture: undefined,
@@ -120,10 +120,10 @@ export default function SingleFilePanel({
             await saveMetadata(songFile);
 
             // TODO: add a playlist to which the song has to be added
-            const result = await uploadSong(songFile.fullPath);
+            //const result = await uploadSong(songFile.fullPath);
             // TODO: update song object with songXorname, update playlist data, sync with network
 
-            console.log("The song has been uploaded: ", result);
+            //console.log("The song has been uploaded: ", result);
         } catch (ex) {
             console.log("The song could not be uploaded: ", ex);
         } finally {
@@ -166,14 +166,14 @@ export default function SingleFilePanel({
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                    {fileDetail.name && (
+                    {fileDetail.fileName && (
                         <p className="text-sm text-gray-500">
-                            {t("fileName")}: {fileDetail.name}
+                            {t("fileName")}: {fileDetail.fileName}
                         </p>
                     )}
-                    {fileDetail.location && (
+                    {fileDetail.fullPath && (
                         <p className="text-sm text-gray-500">
-                            {t("location")}: {fileDetail.location}
+                            {t("location")}: {fileDetail.fullPath}
                         </p>
                     )}
                     {fileDetail.size && (
