@@ -250,10 +250,12 @@ export async function putData(
 
 export async function download(
     xorname: string,
-    destinationDir: string
+    destinationDir: string,
+    fileName?: string
 ): Promise<object> {
     return await invoke("download", {
         xorname: xorname,
+        fileName: fileName,
         destination: destinationDir,
     });
 }

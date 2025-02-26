@@ -550,7 +550,7 @@ impl FileMetadata {
             });
 
         FileMetadata {
-            file_path,
+            full_path: file_path,
             title,
             artist,
             album,
@@ -561,6 +561,7 @@ impl FileMetadata {
             channels,
             sample_rate,
             picture: picture.map(|(data, mime_type)| FilePicture { data, mime_type }),
+            ..Default::default() // other fields will be None (serialized to null)
         }
     }
 }
@@ -571,10 +572,17 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
         .into_iter()
         .map(|file_path| {
             match read_from_path(&file_path) {
-                Ok(tagged_file) => FileMetadata::from_tagged_file(&tagged_file, file_path),
+                Ok(tagged_file) => {
+                    let size = std::fs::File::open(&file_path).unwrap()
+                            .metadata().unwrap()
+                            .len();
+                    let mut meta = FileMetadata::from_tagged_file(&tagged_file, file_path);
+                    meta.size = Some(size as u32);
+                    meta
+                }
                 Err(_) => {
                     FileMetadata {
-                        file_path,
+                        full_path: file_path,
                         ..Default::default() // other fields will be None (serialized to null)
                     }
                 }
@@ -587,10 +595,10 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
 
 #[tauri::command]
 async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(), Error> {
-    let mut tagged_file = read_from_path(&song_file.file_path).map_err(|e| {
+    let mut tagged_file = read_from_path(&song_file.full_path).map_err(|e| {
         Error::Common(format!(
             "Cannot read tags from file {}",
-            song_file.file_path
+            song_file.full_path
         ))
     })?;
     tagged_file.clear();
@@ -624,8 +632,8 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
     }
 
     new_tag
-        .save_to_path(&song_file.file_path, WriteOptions::default())
-        .map_err(|e| Error::Common(format!("Cannot save tags to file {}", song_file.file_path)))?;
+        .save_to_path(&song_file.full_path, WriteOptions::default())
+        .map_err(|e| Error::Common(format!("Cannot save tags to file {}", song_file.full_path)))?;
     Ok(())
 }
 
@@ -644,16 +652,20 @@ async fn read_metadata(
         .download(&xorname)
         .await?;
 
+    let size = data.len();
     let mut reader = std::io::Cursor::new(data);
     let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
         .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
 
-    Ok(FileMetadata::from_tagged_file(&tagged_file, path))
+    let mut meta = FileMetadata::from_tagged_file(&tagged_file, path);
+    meta.size = Some(size as u32);
+    Ok(meta)
 }
 
 #[tauri::command]
 async fn download(
     xorname: String,
+    file_name: Option<String>,
     destination: String, // directory to download to
     app: AppHandle,
 ) -> Result<FileMetadata, Error> {
@@ -673,40 +685,52 @@ async fn download(
         .download(&xorname)
         .await?;
 
+    let size = data.len();
     let mut reader = std::io::Cursor::new(data);
     let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
         .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
     let data = reader.into_inner(); // get ownership back, avoid cloning data
 
     let mut metadata = FileMetadata::from_tagged_file(&tagged_file, String::new());
-
-    let filename_meta = metadata.clone();
-    let mut filename_parts: Vec<String> = vec![];
-    let mut songname_parts: Vec<String> = vec![];
-    filename_meta.track_number.inspect(|track| songname_parts.push(format!("{:0>3}", track)));
-    filename_meta.artist.inspect(|artist| songname_parts.push(artist.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
-    filename_meta.title.inspect(|title| songname_parts.push(title.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
+    metadata.size = Some(size as u32);
 
     let mut path = PathBuf::from(destination);
-    filename_parts.push(hex::encode(xorname));
-    filename_parts.push("__".into());
-    filename_parts.push(songname_parts.join(" - "));
-    filename_parts.push(String::from(match tagged_file.file_type() {
-        FileType::Aac => ".aac",
-        FileType::Ape => ".ape",
-        FileType::Aiff => ".aiff",
-        FileType::Mpeg => ".mp3",
-        FileType::Flac => ".flac",
-        FileType::Mpc => ".mpc",
-        FileType::Opus => ".opus",
-        FileType::Speex => ".spx",
-        FileType::WavPack => ".wv",
-        FileType::Wav => ".wav",
-        FileType::Vorbis => ".ogg",
-        FileType::Mp4 => ".m4a",
-        _ => "",
-    }));
-    path.push(filename_parts.join(""));
+    if let Some(file_name) = file_name {
+        path.push(file_name);
+    } else {
+        let filename_meta = metadata.clone();
+        let mut songname_parts: Vec<String> = vec![];
+        filename_meta.track_number.inspect(|track| songname_parts.push(format!("{:0>3}", track)));
+        filename_meta.artist.inspect(|artist| songname_parts.push(artist.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
+        filename_meta.title.inspect(|title| songname_parts.push(title.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
+        
+        let songname = songname_parts.join(" - ");
+        let extension = String::from(match tagged_file.file_type() {
+            FileType::Aac => ".aac",
+            FileType::Ape => ".ape",
+            FileType::Aiff => ".aiff",
+            FileType::Mpeg => ".mp3",
+            FileType::Flac => ".flac",
+            FileType::Mpc => ".mpc",
+            FileType::Opus => ".opus",
+            FileType::Speex => ".spx",
+            FileType::WavPack => ".wv",
+            FileType::Wav => ".wav",
+            FileType::Vorbis => ".ogg",
+            FileType::Mp4 => ".m4a",
+            _ => "",
+        });
+
+        metadata.file_name = Some(songname.clone());
+        metadata.extension = Some(extension.clone());
+
+        let mut filename_parts: Vec<String> = vec![];
+//        filename_parts.push(hex::encode(xorname));
+//        filename_parts.push("__".into());
+        filename_parts.push(songname);
+        filename_parts.push(extension);
+        path.push(filename_parts.join(""));
+    }
 
     fs::write(&path, data).map_err(|_| {
         Error::Common(format!(
@@ -715,7 +739,7 @@ async fn download(
         ))
     })?;
 
-    metadata.file_path = String::from(path.to_string_lossy());
+    metadata.full_path = String::from(path.to_string_lossy());
 
     Ok(metadata)
 }
@@ -776,6 +800,7 @@ pub fn run() {
             get_file_metadata,
             save_file_metadata,
             read_metadata,
+            download,
             upload,
             put_data,
         ])

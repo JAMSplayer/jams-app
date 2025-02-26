@@ -11,8 +11,12 @@ pub(crate) struct SimpleAccountUser {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct FileMetadata {
-    pub(crate) file_path: String,
+    pub(crate) full_path: String,
+    pub(crate) file_name: Option<String>,
+    pub(crate) extension: Option<String>,
+    pub(crate) size: Option<u32>,
     pub(crate) title: Option<String>,
     pub(crate) artist: Option<String>,
     pub(crate) album: Option<String>,

@@ -22,7 +22,7 @@ import {
 } from "@/backend/backend-store";
 import Networks from "@/enums/networks";
 import { isEthereumAddress } from "@/lib/utils/address";
-import { FileDetail } from "@/types/file-detail";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
@@ -205,8 +205,9 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
 
 export async function download(
     xorname: string,
+    fileName?: string,
     destinationDir?: string
-): Promise<FileDetail | null> {
+): Promise<NetworkFileDetail | null> {
     console.log(
         `downloading song: ${xorname} to ${
             destinationDir || "default folder"
@@ -214,44 +215,31 @@ export async function download(
     );
 
     try {
-        const targetDir = destinationDir || (await getDownloadFolder());
+        const targetDir: string | null =
+            destinationDir || (await getDownloadFolder());
 
         if (!targetDir) {
             console.error("no valid download directory found.");
             return null;
         }
 
-        console.log(`downloading to: ${targetDir}`);
+        console.log(`downloading to: `, targetDir);
 
         const response = (await autonomiDownload(
             xorname,
             targetDir
-        )) as Partial<FileDetail>;
+        )) as Partial<NetworkFileDetail>;
 
         console.log("download response:", response);
 
         // ensure response is correctly structured
-        if (
-            !response ||
-            !response.fullPath ||
-            typeof response !== "object" ||
-            !("file_path" in response)
-        ) {
+        if (!response || typeof response !== "object") {
             console.error("Invalid response received from autonomiDownload.");
             return null;
         }
 
-        console.log(response.file_path);
-        console.log(response.fullPath);
-
-        // TODO get these from autonomi.tsx download function object
-        const fileDetail: FileDetail = {
-            fullPath: response.fullPath,
-            title: response.title,
-            name: response.name ?? "",
-            extension: response.extension ?? "",
-            location: "",
-            size: null,
+        const fileDetail: NetworkFileDetail = {
+            ...response,
         };
 
         return fileDetail;
