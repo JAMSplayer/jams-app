@@ -1,5 +1,5 @@
 use safe::XorName;
-use std::{path::PathBuf, str::FromStr};
+use std::{path::PathBuf};
 use tauri::path::BaseDirectory;
 use tauri::AppHandle;
 use tauri::Manager;

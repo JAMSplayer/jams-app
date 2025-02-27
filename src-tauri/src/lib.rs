@@ -197,12 +197,9 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
         println!("Connecting to official network.");
     }
 
-    //    Safe::init_logging().map_err(|_| Error::Common(format!("Autonomi logging error")))?;
-    Safe::init_logging().unwrap();
-
     println!("\n\nConnecting...");
 
-    let safe = Safe::connect(peers, add_network_contacts, None)
+    let safe = Safe::connect(peers, add_network_contacts, None, "INFO".into())
         .await
         .inspect_err(|_| {
             app.unmanage::<Mutex<Option<Safe>>>();
@@ -236,7 +233,7 @@ async fn sign_in(
     let pk = load_create_import_key(&app_root, login.clone(), password, eth_pk_import, register)?;
     println!("\n\nEth Private Key: {}", pk);
 
-    let signed_in_safe = app
+    app
         .try_state::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?
         .lock()
@@ -245,11 +242,12 @@ async fn sign_in(
         .ok_or(Error::NotConnected)? // not signed in
         .login_with_eth(Some(pk))?; // sign in
 
-    let address = signed_in_safe.address()?.to_string();
+    let address = client_address(
+        app
+            .try_state::<Mutex<Option<Safe>>>()
+            .ok_or(Error::NotConnected)?
+    ).await?;
     println!("ETH wallet address: {}", address);
-
-    // Store new `safe` object in the application's state
-    *(app.state::<Mutex<Option<Safe>>>().lock().await) = Some(signed_in_safe);
 
     // Prepare the address directory and file
     let addr_dir = user_root(&app_root, login.clone());
@@ -297,6 +295,20 @@ async fn disconnect(app: AppHandle) -> Result<(), Error> {
     let _ = app
         .emit("disconnected", ())
         .inspect_err(|e| eprintln!("{}", e));
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn log_level(level: String, app: AppHandle) -> Result<(), Error> {
+    let _ = app
+        .try_state::<Mutex<Option<Safe>>>()
+        .ok_or(Error::NotConnected)?
+        .lock()
+        .await
+        .as_mut()
+        .ok_or(Error::NotConnected)? // safe
+        .log_level(level)?;
 
     Ok(())
 }
@@ -718,6 +730,7 @@ pub fn run() {
             sign_in,
             is_connected,
             disconnect,
+            log_level,
             session_set,
             session_read,
             create_reg,

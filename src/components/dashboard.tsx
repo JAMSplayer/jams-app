@@ -1,6 +1,7 @@
 import { useConnection } from "@/providers/connection-provider";
 import { SongLoadButton } from "./player/song-load-button";
 import { Button } from "./ui/button";
+import { logLevel } from "@/backend/autonomi";
 import { registeredAccounts } from "@/backend/logic";
 
 export default function Dashboard() {
@@ -32,6 +33,11 @@ export default function Dashboard() {
             >
                 Get Accounts
             </Button>
+            <div>
+                <Button onClick={async () => { await logLevel("ERROR") }}> log: ERROR </Button>
+                <Button onClick={async () => { await logLevel("INFO") }}> log: INFO </Button>
+                <Button onClick={async () => { await logLevel("TRACE") }}> log: TRACE </Button>
+            </div>
             <div className="flex flex-col">
                 <div>
                     <h1>
