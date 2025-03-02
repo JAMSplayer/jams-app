@@ -228,7 +228,7 @@ export async function download(
         const response = (await autonomiDownload(
             xorname,
             targetDir
-        )) as Partial<NetworkFileDetail>;
+        )) as NetworkFileDetail;
 
         console.log("download response:", response);
 
@@ -238,11 +238,7 @@ export async function download(
             return null;
         }
 
-        const fileDetail: NetworkFileDetail = {
-            ...response,
-        };
-
-        return fileDetail;
+        return response;
     } catch (e) {
         console.error("Download error:", e);
         return null;

@@ -488,7 +488,7 @@ fn truncate_number(value: u32, max_length: usize) -> u32 {
 }
 
 impl FileMetadata {
-    fn from_tagged_file(tagged_file: &TaggedFile, file_path: String) -> Self {
+    fn from_tagged_file(tagged_file: &TaggedFile) -> Self {
         const MAX_TITLE_LENGTH: usize = 100;
         const MAX_ARTIST_LENGTH: usize = 100;
         const MAX_ALBUM_LENGTH: usize = 100;
@@ -550,7 +550,6 @@ impl FileMetadata {
             });
 
         FileMetadata {
-            full_path: file_path,
             title,
             artist,
             album,
@@ -576,13 +575,12 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
                     let size = std::fs::File::open(&file_path).unwrap()
                             .metadata().unwrap()
                             .len();
-                    let mut meta = FileMetadata::from_tagged_file(&tagged_file, file_path);
+                    let mut meta = FileMetadata::from_tagged_file(&tagged_file);
                     meta.size = Some(size as u32);
                     meta
                 }
                 Err(_) => {
                     FileMetadata {
-                        full_path: file_path,
                         ..Default::default() // other fields will be None (serialized to null)
                     }
                 }
@@ -595,10 +593,12 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
 
 #[tauri::command]
 async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(), Error> {
-    let mut tagged_file = read_from_path(&song_file.full_path).map_err(|e| {
+    let full_path = String::from(song_file.full_path()?.to_string_lossy().as_ref());
+
+    let mut tagged_file = read_from_path(&full_path).map_err(|e| {
         Error::Common(format!(
             "Cannot read tags from file {}",
-            song_file.full_path
+            full_path
         ))
     })?;
     tagged_file.clear();
@@ -632,8 +632,8 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
     }
 
     new_tag
-        .save_to_path(&song_file.full_path, WriteOptions::default())
-        .map_err(|e| Error::Common(format!("Cannot save tags to file {}", song_file.full_path)))?;
+        .save_to_path(&full_path, WriteOptions::default())
+        .map_err(|e| Error::Common(format!("Cannot save tags to file {}", full_path)))?;
     Ok(())
 }
 
@@ -657,7 +657,7 @@ async fn read_metadata(
     let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
         .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
 
-    let mut meta = FileMetadata::from_tagged_file(&tagged_file, path);
+    let mut meta = FileMetadata::from_tagged_file(&tagged_file);
     meta.size = Some(size as u32);
     Ok(meta)
 }
@@ -665,7 +665,7 @@ async fn read_metadata(
 #[tauri::command]
 async fn download(
     xorname: String,
-    file_name: Option<String>,
+    file_name: Option<String>, // name with extension
     destination: String, // directory to download to
     app: AppHandle,
 ) -> Result<FileMetadata, Error> {
@@ -691,11 +691,18 @@ async fn download(
         .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
     let data = reader.into_inner(); // get ownership back, avoid cloning data
 
-    let mut metadata = FileMetadata::from_tagged_file(&tagged_file, String::new());
+    let mut metadata = FileMetadata::from_tagged_file(&tagged_file);
     metadata.size = Some(size as u32);
+    metadata.xorname = Some(xorname.clone());
+    metadata.folder_path = Some(destination.clone());
 
     let mut path = PathBuf::from(destination);
     if let Some(file_name) = file_name {
+        let file_name = PathBuf::from(file_name);
+
+        metadata.file_name = file_name.file_stem().map(|s| String::from(s.to_string_lossy().as_ref()));
+        metadata.extension = file_name.extension().map(|s| String::from(s.to_string_lossy().as_ref()));
+
         path.push(file_name);
     } else {
         let filename_meta = metadata.clone();
@@ -706,18 +713,18 @@ async fn download(
         
         let songname = songname_parts.join(" - ");
         let extension = String::from(match tagged_file.file_type() {
-            FileType::Aac => ".aac",
-            FileType::Ape => ".ape",
-            FileType::Aiff => ".aiff",
-            FileType::Mpeg => ".mp3",
-            FileType::Flac => ".flac",
-            FileType::Mpc => ".mpc",
-            FileType::Opus => ".opus",
-            FileType::Speex => ".spx",
-            FileType::WavPack => ".wv",
-            FileType::Wav => ".wav",
-            FileType::Vorbis => ".ogg",
-            FileType::Mp4 => ".m4a",
+            FileType::Aac => "aac",
+            FileType::Ape => "ape",
+            FileType::Aiff => "aiff",
+            FileType::Mpeg => "mp3",
+            FileType::Flac => "flac",
+            FileType::Mpc => "mpc",
+            FileType::Opus => "opus",
+            FileType::Speex => "spx",
+            FileType::WavPack => "wv",
+            FileType::Wav => "wav",
+            FileType::Vorbis => "ogg",
+            FileType::Mp4 => "m4a",
             _ => "",
         });
 
@@ -728,6 +735,7 @@ async fn download(
 //        filename_parts.push(hex::encode(xorname));
 //        filename_parts.push("__".into());
         filename_parts.push(songname);
+        filename_parts.push(String::from("."));
         filename_parts.push(extension);
         path.push(filename_parts.join(""));
     }
@@ -738,8 +746,6 @@ async fn download(
             path.display()
         ))
     })?;
-
-    metadata.full_path = String::from(path.to_string_lossy());
 
     Ok(metadata)
 }
@@ -805,7 +811,7 @@ pub fn run() {
             put_data,
         ])
         .setup(|app| {
-            server::run(app.handle().clone());
+//            server::run(app.handle().clone()); // temporarily disable local server, because streaming from network is not implemented.
             Ok(())
         })
         .run(tauri::generate_context!())

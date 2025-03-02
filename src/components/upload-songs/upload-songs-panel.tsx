@@ -5,7 +5,7 @@ import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
 import { fetchMetadata } from "@/backend/metadata";
 import { LocalFileDetail } from "@/types/local-file-detail";
-import { extractFromFullPath } from "@/lib/utils/location";
+import { extractFromFullPath, generateLocation } from "@/lib/utils/location";
 
 export default function UploadSongsPanel() {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
@@ -40,7 +40,7 @@ export default function UploadSongsPanel() {
                 const newFileDetails: LocalFileDetail[] = [];
                 for (const filePath of validFiles) {
                     const alreadyExists = fileDetails.some(
-                        (details) => details.fullPath === filePath
+                        (details) => generateLocation("", details.fileName, details.extension, details.folderPath) === filePath
                     );
 
                     if (!alreadyExists) {
@@ -85,7 +85,6 @@ export default function UploadSongsPanel() {
 
             // proceed with whatever information is available
             return {
-                fullPath: filePath,
                 fileName,
                 extension,
                 folderPath,

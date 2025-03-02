@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { formatBytes } from "@/lib/utils/formatting";
 import { useTranslation } from "react-i18next";
 import { LocalFileDetail } from "@/types/local-file-detail";
-import { extractFromFullPath } from "@/lib/utils/location";
+import { generateLocation } from "@/lib/utils/location";
 
 interface MultipleFilePanelProps {
     onBack: () => void;
@@ -117,12 +117,10 @@ export default function MultipleFilePanel({
                                 {fileDetails[currentIndex].fileName}
                             </p>
                         )}
-                        {fileDetails[currentIndex].fullPath && (
-                            <p className="text-sm text-gray-500 mb-1">
-                                {t("location")}:{" "}
-                                {fileDetails[currentIndex].fullPath}
-                            </p>
-                        )}
+                        <p className="text-sm text-gray-500 mb-1">
+                            {t("location")}:{" "}
+                            {generateLocation("", fileDetails[currentIndex].fileName, fileDetails[currentIndex].extension, fileDetails[currentIndex].folderPath)}
+                        </p>
                         {fileDetails[currentIndex].size && (
                             <p className="text-sm text-gray-500 mb-1">
                                 {t("size")}:{" "}

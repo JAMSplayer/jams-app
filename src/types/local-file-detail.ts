@@ -5,10 +5,9 @@ export type FilePicture = {
 
 // this is the file type when we drag/drop files to upload
 export type LocalFileDetail = {
-    fullPath: string;
+    folderPath: string;
     fileName: string;
     extension: string;
-    folderPath: string;
     size: number;
     title?: string;
     artist?: string;

@@ -5,7 +5,7 @@ export type FilePicture = {
 
 // this is the file type that we return when querying the network
 export type NetworkFileDetail = {
-    downloadFolder: string;
+    folderPath: string;
     fileName: string;
     extension: string;
     xorname: string;

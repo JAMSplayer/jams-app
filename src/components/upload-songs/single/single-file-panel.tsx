@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon } from "lucide-react";
 import { FilePicture } from "@/types/network-file-detail";
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
+import { base64ToImageFile } from "@/lib/utils/images";
+import { generateLocation } from "@/lib/utils/location";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import SelectYear from "@/components/select-year";
-import { base64ToImageFile } from "@/lib/utils/images";
 import { uploadSong } from "@/backend/uploading";
 import { saveMetadata } from "@/backend/metadata";
 import { SongUpload } from "@/types/songs/song-upload";
@@ -120,7 +121,7 @@ export default function SingleFilePanel({
             await saveMetadata(songFile);
 
             // TODO: add a playlist to which the song has to be added
-            //const result = await uploadSong(songFile.fullPath);
+            //const result = await uploadSong(generateLocation("", songFile.fileName, songFile.extension, songFile.folderPath));
             // TODO: update song object with songXorname, update playlist data, sync with network
 
             //console.log("The song has been uploaded: ", result);
@@ -171,11 +172,9 @@ export default function SingleFilePanel({
                             {t("fileName")}: {fileDetail.fileName}
                         </p>
                     )}
-                    {fileDetail.fullPath && (
-                        <p className="text-sm text-gray-500">
-                            {t("location")}: {fileDetail.fullPath}
-                        </p>
-                    )}
+                    <p className="text-sm text-gray-500">
+                        {t("location")}: {generateLocation("", fileDetail.fileName, fileDetail.extension, fileDetail.folderPath)}
+                    </p>
                     {fileDetail.size && (
                         <p className="text-sm text-gray-500">
                             {t("size")}: {formatBytes(fileDetail.size)}
