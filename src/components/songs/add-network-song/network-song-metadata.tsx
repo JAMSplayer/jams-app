@@ -142,7 +142,6 @@ export default function NetworkSongMetadataPanel({
         //     title: string;
         //     description?: string;
         //     artist: string;
-        //     artUrl?: string;
         //     dateCreated: Date;
         //     dateUpdated?: Date;
         //     fileName: string,

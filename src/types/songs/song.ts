@@ -3,7 +3,6 @@ export type Song = {
     xorname: string;
     title: string;
     artist: string;
-    artUrl?: string;
     dateCreated: Date;
     dateUpdated?: Date;
     fileName: string;
