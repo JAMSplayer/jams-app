@@ -9,7 +9,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import SelectYear from "@/components/select-year";
-import { uploadSong } from "@/backend/uploading";
 import { saveMetadata } from "@/backend/metadata";
 import { SongUpload } from "@/types/songs/song-upload";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -34,7 +33,6 @@ export default function SingleFilePanel({
         register,
         handleSubmit,
         setValue,
-        getValues,
         watch,
         formState: { errors, isValid },
     } = useForm<FormSchema>({

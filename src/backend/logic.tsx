@@ -227,7 +227,8 @@ export async function download(
 
         const response = (await autonomiDownload(
             xorname,
-            targetDir
+            targetDir,
+            fileName
         )) as NetworkFileDetail;
 
         console.log("download response:", response);

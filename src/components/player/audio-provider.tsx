@@ -1,5 +1,6 @@
 import { Song } from "@/types/songs/song";
 import { createContext, useContext, useMemo, useReducer, useRef } from "react";
+import { generateLocation } from "@/lib/utils/location";
 
 interface PlayerState {
     playing: boolean;
@@ -79,14 +80,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         return {
             play(song) {
                 if (song) {
+                    const location = generateLocation(song.xorname, song.fileName, song.extension, song.downloadFolder);
                     dispatch({ type: ActionKind.SET_META, payload: song });
 
                     // If the song location changes, load the new song
                     if (
                         playerRef.current &&
-                        playerRef.current.currentSrc !== song.location
+                        playerRef.current.currentSrc !== location
                     ) {
-                        playerRef.current.src = song.location;
+                        playerRef.current.src = location;
                         playerRef.current.load();
                         playerRef.current.currentTime = 0;
                     }
@@ -100,7 +102,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
             toggle(song) {
                 const isPlaying = song
                     ? state.playing &&
-                      playerRef.current?.currentSrc === song.location
+                      playerRef.current?.currentSrc === generateLocation(song.xorname, song.fileName, song.extension, song.downloadFolder)
                     : state.playing;
 
                 if (isPlaying) {
@@ -136,7 +138,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
             isPlaying(song) {
                 return song
                     ? state.playing &&
-                          playerRef.current?.currentSrc === song.location
+                          playerRef.current?.currentSrc === generateLocation(song.xorname, song.fileName, song.extension, song.downloadFolder)
                     : state.playing;
             },
         };

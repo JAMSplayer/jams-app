@@ -42,7 +42,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
 
     const { store } = useStorage();
 
-    const [song, setSong] = useState<Song | undefined>(undefined);
+    const [_song, setSong] = useState<Song | undefined>(undefined);
 
     if (!id) {
         return <p>No Song ID provided.</p>;

@@ -1,14 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, CirclePlusIcon, EditIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, CirclePlusIcon, EditIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { convertToBase64, filePictureToDataURL } from "@/lib/utils/images";
-import { open } from "@tauri-apps/plugin-dialog";
-import { readFile } from "@tauri-apps/plugin-fs";
+import { filePictureToDataURL } from "@/lib/utils/images";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import { editSongSchema } from "@/form-schemas/edit-song-schema";
 import { useStorage } from "@/providers/storage-provider";
 import { Song } from "@/types/songs/song";
@@ -25,7 +22,6 @@ import {
 import { TagInput } from "@/components/tag-input";
 import SelectYear from "@/components/select-year";
 import { useImageSelector } from "@/hooks/use-image-selector";
-import { download } from "@/backend/logic";
 import { NetworkFileDetail } from "@/types/network-file-detail";
 
 interface NetworkSongMetadataPanelProps {
@@ -55,7 +51,6 @@ export default function NetworkSongMetadataPanel({
     const {
         handleSubmit,
         register,
-        control,
         getValues,
         setValue,
         formState: { isValid },

@@ -7,7 +7,7 @@ import {
     ChevronUpIcon,
     UploadIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { formatBytes } from "@/lib/utils/formatting";
 import { useTranslation } from "react-i18next";
 import { LocalFileDetail } from "@/types/local-file-detail";

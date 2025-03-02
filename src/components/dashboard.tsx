@@ -2,6 +2,8 @@ import { useConnection } from "@/providers/connection-provider";
 import { SongLoadButton } from "./player/song-load-button";
 import { Button } from "./ui/button";
 import { registeredAccounts } from "@/backend/logic";
+import { resolveResource } from '@tauri-apps/api/path';
+import { extractFromFullPath } from "@/lib/utils/location";
 
 export default function Dashboard() {
     const { isConnected, account } = useConnection();
@@ -10,16 +12,23 @@ export default function Dashboard() {
         <div className="p-4 space-y-2">
             <div className="flex flex-row">
                 <SongLoadButton
-                    song={{
-                        id: "123",
-                        xorname: "124",
-                        location:
-                            "http://localhost:12345/08dbb205f5a5712e48551c0e437f07be304a5daadf20e07e8307e7f564fa9962__BegBlag.mp3",
-                        title: "BegBlag",
-                        artist: "BegBlag",
-                        dateCreated: new Date(),
-                        picture: undefined,
-                        tags: [],
+                    song={async () => {
+                        const pathData = extractFromFullPath(await resolveResource('resources/A_Lazy_Farmer_Boy_by_Buster_Carter_And_Preston_Young.mp3'));
+                        console.log("pathData: ", pathData);
+                        const { fileName, extension, folderPath } = pathData;
+                        
+                        return {
+                            id: "123",
+                            xorname: "124",
+                            downloadFolder: folderPath,
+                            fileName,
+                            extension,
+                            title: "BegBlag",
+                            artist: "BegBlag",
+                            dateCreated: new Date(),
+                            picture: undefined,
+                            tags: [],
+                        }
                     }}
                 />
             </div>
