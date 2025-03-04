@@ -36,14 +36,7 @@ export default function PlaylistsPanel() {
             const storedPlaylists: Playlist[] =
                 (await store.get("playlists")) || [];
 
-            // Convert date strings to Date objects
-            const playlistsWithDates = storedPlaylists.map((playlist) => ({
-                ...playlist,
-                createdAt: new Date(playlist.createdAt),
-                updatedAt: new Date(playlist.updatedAt),
-            }));
-
-            setPlaylists(playlistsWithDates);
+            setPlaylists(storedPlaylists);
         } catch (error) {
             console.error("Failed to load playlists:", error);
         }
