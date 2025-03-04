@@ -220,6 +220,14 @@ export async function download(
             return null;
         }
 
+        if (typeof targetDir !== "string") {
+            console.error(
+                "Invalid download directory format (should be string):",
+                targetDir
+            );
+            return null;
+        }
+
         console.log(`Downloading to: ${targetDir}`);
 
         // start the download
