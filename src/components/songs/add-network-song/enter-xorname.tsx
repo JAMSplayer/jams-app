@@ -69,7 +69,7 @@ const EnterXorname: React.FC<EnterXornameProps> = ({ onSearchSuccess }) => {
                         onClick={handleSearch}
                         disabled={!isValid || isLoading}
                     >
-                        {isLoading ? "Searching..." : "Search"}{" "}
+                        {isLoading ? "Downloading..." : "Search"}{" "}
                         <MagnifyingGlassIcon />
                     </Button>
                 </div>
