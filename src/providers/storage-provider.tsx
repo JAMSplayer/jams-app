@@ -26,12 +26,15 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const setDefaults = async () => {
         try {
-            if (!store) {
+            const activeStore = sharedStore;
+            if (!activeStore) {
                 console.error("Store is not initialized.");
                 return;
             }
 
-            const downloadFolder = await store.get<string>("download-folder");
+            const downloadFolder = await activeStore.get<string>(
+                "download-folder"
+            );
 
             if (downloadFolder) {
                 return;
@@ -39,8 +42,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
 
             // if not set, use the default download directory
             const defaultDownloadFolder = await downloadDir();
-            await store.set("download-folder", defaultDownloadFolder);
-            await store.save();
+            await activeStore.set("download-folder", defaultDownloadFolder);
+            await activeStore.save();
         } catch (error) {
             console.error(
                 "Failed to set default download folder in store:",
