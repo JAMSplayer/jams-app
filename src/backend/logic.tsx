@@ -202,29 +202,27 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
         return [];
     }
 }
-
 export async function download(
     xorname: string,
     fileName?: string,
     destinationDir?: string
 ): Promise<NetworkFileDetail | null> {
     console.log(
-        `downloading song: ${xorname} to ${
-            destinationDir || "default folder"
-        }...`
+        `Starting download: ${xorname} => ${destinationDir || "default folder"}`
     );
 
     try {
-        const targetDir: string | null =
-            destinationDir || (await getDownloadFolder());
+        // get target directory (use provided dir, otherwise fetch default)
+        const targetDir = destinationDir || (await getDownloadFolder());
 
         if (!targetDir) {
-            console.error("no valid download directory found.");
+            console.error("No valid download directory found.");
             return null;
         }
 
-        console.log(`downloading to: `, targetDir);
+        console.log(`Downloading to: ${targetDir}`);
 
+        // start the download
         const response = (await autonomiDownload(
             xorname,
             targetDir,
@@ -235,13 +233,13 @@ export async function download(
 
         // ensure response is correctly structured
         if (!response || typeof response !== "object") {
-            console.error("Invalid response received from autonomiDownload.");
+            console.error("Invalid response received from download function.");
             return null;
         }
 
         return response;
-    } catch (e) {
-        console.error("Download error:", e);
+    } catch (error) {
+        console.error("Download error:", error);
         return null;
     }
 }

@@ -37,23 +37,22 @@ export const getTestnetPeerAddress = async (): Promise<string | null> => {
 
 export const getDownloadFolder = async (): Promise<string | null> => {
     try {
-        // check if a custom download folder is stored
         const store = await getExternalStore();
         const downloadFolder = await store.get<string>("download-folder");
 
-        console.log("df", downloadFolder);
-
-        return downloadFolder ? downloadFolder : null;
+        console.log("Download folder from store:", downloadFolder);
+        if (downloadFolder) return downloadFolder;
     } catch (error) {
-        console.error("Failed to fetch download folder:", error);
+        console.error("Failed to fetch download folder from store:", error);
+    }
 
-        // fallback in case of error: return system download folder
-        try {
-            const defaultDownloadFolder = await downloadDir();
-            return defaultDownloadFolder || null;
-        } catch (e) {
-            console.error("Error fetching system download folder:", e);
-            return null;
-        }
+    // fallback: try to get the systems default download folder
+    try {
+        const defaultDownloadFolder = await downloadDir();
+        console.log("Using system download folder:", defaultDownloadFolder);
+        return defaultDownloadFolder || null;
+    } catch (e) {
+        console.error("Error fetching system download folder:", e);
+        return null;
     }
 };
