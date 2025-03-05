@@ -646,7 +646,7 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
         .inspect(|track_number| new_tag.set_track(*track_number));
 
     if let Some(pic) = song_file.picture {
-        let pic = normalize_cover_art(pic).map_err(|e| Error::Common(format!("Could not resize cover art for {}. {}", song_file.file_path, e)))?;
+        let pic = normalize_cover_art(pic).map_err(|e| Error::Common(format!("Could not resize cover art for {}. {}", full_path, e)))?;
         let new_pic = Picture::new_unchecked(
             PictureType::CoverFront,
             pic.mime_type.map(|mime| MimeType::from_str(&mime)),
