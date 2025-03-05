@@ -5,9 +5,11 @@ export type SongUpload = {
     genre?: string;
     year?: number;
     trackNumber?: number;
+
     duration?: number;
     channels?: number;
     sampleRate?: number;
+
     picture?: string;
     tags?: string[];
 };

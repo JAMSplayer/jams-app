@@ -20,6 +20,12 @@
     "core:event:allow-listen",
     "clipboard-manager:allow-write-text",
     "clipboard-manager:default",
+    "fs:allow-app-write",
+    "fs:write-all",
+    "fs:allow-write-file",
+    "fs:allow-create",
+    "fs:allow-write-text-file",
+    "dialog:allow-save",
     "sql:default",
     "sql:allow-execute",
     {
@@ -32,7 +38,6 @@
           "path": "$HOME/**"
         }
       ]
-    },
-    "clipboard-manager:default"
+    }
   ]
 }
