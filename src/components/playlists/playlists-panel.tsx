@@ -16,6 +16,7 @@ import { readFile } from "@tauri-apps/plugin-fs";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Button } from "../ui/button";
 import { DownloadIcon } from "lucide-react";
+import { Song } from "@/types/songs/song";
 
 export default function PlaylistsPanel() {
     const { t } = useTranslation();
@@ -36,14 +37,7 @@ export default function PlaylistsPanel() {
             const storedPlaylists: Playlist[] =
                 (await store.get("playlists")) || [];
 
-            // Convert date strings to Date objects
-            const playlistsWithDates = storedPlaylists.map((playlist) => ({
-                ...playlist,
-                createdAt: new Date(playlist.createdAt),
-                updatedAt: new Date(playlist.updatedAt),
-            }));
-
-            setPlaylists(playlistsWithDates);
+            setPlaylists(storedPlaylists);
         } catch (error) {
             console.error("Failed to load playlists:", error);
         }
@@ -60,6 +54,14 @@ export default function PlaylistsPanel() {
         }
 
         try {
+            const defaultDownloadFolder = await store.get<string>(
+                "download-folder"
+            );
+            if (defaultDownloadFolder) {
+                console.error("No default download folder found.");
+                return;
+            }
+
             // prompt the user to select the playlist file
             const filePath = await open({
                 filters: [{ name: "JSON", extensions: ["json"] }],
@@ -84,6 +86,16 @@ export default function PlaylistsPanel() {
             ) {
                 console.error("Invalid playlist data.");
                 return;
+            }
+
+            // set the default downloadFolder for all songs
+            if (Array.isArray(importedPlaylist.songs)) {
+                importedPlaylist.songs = importedPlaylist.songs.map(
+                    (song: Song) => ({
+                        ...song,
+                        downloadFolder: defaultDownloadFolder,
+                    })
+                );
             }
 
             // retrieve the current playlists from the store

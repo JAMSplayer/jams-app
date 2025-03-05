@@ -23,7 +23,6 @@ const PlaylistScroller = ({
     const { t } = useTranslation();
     const { store } = useStorage();
 
-    // export the playlist to a file - show dialog where to save it
     const exportPlaylistData = async (id: string) => {
         if (!store) {
             console.error("Store is not initialized.");
@@ -38,7 +37,7 @@ const PlaylistScroller = ({
         try {
             const playlists = await store.get("playlists");
 
-            // Ensure playlists is an array
+            // ensure playlists is an array
             const storedPlaylists = Array.isArray(playlists)
                 ? (playlists as Playlist[])
                 : [];
@@ -50,6 +49,14 @@ const PlaylistScroller = ({
                 return;
             }
 
+            // create a copy and remove downloadFolder info from all songs
+            const redactedPlaylist: Playlist = {
+                ...playlist,
+                songs: playlist.songs?.map(({ downloadFolder, ...song }) => ({
+                    ...song,
+                })),
+            };
+
             const filePath = await save({
                 defaultPath: `${playlist.title}.json`,
                 filters: [{ name: "JSON", extensions: ["json"] }],
@@ -60,7 +67,7 @@ const PlaylistScroller = ({
                 return;
             }
 
-            const jsonData = JSON.stringify(playlist, null, 2);
+            const jsonData = JSON.stringify(redactedPlaylist, null, 2);
             await writeFile(filePath, new TextEncoder().encode(jsonData));
 
             toast("Playlist Export", {
