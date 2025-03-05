@@ -10,6 +10,7 @@ import { Song } from "@/types/songs/song";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../tag-input";
 import { t } from "i18next";
+import { filePictureToDataURL } from "@/lib/utils/images";
 
 type FormSchema = z.infer<typeof editSongSchema>;
 
@@ -91,7 +92,10 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 // Populate form fields
                 setValue("title", song.title);
                 setValue("artist", song.artist);
-                setValue("picture", song.picture);
+
+                if (song.picture) {
+                    setValue("picture", filePictureToDataURL(song.picture));
+                }
             } catch (error) {
                 console.error("Failed to load song data:", error);
             }

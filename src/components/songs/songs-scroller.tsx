@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 //import { useNavigate } from "react-router-dom";
 import Portal from "../portal";
+import { filePictureToDataURL } from "@/lib/utils/images";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -105,11 +106,6 @@ const SongScroller = ({
                 return dateB.getTime() - dateA.getTime();
             }
         });
-    };
-
-    // TODO: to be replaced by lib/utils/images.ts implementation from add-network-song-integration branch
-    const filePictureToDataURL = (fp: FilePicture): string => {
-        return "data:???";
     };
 
     // Apply filter and sort to the songs
@@ -279,7 +275,7 @@ const SongScroller = ({
                             <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.picture ? (
                                     <img
-                                        src={song.picture}
+                                        src={filePictureToDataURL(song.picture)}
                                         alt="Album Art"
                                         className="w-full h-full object-cover"
                                     />

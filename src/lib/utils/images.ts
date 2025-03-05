@@ -1,4 +1,4 @@
-import { FilePicture } from "@/types/network-file-detail";
+import { FilePicture } from "@/types/file-picture";
 
 export const convertToBase64 = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {

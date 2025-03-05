@@ -1,7 +1,4 @@
-export type FilePicture = {
-    data: Uint8Array; // Corresponds to Vec<u8> returned from rust
-    mime_type: string; // Corresponds to String returned from rust
-};
+import { FilePicture } from "./file-picture";
 
 // this is the file type that we return when querying the network
 export type NetworkFileDetail = {

@@ -173,6 +173,7 @@ export default function NetworkSongMetadataPanel({
                 fileName: "test",
                 extension: "mp4",
                 downloadFolder: "test",
+                picture: undefined,
             };
 
             setSong(updatedSong);

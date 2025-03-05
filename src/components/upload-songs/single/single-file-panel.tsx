@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon } from "lucide-react";
-import { FilePicture } from "@/types/network-file-detail";
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { base64ToImageFile } from "@/lib/utils/images";
 import { generateLocation } from "@/lib/utils/location";
@@ -17,6 +16,7 @@ import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../../tag-input";
 import { LocalFileDetail } from "@/types/local-file-detail";
+import { FilePicture } from "@/types/file-picture";
 
 interface SingleFilePanelProps {
     onBack: () => void;
@@ -171,7 +171,13 @@ export default function SingleFilePanel({
                         </p>
                     )}
                     <p className="text-sm text-gray-500">
-                        {t("location")}: {generateLocation("", fileDetail.fileName, fileDetail.extension, fileDetail.folderPath)}
+                        {t("location")}:{" "}
+                        {generateLocation(
+                            "",
+                            fileDetail.fileName,
+                            fileDetail.extension,
+                            fileDetail.folderPath
+                        )}
                     </p>
                     {fileDetail.size && (
                         <p className="text-sm text-gray-500">
