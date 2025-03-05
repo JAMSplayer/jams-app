@@ -39,4 +39,4 @@ lofty = "0.22"
 image = "0.25"
 # needs to have Git command installed and be able to authenticate the GitHub repository
 # configuration in .cargo/config.toml
-safe = { version = "0.2.1", git = "ssh://git@github.com/JAMSplayer/safe.git" }
+safe = { version = "0.2.2", git = "ssh://git@github.com/JAMSplayer/safe.git" }

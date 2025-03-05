@@ -20,6 +20,8 @@ const ACCOUNTS_DIR: &str = "accounts";
 const SK_FILENAME: &str = "sk.key";
 const ADDRESS_FILENAME: &str = "evm_address";
 
+const DEFAULT_LOG_LEVEL: &str = "INFO";
+
 #[derive(Debug, Serialize, Deserialize)]
 enum Error {
     Common(String),
@@ -199,7 +201,7 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 
     println!("\n\nConnecting...");
 
-    let safe = Safe::connect(peers, add_network_contacts, None, "INFO".into())
+    let safe = Safe::connect(peers, add_network_contacts, None, DEFAULT_LOG_LEVEL.into())
         .await
         .inspect_err(|_| {
             app.unmanage::<Mutex<Option<Safe>>>();
@@ -677,7 +679,7 @@ async fn read_metadata(
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .download(&xorname)
+        .download(xorname)
         .await?;
 
     let mut reader = Cursor::new(data);
