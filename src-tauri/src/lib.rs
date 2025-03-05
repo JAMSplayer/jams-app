@@ -667,28 +667,6 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
     Ok(())
 }
 
-#[tauri::command]
-async fn read_metadata(
-    path: String,
-    safe: State<'_, Mutex<Option<Safe>>>,
-) -> Result<FileMetadata, Error> {
-    let (xorname, _file_name) = server::autonomi(&path)?;
-
-    let data = safe
-        .lock()
-        .await
-        .as_mut()
-        .ok_or(Error::NotConnected)?
-        .download(xorname)
-        .await?;
-
-    let mut reader = Cursor::new(data);
-    let tagged_file = TaggedFile::read_from(&mut reader, ParseOptions::default())
-        .map_err(|e| Error::Common(format!("Cannot read file data for tagging : {}", e)))?;
-
-    Ok(FileMetadata::from_tagged_file(tagged_file, path))
-}
-
 // returns hex-encoded xorname
 #[tauri::command]
 async fn upload(
@@ -745,7 +723,6 @@ pub fn run() {
             delete_account,
             get_file_metadata,
             save_file_metadata,
-            read_metadata,
             upload,
             put_data,
         ])
