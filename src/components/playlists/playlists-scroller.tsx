@@ -52,8 +52,9 @@ const PlaylistScroller = ({
             // create a copy and remove downloadFolder info from all songs
             const redactedPlaylist: Playlist = {
                 ...playlist,
-                songs: playlist.songs?.map(({ downloadFolder, ...song }) => ({
+                songs: playlist.songs?.map((song) => ({
                     ...song,
+                    downloadFolder: null, // redact by setting it to null
                 })),
             };
 

@@ -9,7 +9,7 @@ export type Song = {
     dateUpdated?: Date;
     fileName: string;
     extension: string;
-    downloadFolder: string;
+    downloadFolder: string | null;
     tags?: string[];
     picture?: FilePicture;
     trackNumber?: number;
