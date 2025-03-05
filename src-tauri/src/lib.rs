@@ -8,7 +8,7 @@ use lofty::tag::{Accessor, Tag, TagExt};
 use lofty::file::{FileType};
 use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey, XorName};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, io::Cursor};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 mod frontend;
@@ -591,6 +591,30 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
     Ok(metadata_list)
 }
 
+fn normalize_cover_art(input: FilePicture) -> Result<FilePicture, image::error::ImageError> {
+    let img = image::ImageReader::new(Cursor::new(input.data.clone())).with_guessed_format()?.decode()?;
+
+    if img.width() > 200 || img.height() > 200 {
+
+        let img = if img.width() > 200 && img.height() > 200 {
+            img.resize_to_fill(200, 200, image::imageops::FilterType::CatmullRom)
+        } else {
+            img.resize(200, 200, image::imageops::FilterType::CatmullRom)
+        };
+
+    } else if input.data.len() < 40_000 {
+        return Ok(input);
+    }
+
+    let mut output: Vec<u8> = vec![];
+    let mut encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(&mut output, 70);
+    encoder.encode_image(&img)?;
+    Ok(FilePicture {
+        data: output,
+        mime_type: Some(String::from("image/jpeg")),
+    })
+}
+
 #[tauri::command]
 async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(), Error> {
     let full_path = String::from(song_file.full_path()?.to_string_lossy().as_ref());
@@ -622,6 +646,7 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
         .inspect(|track_number| new_tag.set_track(*track_number));
 
     if let Some(pic) = song_file.picture {
+        let pic = normalize_cover_art(pic).map_err(|e| Error::Common(format!("Could not resize cover art for {}. {}", song_file.file_path, e)))?;
         let new_pic = Picture::new_unchecked(
             PictureType::CoverFront,
             pic.mime_type.map(|mime| MimeType::from_str(&mime)),

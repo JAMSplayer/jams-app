@@ -40,6 +40,11 @@ const Player = () => {
         return null;
     }
 
+    // TODO: to be replaced by lib/utils/images.ts implementation from add-network-song-integration branch
+    const filePictureToDataURL = (fp: FilePicture): string => {
+        return "data:???";
+    };
+
     return (
         <div className="flex items-center gap-6 bg-card px-4 py-4 border-y md:px-6">
             <button
