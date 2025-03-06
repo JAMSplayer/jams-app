@@ -38,7 +38,9 @@ export const getTestnetPeerAddress = async (): Promise<string | null> => {
 export const getDownloadFolder = async (): Promise<string | null> => {
     try {
         const store = await getExternalStore();
-        const downloadFolder = await store.get<{ value: string }>("download-folder");
+        const downloadFolder = await store.get<{ value: string }>(
+            "download-folder"
+        );
 
         console.log("Download folder from store:", downloadFolder);
         if (downloadFolder && downloadFolder.value) return downloadFolder.value;
