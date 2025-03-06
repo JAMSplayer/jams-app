@@ -275,12 +275,12 @@ const SongScroller = ({
                             <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.picture ? (
                                     <img
-                                        src={filePictureToDataURL(song.picture)}
+                                        src={song.picture}
                                         alt="Album Art"
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gray-300"></div> // Placeholder
+                                    <div className="w-full h-full bg-gray-300"></div>
                                 )}
 
                                 <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">

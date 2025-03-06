@@ -1,5 +1,3 @@
-import { FilePicture } from "../file-picture";
-
 export type Song = {
     id: string;
     xorname: string;
@@ -11,6 +9,6 @@ export type Song = {
     extension: string;
     downloadFolder: string | null;
     tags?: string[];
-    picture?: FilePicture;
+    picture?: string;
     trackNumber?: number;
 };

@@ -1,5 +1,3 @@
-import { FilePicture } from "./file-picture";
-
 // this is the file type that we return when querying the network
 export type NetworkFileDetail = {
     folderPath: string;
@@ -16,5 +14,5 @@ export type NetworkFileDetail = {
     duration?: number; // duration in seconds
     channels?: number;
     sampleRate?: number;
-    picture?: FilePicture;
+    picture?: string;
 };

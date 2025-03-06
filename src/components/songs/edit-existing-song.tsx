@@ -94,7 +94,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 setValue("artist", song.artist);
 
                 if (song.picture) {
-                    setValue("picture", filePictureToDataURL(song.picture));
+                    setValue("picture", song.picture);
                 }
             } catch (error) {
                 console.error("Failed to load song data:", error);

@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { filePictureToDataURL } from "@/lib/utils/images";
 import { Input } from "@/components/ui/input";
 import { editSongSchema } from "@/form-schemas/edit-song-schema";
 import { useStorage } from "@/providers/storage-provider";
@@ -95,12 +94,7 @@ export default function NetworkSongMetadataPanel({
                 setValue("genre", fileDetail.genre ?? "");
                 setValue("year", fileDetail.year ?? 1800);
                 setValue("trackNumber", fileDetail.trackNumber ?? 0);
-                setValue(
-                    "picture",
-                    fileDetail.picture
-                        ? filePictureToDataURL(fileDetail.picture)
-                        : undefined
-                );
+                setValue("picture", fileDetail.picture);
             } catch (error) {
                 console.error("Failed to load song data:", error);
             }

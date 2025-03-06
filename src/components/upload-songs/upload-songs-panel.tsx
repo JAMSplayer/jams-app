@@ -6,6 +6,8 @@ import MultipleFilePanel from "./multiple/multiple-file-panel";
 import { fetchMetadata } from "@/backend/metadata";
 import { LocalFileDetail } from "@/types/local-file-detail";
 import { extractFromFullPath, generateLocation } from "@/lib/utils/location";
+import { FilePicture } from "@/types/file-picture";
+import { base64ToFilePicture, filePictureToDataURL } from "@/lib/utils/images";
 
 export default function UploadSongsPanel() {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
@@ -40,7 +42,13 @@ export default function UploadSongsPanel() {
                 const newFileDetails: LocalFileDetail[] = [];
                 for (const filePath of validFiles) {
                     const alreadyExists = fileDetails.some(
-                        (details) => generateLocation("", details.fileName, details.extension, details.folderPath) === filePath
+                        (details) =>
+                            generateLocation(
+                                "",
+                                details.fileName,
+                                details.extension,
+                                details.folderPath
+                            ) === filePath
                     );
 
                     if (!alreadyExists) {
@@ -98,11 +106,8 @@ export default function UploadSongsPanel() {
                 duration: meta.duration,
                 channels: meta.channels,
                 sampleRate: meta.sampleRate,
-                picture: meta.picture // test if either data or mime_type is undefined that picture is set to undefined
-                    ? {
-                          data: new Uint8Array(meta.picture.data),
-                          mime_type: meta.picture.mime_type,
-                      }
+                picture: meta.picture
+                    ? base64ToFilePicture(meta.picture)
                     : undefined,
             };
         } catch (error) {
