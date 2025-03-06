@@ -5,6 +5,7 @@ import Dashboard from "./components/dashboard";
 import Settings from "./pages/settings";
 import StatusSettings from "./components/settings/status-settings";
 import StorageSettings from "./components/settings/storage-settings";
+import ConsoleLoggerSettings from "./components/settings/console-logger-settings";
 import NotificationSettings from "./components/settings/notification-settings";
 import PreferenceSettings from "./components/settings/preference-settings";
 import NetworkSettings from "./components/settings/network-settings";
@@ -15,7 +16,6 @@ import CreatePlaylist from "./pages/create-playlist";
 import EditPlaylist from "./pages/edit-playlist";
 import AddNetworkSong from "./pages/add-network-song";
 import Favorites from "./pages/favorites";
-
 
 const AppRoutes = () => {
     return (
@@ -38,6 +38,7 @@ const AppRoutes = () => {
                 />
                 <Route path="preference" element={<PreferenceSettings />} />
                 <Route path="network" element={<NetworkSettings />} />
+                <Route path="console" element={<ConsoleLoggerSettings />} />
             </Route>
         </Routes>
     );

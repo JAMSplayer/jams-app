@@ -24,6 +24,7 @@ export default function Settings() {
             current: false,
         },
         { name: t("network"), href: "/settings/network", current: false },
+        { name: t("console"), href: "/settings/console", current: false },
     ];
 
     // Initialize pages with default settings page
