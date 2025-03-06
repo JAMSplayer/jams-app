@@ -22,6 +22,7 @@ import {
 } from "@/backend/backend-store";
 import Networks from "@/enums/networks";
 import { isEthereumAddress } from "@/lib/utils/address";
+import { filePictureToDataURL } from "@/lib/utils/images";
 import { NetworkFileDetail } from "@/types/network-file-detail";
 
 // =======
@@ -231,21 +232,31 @@ export async function download(
         console.log(`Downloading to: ${targetDir}`);
 
         // start the download
-        const response = (await autonomiDownload(
+        const response = await autonomiDownload(
             xorname,
             targetDir,
             fileName
-        )) as NetworkFileDetail;
+        );
 
         console.log("download response:", response);
-
+        
         // ensure response is correctly structured
         if (!response || typeof response !== "object") {
             console.error("Invalid response received from download function.");
             return null;
         }
 
-        return response;
+        const pictureProp = Object.getOwnPropertyDescriptor(response, "picture");
+        const pictureUrl: string | null = pictureProp ? filePictureToDataURL(pictureProp.value) : null;
+
+        const fileDetail: NetworkFileDetail = {
+            ...response,
+            picture: pictureUrl || undefined,
+        };
+
+        console.log("download fileDetail:", fileDetail);
+
+        return fileDetail;
     } catch (error) {
         console.error("Download error:", error);
         return null;
