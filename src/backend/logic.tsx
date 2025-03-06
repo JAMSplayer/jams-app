@@ -232,11 +232,11 @@ export async function download(
         console.log(`Downloading to: ${targetDir}`);
 
         // start the download
-        const response = await autonomiDownload(
+        const response = (await autonomiDownload(
             xorname,
             targetDir,
             fileName
-        );
+        )) as NetworkFileDetail;
 
         console.log("download response:", response);
         

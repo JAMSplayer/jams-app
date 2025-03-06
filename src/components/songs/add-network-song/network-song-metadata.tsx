@@ -157,17 +157,10 @@ export default function NetworkSongMetadataPanel({
 
         try {
             const updatedSong: Song = {
-                ...data,
                 id: uuidv4(),
-                xorname:
-                    "a0f6fa2b08e868060fe6e57018e3f73294821feaf3fdcf9cd636ac3d11e7e2ac",
-                title: "test",
-                artist: "test",
                 dateCreated: new Date(),
-                fileName: "test",
-                extension: "mp4",
-                downloadFolder: "test",
                 picture: undefined,
+                ...data,
             };
 
             setSong(updatedSong);

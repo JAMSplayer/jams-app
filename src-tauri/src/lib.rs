@@ -695,6 +695,7 @@ async fn download(
     metadata.size = Some(size as u32);
     metadata.xorname = Some(xorname.clone());
     metadata.folder_path = Some(destination.clone());
+    metadata.picture = metadata.picture.map(|pic| normalize_cover_art(pic).map_err(|e| Error::Common(format!("Could not resize cover art for {}. {}", xorname, e)))).transpose()?;
 
     let mut path = PathBuf::from(destination);
     if let Some(file_name) = file_name {
