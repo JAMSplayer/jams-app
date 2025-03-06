@@ -8,10 +8,7 @@ import { Playlist } from "@/types/playlists/playlist";
 import { useStorage } from "@/providers/storage-provider";
 import { AlertConfirmationModal } from "../alert-confirmation-modal";
 import { toast } from "sonner";
-
-//import { useNavigate } from "react-router-dom";
 import Portal from "../portal";
-import { filePictureToDataURL } from "@/lib/utils/images";
 
 interface SongScrollerProps {
     songs: Song[];

@@ -10,7 +10,6 @@ import { Song } from "@/types/songs/song";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../tag-input";
 import { t } from "i18next";
-import { filePictureToDataURL } from "@/lib/utils/images";
 
 type FormSchema = z.infer<typeof editSongSchema>;
 

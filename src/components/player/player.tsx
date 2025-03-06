@@ -8,7 +8,6 @@ import { RewindButton } from "@/components/player/rewind-button";
 import { Slider } from "@/components/player/slider";
 import { ChevronDown } from "lucide-react";
 import { usePlayerStore } from "@/store/player-store";
-import { filePictureToDataURL } from "@/lib/utils/images";
 
 function parseTime(seconds: number) {
     let hours = Math.floor(seconds / 3600);
@@ -62,7 +61,7 @@ const Player = () => {
                     style={{ height: "6.95rem", width: "6.75rem" }}
                 >
                     <img
-                        src={filePictureToDataURL(player.song.picture)}
+                        src={player.song.picture}
                         alt={player.song.title || "Album Art"}
                         className="w-full h-full object-cover"
                     />

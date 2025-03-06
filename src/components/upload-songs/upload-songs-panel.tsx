@@ -6,8 +6,7 @@ import MultipleFilePanel from "./multiple/multiple-file-panel";
 import { fetchMetadata } from "@/backend/metadata";
 import { LocalFileDetail } from "@/types/local-file-detail";
 import { extractFromFullPath, generateLocation } from "@/lib/utils/location";
-import { FilePicture } from "@/types/file-picture";
-import { base64ToFilePicture, filePictureToDataURL } from "@/lib/utils/images";
+import { base64ToFilePicture } from "@/lib/utils/images";
 
 export default function UploadSongsPanel() {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
