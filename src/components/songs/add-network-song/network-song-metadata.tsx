@@ -125,7 +125,7 @@ export default function NetworkSongMetadataPanel({
 
     // image ----------------------------------------------------------------
 
-    const { selectedImage, handleImageSelect } = useImageSelector();
+    let { selectedImage, handleImageSelect } = useImageSelector();
 
     const handleImageUpload = () => {
         handleImageSelect((base64Image) => {
@@ -148,7 +148,6 @@ export default function NetworkSongMetadataPanel({
             const updatedSong: Song = {
                 id: uuidv4(),
                 dateCreated: new Date(),
-                picture: undefined,
                 xorname: fileDetail.xorname,
                 fileName: fileDetail.fileName,
                 extension: fileDetail.extension,
@@ -409,9 +408,13 @@ export default function NetworkSongMetadataPanel({
 
                                 {/* Album Art */}
                                 <div className="flex justify-center items-center relative">
-                                    {selectedImage ? (
+                                    {getValues("picture") || selectedImage ? (
                                         <img
-                                            src={selectedImage}
+                                            src={
+                                                getValues("picture") ||
+                                                selectedImage ||
+                                                undefined
+                                            }
                                             alt="Playlist Art"
                                             className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
                                             onClick={handleImageUpload}
