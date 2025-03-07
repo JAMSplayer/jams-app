@@ -22,6 +22,7 @@ import { TagInput } from "@/components/tag-input";
 import SelectYear from "@/components/select-year";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { NetworkFileDetail } from "@/types/network-file-detail";
+import { generateLocation } from "@/lib/utils/location";
 
 interface NetworkSongMetadataPanelProps {
     fileDetail: NetworkFileDetail | null;
@@ -160,6 +161,15 @@ export default function NetworkSongMetadataPanel({
                 id: uuidv4(),
                 dateCreated: new Date(),
                 picture: undefined,
+                xorname: fileDetail.xorname,
+                fileName: fileDetail.fileName,
+                extension: fileDetail.extension,
+                downloadFolder: generateLocation(
+                    fileDetail.xorname,
+                    fileDetail.fileName,
+                    fileDetail.extension,
+                    fileDetail.folderPath
+                ),
                 ...data,
             };
 
