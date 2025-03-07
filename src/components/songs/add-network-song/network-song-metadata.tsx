@@ -23,6 +23,9 @@ import SelectYear from "@/components/select-year";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { NetworkFileDetail } from "@/types/network-file-detail";
 import { generateLocation } from "@/lib/utils/location";
+import { isTitleUnique } from "@/lib/utils/validation";
+import { Playlist } from "@/types/playlists/playlist";
+import { toast } from "sonner";
 
 interface NetworkSongMetadataPanelProps {
     fileDetail: NetworkFileDetail | null;
@@ -125,35 +128,6 @@ export default function NetworkSongMetadataPanel({
             return;
         }
 
-        // example of what song should look like
-        // const song: Song = {
-        //     id: string;
-        //     xorname: string;
-        //     title: string;
-        //     description?: string;
-        //     artist: string;
-        //     dateCreated: Date;
-        //     dateUpdated?: Date;
-        //     fileName: string,
-        //     extension: string,
-        //     downloadFolder: string
-        //     tags?: string[];
-        //     picture?: string;
-        //     trackNumber?: number
-        // };
-
-        // const song: Song = {
-        //     id: uuidv4(),
-        //     xorname:
-        //         "a0f6fa2b08e868060fe6e57018e3f73294821feaf3fdcf9cd636ac3d11e7e2ac",
-        //     title: "test",
-        //     artist: "test",
-        //     dateCreated: new Date(),
-        //     fileName: "test",
-        //     extension: "mp4",
-        //     downloadFolder: "test",
-        // };
-
         console.log(data);
 
         try {
@@ -172,6 +146,16 @@ export default function NetworkSongMetadataPanel({
                 ),
                 ...data,
             };
+
+            // ensure title is unique throughout all playlists:
+            const playlists: Playlist[] = (await store.get("playlists")) || [];
+            const titleUnique = isTitleUnique(updatedSong.title, playlists);
+            if (!titleUnique) {
+                toast("Title not Unique", {
+                    description: "The title needs to be unique",
+                });
+                return;
+            }
 
             setSong(updatedSong);
 
