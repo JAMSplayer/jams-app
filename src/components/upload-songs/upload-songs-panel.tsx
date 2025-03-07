@@ -7,6 +7,7 @@ import { fetchMetadata } from "@/backend/metadata";
 import { LocalFileDetail } from "@/types/local-file-detail";
 import { extractFromFullPath, generateLocation } from "@/lib/utils/location";
 import { base64ToFilePicture } from "@/lib/utils/images";
+import { useStorage } from "@/providers/storage-provider";
 
 export default function UploadSongsPanel() {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
@@ -14,6 +15,7 @@ export default function UploadSongsPanel() {
     const [fileDetails, setFileDetails] = useState<LocalFileDetail[]>([]);
     const [fileKey, setFileKey] = useState(0); // A key to force re-render
     const [errorMessage, setErrorMessage] = useState("");
+    const { store } = useStorage();
 
     const handleFilesAdded = async (inputtedFilePaths: string[]) => {
         if (inputtedFilePaths.length > 0) {
@@ -38,16 +40,23 @@ export default function UploadSongsPanel() {
             if (validFiles.length > 0) {
                 setIsMultiFile(validFiles.length > 1);
 
+                if (!store) {
+                    console.error("Store is not initialized.");
+                    return;
+                }
+
+                const defaultDownloadFolder = await store.get<string>(
+                    "download-folder"
+                );
+                if (!defaultDownloadFolder) {
+                    console.error("No default download folder found.");
+                    return;
+                }
+
                 const newFileDetails: LocalFileDetail[] = [];
                 for (const filePath of validFiles) {
                     const alreadyExists = fileDetails.some(
-                        (details) =>
-                            generateLocation(
-                                "",
-                                details.fileName,
-                                details.extension,
-                                details.folderPath
-                            ) === filePath
+                        (details) => details.folderPath === filePath
                     );
 
                     if (!alreadyExists) {

@@ -2,7 +2,7 @@ import { useConnection } from "@/providers/connection-provider";
 import { SongLoadButton } from "./player/song-load-button";
 import { Button } from "./ui/button";
 import { registeredAccounts } from "@/backend/logic";
-import { resolveResource } from '@tauri-apps/api/path';
+import { resolveResource } from "@tauri-apps/api/path";
 import { extractFromFullPath } from "@/lib/utils/location";
 
 export default function Dashboard() {
@@ -13,10 +13,14 @@ export default function Dashboard() {
             <div className="flex flex-row">
                 <SongLoadButton
                     song={async () => {
-                        const pathData = extractFromFullPath(await resolveResource('resources/A_Lazy_Farmer_Boy_by_Buster_Carter_And_Preston_Young.mp3'));
+                        const pathData = extractFromFullPath(
+                            await resolveResource(
+                                "resources/A_Lazy_Farmer_Boy_by_Buster_Carter_And_Preston_Young.mp3"
+                            )
+                        );
                         console.log("pathData: ", pathData);
                         const { fileName, extension, folderPath } = pathData;
-                        
+
                         return {
                             id: "123",
                             xorname: "124",
@@ -28,7 +32,7 @@ export default function Dashboard() {
                             dateCreated: new Date(),
                             picture: undefined,
                             tags: [],
-                        }
+                        };
                     }}
                 />
             </div>

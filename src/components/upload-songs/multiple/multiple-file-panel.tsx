@@ -117,10 +117,6 @@ export default function MultipleFilePanel({
                                 {fileDetails[currentIndex].fileName}
                             </p>
                         )}
-                        <p className="text-sm text-gray-500 mb-1">
-                            {t("location")}:{" "}
-                            {generateLocation("", fileDetails[currentIndex].fileName, fileDetails[currentIndex].extension, fileDetails[currentIndex].folderPath)}
-                        </p>
                         {fileDetails[currentIndex].size && (
                             <p className="text-sm text-gray-500 mb-1">
                                 {t("size")}:{" "}

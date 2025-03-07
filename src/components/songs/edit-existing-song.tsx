@@ -62,6 +62,14 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 return;
             }
 
+            const defaultDownloadFolder = await store.get<string>(
+                "download-folder"
+            );
+            if (!defaultDownloadFolder) {
+                console.error("No default download folder found.");
+                return;
+            }
+
             try {
                 const song: Song = {
                     id: "123",
@@ -71,7 +79,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                     dateCreated: new Date(),
                     fileName: "test",
                     extension: "test",
-                    downloadFolder: "test",
+                    downloadFolder: defaultDownloadFolder,
                     picture: undefined,
                     tags: [],
                     trackNumber: undefined,

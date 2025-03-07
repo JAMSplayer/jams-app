@@ -170,15 +170,6 @@ export default function SingleFilePanel({
                             {t("fileName")}: {fileDetail.fileName}
                         </p>
                     )}
-                    <p className="text-sm text-gray-500">
-                        {t("location")}:{" "}
-                        {generateLocation(
-                            "",
-                            fileDetail.fileName,
-                            fileDetail.extension,
-                            fileDetail.folderPath
-                        )}
-                    </p>
                     {fileDetail.size && (
                         <p className="text-sm text-gray-500">
                             {t("size")}: {formatBytes(fileDetail.size)}

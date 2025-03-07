@@ -26,6 +26,7 @@ import { generateLocation } from "@/lib/utils/location";
 import { isTitleUnique } from "@/lib/utils/validation";
 import { Playlist } from "@/types/playlists/playlist";
 import { toast } from "sonner";
+import { getDownloadFolder } from "@/backend/backend-store";
 
 interface NetworkSongMetadataPanelProps {
     fileDetail: NetworkFileDetail | null;
@@ -144,6 +145,14 @@ export default function NetworkSongMetadataPanel({
 
         console.log(data);
 
+        const defaultDownloadFolder = await store.get<string>(
+            "download-folder"
+        );
+        if (!defaultDownloadFolder) {
+            console.error("No default download folder found.");
+            return;
+        }
+
         try {
             const updatedSong: Song = {
                 id: uuidv4(),
@@ -151,12 +160,7 @@ export default function NetworkSongMetadataPanel({
                 xorname: fileDetail.xorname,
                 fileName: fileDetail.fileName,
                 extension: fileDetail.extension,
-                downloadFolder: generateLocation(
-                    fileDetail.xorname,
-                    fileDetail.fileName,
-                    fileDetail.extension,
-                    fileDetail.folderPath
-                ),
+                downloadFolder: defaultDownloadFolder,
                 ...data,
             };
 

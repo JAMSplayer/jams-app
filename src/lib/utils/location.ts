@@ -1,12 +1,11 @@
 export const generateLocation = (
-    xorname: string,
     fileName: string,
     extension: string,
     downloadFolder: string
 ): string => {
-    if (!xorname || !fileName || !extension || !downloadFolder) {
+    if (!fileName || !extension || !downloadFolder) {
         throw new Error(
-            "All parameters (xorname, fileName, extension, downloadFolder) are required."
+            "All parameters (fileName, extension, downloadFolder) are required."
         );
     }
 
@@ -14,7 +13,12 @@ export const generateLocation = (
         .replace(/\\/g, "/")
         .replace(/\/$/, "");
 
-    return `${sanitizedFolder}/${xorname}__${fileName}.${extension}`;
+    console.log("download folder: ", downloadFolder);
+    console.log("sanatized folder: ", sanitizedFolder);
+    console.log("extension: ", extension);
+    console.log("fileName: ", fileName);
+
+    return `${sanitizedFolder}/${fileName}.${extension}`;
 };
 
 export function extractFromFullPath(fullPath: string): {

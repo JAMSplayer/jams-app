@@ -57,7 +57,7 @@ export default function PlaylistsPanel() {
             const defaultDownloadFolder = await store.get<string>(
                 "download-folder"
             );
-            if (defaultDownloadFolder) {
+            if (!defaultDownloadFolder) {
                 console.error("No default download folder found.");
                 return;
             }
