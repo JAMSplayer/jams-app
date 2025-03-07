@@ -5,6 +5,7 @@ import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { NetworkFileDetail } from "@/types/network-file-detail";
 import { download } from "@/backend/logic";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface EnterXornameProps {
     onSearchSuccess: (fileDetail: NetworkFileDetail) => void;
@@ -69,8 +70,15 @@ const EnterXorname: React.FC<EnterXornameProps> = ({ onSearchSuccess }) => {
                         onClick={handleSearch}
                         disabled={!isValid || isLoading}
                     >
-                        {isLoading ? "Downloading..." : "Search"}{" "}
-                        <MagnifyingGlassIcon />
+                        {isLoading ? (
+                            <>
+                                Downloading... <LoadingSpinner />
+                            </>
+                        ) : (
+                            <>
+                                Search <MagnifyingGlassIcon />
+                            </>
+                        )}
                     </Button>
                 </div>
                 {errorMessage && (

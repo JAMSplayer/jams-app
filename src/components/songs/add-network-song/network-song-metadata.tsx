@@ -90,12 +90,12 @@ export default function NetworkSongMetadataPanel({
 
                 // Populate form fields from metadata
                 setValue("title", fileDetail.title ?? "");
-                setValue("artist", fileDetail.artist ?? "");
+                setValue("artist", fileDetail.artist ?? undefined);
                 setValue("album", fileDetail.album ?? "");
                 setValue("genre", fileDetail.genre ?? "");
                 setValue("year", fileDetail.year ?? 1800);
                 setValue("trackNumber", fileDetail.trackNumber ?? 0);
-                setValue("picture", fileDetail.picture);
+                setValue("picture", fileDetail.picture ?? undefined);
             } catch (error) {
                 console.error("Failed to load song data:", error);
             }
