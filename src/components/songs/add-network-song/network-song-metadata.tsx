@@ -38,7 +38,7 @@ export default function NetworkSongMetadataPanel({
 }: NetworkSongMetadataPanelProps) {
     const networkSongForm = useForm<z.infer<typeof editSongSchema>>({
         resolver: zodResolver(editSongSchema),
-        mode: "onChange",
+        mode: "onBlur",
         defaultValues: {
             title: undefined,
             artist: undefined,
@@ -92,13 +92,27 @@ export default function NetworkSongMetadataPanel({
                 setValue("tags", []);
 
                 // Populate form fields from metadata
-                setValue("title", fileDetail.title ?? "");
-                setValue("artist", fileDetail.artist ?? undefined);
-                setValue("album", fileDetail.album ?? "");
-                setValue("genre", fileDetail.genre ?? "");
-                setValue("year", fileDetail.year ?? 1800);
-                setValue("trackNumber", fileDetail.trackNumber ?? 0);
-                setValue("picture", fileDetail.picture ?? undefined);
+                setValue("title", fileDetail.title ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("artist", fileDetail.artist ?? undefined, {
+                    shouldValidate: true,
+                });
+                setValue("album", fileDetail.album ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("genre", fileDetail.genre ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("year", fileDetail.year ?? 1800, {
+                    shouldValidate: true,
+                });
+                setValue("trackNumber", fileDetail.trackNumber ?? 0, {
+                    shouldValidate: true,
+                });
+                setValue("picture", fileDetail.picture ?? undefined, {
+                    shouldValidate: true,
+                });
             } catch (error) {
                 console.error("Failed to load song data:", error);
             }
