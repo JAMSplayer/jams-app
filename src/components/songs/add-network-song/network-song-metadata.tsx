@@ -22,11 +22,9 @@ import { TagInput } from "@/components/tag-input";
 import SelectYear from "@/components/select-year";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { NetworkFileDetail } from "@/types/network-file-detail";
-import { generateLocation } from "@/lib/utils/location";
 import { isTitleUnique } from "@/lib/utils/validation";
 import { Playlist } from "@/types/playlists/playlist";
 import { toast } from "sonner";
-import { getDownloadFolder } from "@/backend/backend-store";
 
 interface NetworkSongMetadataPanelProps {
     fileDetail: NetworkFileDetail | null;

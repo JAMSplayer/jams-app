@@ -5,7 +5,7 @@ import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
 import { fetchMetadata } from "@/backend/metadata";
 import { LocalFileDetail } from "@/types/local-file-detail";
-import { extractFromFullPath, generateLocation } from "@/lib/utils/location";
+import { extractFromFullPath } from "@/lib/utils/location";
 import { base64ToFilePicture } from "@/lib/utils/images";
 import { useStorage } from "@/providers/storage-provider";
 

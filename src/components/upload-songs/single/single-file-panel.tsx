@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon } from "lucide-react";
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
 import { base64ToImageFile } from "@/lib/utils/images";
-import { generateLocation } from "@/lib/utils/location";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
