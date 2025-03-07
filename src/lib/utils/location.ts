@@ -13,17 +13,15 @@ export const generateLocation = (
     console.log("Extension:", extension);
     console.log("File Name:", fileName);
 
-    const localHost = "http://localhost:1420";
-    // encode the file name and ensure no double slashes
-    const safeFileName = encodeURIComponent(fileName.trim());
-    const safeExtension = encodeURIComponent(extension.trim());
-    const safeDownloadFolder = downloadFolder.replace(/\/+$/, ""); // remove trailing slashes
+    // ensure the folder path is formatted correctly
+    const safeDownloadFolder = downloadFolder.replace(/\/+$/, ""); // Remove trailing slashes
 
-    const url = `${localHost}${safeDownloadFolder}/${safeFileName}.${safeExtension}`;
+    // construct the raw file path (no encoding here)
+    const filePath = `${safeDownloadFolder}/${fileName.trim()}.${extension.trim()}`;
 
-    console.log("URL: ", url);
+    console.log("Generated File Path:", filePath);
 
-    return url;
+    return filePath;
 };
 
 export function extractFromFullPath(fullPath: string): {

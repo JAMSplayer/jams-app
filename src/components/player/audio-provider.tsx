@@ -88,35 +88,19 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
                     dispatch({ type: ActionKind.SET_META, payload: song });
 
-                    const result = convertFileSrc(
-                        generateLocation(
-                            song.fileName,
-                            song.extension,
-                            song.downloadFolder
-                        )
-                    );
-
-                    console.log(result);
-
                     // if the song location changes, load the new song
+                    const filePath = generateLocation(
+                        song.fileName,
+                        song.extension,
+                        song.downloadFolder
+                    );
+                    const playableURL = convertFileSrc(filePath);
+                    console.log("playing url: ", playableURL);
                     if (
                         playerRef.current &&
-                        playerRef.current.currentSrc !==
-                            convertFileSrc(
-                                generateLocation(
-                                    song.fileName,
-                                    song.extension,
-                                    song.downloadFolder
-                                )
-                            )
+                        playerRef.current.currentSrc !== playableURL
                     ) {
-                        playerRef.current.src = convertFileSrc(
-                            generateLocation(
-                                song.fileName,
-                                song.extension,
-                                song.downloadFolder
-                            )
-                        );
+                        playerRef.current.src = playableURL;
                         playerRef.current.load();
                         playerRef.current.currentTime = 0;
                     }
@@ -138,17 +122,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                     this.pause();
                     return false; // Return false if download folder is unavailable
                 }
-
+                const filePath = generateLocation(
+                    song.fileName,
+                    song.extension,
+                    song.downloadFolder
+                );
+                const playableURL = convertFileSrc(filePath);
                 const isPlaying = song
                     ? state.playing &&
-                      playerRef.current?.currentSrc ===
-                          convertFileSrc(
-                              generateLocation(
-                                  song.fileName,
-                                  song.extension,
-                                  song.downloadFolder
-                              )
-                          )
+                      playerRef.current?.currentSrc === playableURL
                     : state.playing;
 
                 if (isPlaying) {
@@ -186,16 +168,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                     console.log("Could not get download folder for song.");
                     return false; // return false if download folder is unavailable
                 }
+                const filePath = generateLocation(
+                    song.fileName,
+                    song.extension,
+                    song.downloadFolder
+                );
+                const playableURL = convertFileSrc(filePath);
                 return song
                     ? state.playing &&
-                          playerRef.current?.currentSrc ===
-                              convertFileSrc(
-                                  generateLocation(
-                                      song.fileName,
-                                      song.extension,
-                                      song.downloadFolder
-                                  )
-                              )
+                          playerRef.current?.currentSrc === playableURL
                     : state.playing;
             },
         };
