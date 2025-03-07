@@ -109,10 +109,13 @@ const PlaylistScroller = ({
         sortOrder: "asc" | "desc"
     ) => {
         return playlists.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+
             if (sortOrder === "asc") {
-                return a.createdAt.getTime() - b.createdAt.getTime();
+                return dateA.getTime() - dateB.getTime();
             } else {
-                return b.createdAt.getTime() - a.createdAt.getTime();
+                return dateB.getTime() - dateA.getTime();
             }
         });
     };
