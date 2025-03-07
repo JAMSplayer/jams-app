@@ -98,7 +98,9 @@ const Player = () => {
                         onChangeEnd={([value]) => {
                             player.seek(value);
                             if (wasPlayingRef.current) {
-                                player.play();
+                                if (player.song) {
+                                    player.play(player.song);
+                                }
                             }
                         }}
                         numberFormatter={

@@ -9,16 +9,21 @@ export const generateLocation = (
         );
     }
 
-    const sanitizedFolder = downloadFolder
-        .replace(/\\/g, "/")
-        .replace(/\/$/, "");
+    console.log("Download Folder:", downloadFolder);
+    console.log("Extension:", extension);
+    console.log("File Name:", fileName);
 
-    console.log("download folder: ", downloadFolder);
-    console.log("sanatized folder: ", sanitizedFolder);
-    console.log("extension: ", extension);
-    console.log("fileName: ", fileName);
+    const localHost = "http://localhost:1420";
+    // encode the file name and ensure no double slashes
+    const safeFileName = encodeURIComponent(fileName.trim());
+    const safeExtension = encodeURIComponent(extension.trim());
+    const safeDownloadFolder = downloadFolder.replace(/\/+$/, ""); // remove trailing slashes
 
-    return `${sanitizedFolder}/${fileName}.${extension}`;
+    const url = `${localHost}${safeDownloadFolder}/${safeFileName}.${safeExtension}`;
+
+    console.log("URL: ", url);
+
+    return url;
 };
 
 export function extractFromFullPath(fullPath: string): {

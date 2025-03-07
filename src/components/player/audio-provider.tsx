@@ -1,6 +1,6 @@
+import { generateLocation } from "@/lib/utils/location";
 import { Song } from "@/types/songs/song";
 import { createContext, useContext, useMemo, useReducer, useRef } from "react";
-import { generateLocation } from "@/lib/utils/location";
 
 interface PlayerState {
     playing: boolean;
@@ -12,15 +12,15 @@ interface PlayerState {
 }
 
 interface PublicPlayerActions {
-    play: (song?: Song) => void;
+    play: (song: Song) => void;
     pause: () => void;
-    toggle: (song?: Song) => void;
+    toggle: (song: Song) => void;
     seekBy: (amount: number) => void;
     seek: (time: number) => void;
     playbackRate: (rate: number) => void;
     toggleMute: () => void;
     setVolume: (volume: number) => void; // Set volume level
-    isPlaying: (song?: Song) => boolean;
+    isPlaying: (song: Song) => boolean;
 }
 
 export type PlayerAPI = PlayerState & PublicPlayerActions;
@@ -79,73 +79,70 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     let actions = useMemo<PublicPlayerActions>(() => {
         return {
             play(song) {
-                console.log(
-                    "Audio source before playing:",
-                    playerRef.current?.src
-                );
+                if (song) {
+                    if (!song.downloadFolder) {
+                        console.log("Could not get download folder for song.");
+                        return false; // return false if download folder is unavailable
+                    }
 
-                if (!song) {
-                    console.warn("No song provided to play()");
-                    return;
+                    dispatch({ type: ActionKind.SET_META, payload: song });
+
+                    console.log(
+                        generateLocation(
+                            song.fileName,
+                            song.extension,
+                            song.downloadFolder
+                        )
+                    );
+
+                    // if the song location changes, load the new song
+                    if (
+                        playerRef.current &&
+                        playerRef.current.currentSrc !==
+                            generateLocation(
+                                song.fileName,
+                                song.extension,
+                                song.downloadFolder
+                            )
+                    ) {
+                        playerRef.current.src = generateLocation(
+                            song.fileName,
+                            song.extension,
+                            song.downloadFolder
+                        );
+                        playerRef.current.load();
+                        playerRef.current.currentTime = 0;
+                    }
                 }
 
-                if (!song.downloadFolder) {
-                    console.log("Could not get download folder for song.");
-                    return;
-                }
-
-                if (!playerRef.current) {
-                    console.error("Audio element is not available.");
-                    return;
-                }
-
-                const location = generateLocation(
-                    song.fileName,
-                    song.extension,
-                    song.downloadFolder
-                );
-
-                console.log("Generated song location:", location);
-
-                dispatch({ type: ActionKind.SET_META, payload: song });
-
-                if (playerRef.current.currentSrc !== location) {
-                    console.log("Setting new source:", location);
-                    playerRef.current.src = location;
-                    playerRef.current.load();
-                    playerRef.current.currentTime = 0;
-                }
-
-                playerRef.current
-                    .play()
-                    .then(() => console.log("Playback started"))
-                    .catch((error) => console.error("Playback failed:", error));
+                playerRef.current?.play();
             },
             pause() {
                 playerRef.current?.pause();
             },
             toggle(song) {
-                if (song) {
-                    if (!song.downloadFolder) {
-                        console.log("Could not get download folder for song.");
-                        return;
-                    }
+                if (!song) {
+                    console.log("Could not get song.");
+                    return false;
+                }
+                if (!song.downloadFolder) {
+                    console.log("Could not get download folder for song.");
+                    return false; // Return false if download folder is unavailable
+                }
+                const isPlaying = song
+                    ? state.playing &&
+                      playerRef.current?.currentSrc ===
+                          generateLocation(
+                              song.fileName,
+                              song.extension,
+                              song.downloadFolder
+                          )
+                    : state.playing;
 
-                    const isPlaying = song
-                        ? state.playing &&
-                          playerRef.current?.currentSrc ===
-                              generateLocation(
-                                  song.fileName,
-                                  song.extension,
-                                  song.downloadFolder
-                              )
-                        : state.playing;
-
-                    if (isPlaying) {
-                        this.pause();
-                    } else {
-                        this.play(song);
-                    }
+                if (isPlaying) {
+                    this.pause();
+                } else {
+                    this.play(song);
                 }
             },
             seekBy(amount) {
@@ -173,24 +170,20 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 }
             },
             isPlaying(song) {
-                if (!song) {
-                    return false; // Return false if no song is provided
-                }
-
-                if (!song.downloadFolder) {
+                if (!song || !song.downloadFolder) {
                     console.log("Could not get download folder for song.");
-                    return false; // Return false if download folder is unavailable
+                    return false; // return false if download folder is unavailable
                 }
-
-                return (
-                    state.playing &&
-                    playerRef.current?.currentSrc ===
-                        generateLocation(
-                            song.fileName,
-                            song.extension,
-                            song.downloadFolder
-                        )
-                );
+                return song
+                    ? state.playing &&
+                          playerRef.current?.currentSrc ===
+                              "http://localhost:1420" +
+                                  generateLocation(
+                                      song.fileName,
+                                      song.extension,
+                                      song.downloadFolder
+                                  )
+                    : state.playing;
             },
         };
     }, [state.playing, state.song]);
