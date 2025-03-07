@@ -96,9 +96,9 @@ const Player = () => {
                         value={[currentTime ?? player.currentTime]}
                         onChange={([value]) => setCurrentTime(value)}
                         onChangeEnd={([value]) => {
-                            player.seek(value);
-                            if (wasPlayingRef.current) {
-                                if (player.song) {
+                            if (player.song) {
+                                player.seek(value);
+                                if (wasPlayingRef.current) {
                                     player.play(player.song);
                                 }
                             }

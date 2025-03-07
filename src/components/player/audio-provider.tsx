@@ -1,5 +1,6 @@
 import { generateLocation } from "@/lib/utils/location";
 import { Song } from "@/types/songs/song";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { createContext, useContext, useMemo, useReducer, useRef } from "react";
 
 interface PlayerState {
@@ -12,15 +13,15 @@ interface PlayerState {
 }
 
 interface PublicPlayerActions {
-    play: (song: Song) => void;
+    play: (song?: Song) => void;
     pause: () => void;
-    toggle: (song: Song) => void;
+    toggle: (song?: Song) => void;
     seekBy: (amount: number) => void;
     seek: (time: number) => void;
     playbackRate: (rate: number) => void;
     toggleMute: () => void;
     setVolume: (volume: number) => void; // Set volume level
-    isPlaying: (song: Song) => boolean;
+    isPlaying: (song?: Song) => boolean;
 }
 
 export type PlayerAPI = PlayerState & PublicPlayerActions;
@@ -87,7 +88,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
                     dispatch({ type: ActionKind.SET_META, payload: song });
 
-                    console.log(
+                    const result = convertFileSrc(
                         generateLocation(
                             song.fileName,
                             song.extension,
@@ -95,20 +96,26 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                         )
                     );
 
+                    console.log(result);
+
                     // if the song location changes, load the new song
                     if (
                         playerRef.current &&
                         playerRef.current.currentSrc !==
+                            convertFileSrc(
+                                generateLocation(
+                                    song.fileName,
+                                    song.extension,
+                                    song.downloadFolder
+                                )
+                            )
+                    ) {
+                        playerRef.current.src = convertFileSrc(
                             generateLocation(
                                 song.fileName,
                                 song.extension,
                                 song.downloadFolder
                             )
-                    ) {
-                        playerRef.current.src = generateLocation(
-                            song.fileName,
-                            song.extension,
-                            song.downloadFolder
                         );
                         playerRef.current.load();
                         playerRef.current.currentTime = 0;
@@ -123,19 +130,24 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
             toggle(song) {
                 if (!song) {
                     console.log("Could not get song.");
+                    this.pause();
                     return false;
                 }
                 if (!song.downloadFolder) {
                     console.log("Could not get download folder for song.");
+                    this.pause();
                     return false; // Return false if download folder is unavailable
                 }
+
                 const isPlaying = song
                     ? state.playing &&
                       playerRef.current?.currentSrc ===
-                          generateLocation(
-                              song.fileName,
-                              song.extension,
-                              song.downloadFolder
+                          convertFileSrc(
+                              generateLocation(
+                                  song.fileName,
+                                  song.extension,
+                                  song.downloadFolder
+                              )
                           )
                     : state.playing;
 
@@ -177,12 +189,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 return song
                     ? state.playing &&
                           playerRef.current?.currentSrc ===
-                              "http://localhost:1420" +
+                              convertFileSrc(
                                   generateLocation(
                                       song.fileName,
                                       song.extension,
                                       song.downloadFolder
                                   )
+                              )
                     : state.playing;
             },
         };
