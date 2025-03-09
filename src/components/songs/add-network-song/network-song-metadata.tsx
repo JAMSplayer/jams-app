@@ -22,7 +22,6 @@ import { TagInput } from "@/components/tag-input";
 import SelectYear from "@/components/select-year";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { NetworkFileDetail } from "@/types/network-file-detail";
-import { isTitleUnique } from "@/lib/utils/validation";
 import { Playlist } from "@/types/playlists/playlist";
 import { toast } from "sonner";
 
@@ -162,12 +161,12 @@ export default function NetworkSongMetadataPanel({
                 ...data,
             };
 
-            // ensure title is unique throughout all playlists:
+            // ensure id is unique throughout all playlists:
             const playlists: Playlist[] = (await store.get("playlists")) || [];
-            const titleUnique = isTitleUnique(updatedSong.title, playlists);
-            if (!titleUnique) {
-                toast("Title not Unique", {
-                    description: "The title needs to be unique",
+            const idUnique = isIDUnique(updatedSong.id, playlists);
+            if (!idUnique) {
+                toast("ID not Unique", {
+                    description: "The id needs to be unique",
                 });
                 return;
             }

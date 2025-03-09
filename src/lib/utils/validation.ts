@@ -10,10 +10,8 @@ export const isValidPrivateKey = (input: string): boolean => {
     return regex.test(input);
 };
 
-export function isTitleUnique(title: string, playlists: Playlist[]): boolean {
+export function isIDUnique(id: string, playlists: Playlist[]): boolean {
     return !playlists.some((playlist) =>
-        playlist.songs?.some(
-            (song) => song.title.toLowerCase() === title.toLowerCase()
-        )
+        playlist.songs?.some((song) => song.id === id)
     );
 }
