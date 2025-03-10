@@ -32,11 +32,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
-            const downloadFolder = await activeStore.get<string>(
+            const downloadFolder = await activeStore.get<{ value: string }>(
                 "download-folder"
             );
 
-            if (downloadFolder) {
+            if (downloadFolder && downloadFolder.value) {
                 return;
             }
 

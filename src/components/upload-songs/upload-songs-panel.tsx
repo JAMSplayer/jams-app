@@ -45,10 +45,10 @@ export default function UploadSongsPanel() {
                     return;
                 }
 
-                const defaultDownloadFolder = await store.get<string>(
+                const defaultDownloadFolder = await store.get<{ value: string }>(
                     "download-folder"
                 );
-                if (!defaultDownloadFolder) {
+                if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
                     console.error("No default download folder found.");
                     return;
                 }

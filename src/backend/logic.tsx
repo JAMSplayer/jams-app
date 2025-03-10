@@ -203,6 +203,7 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
         return [];
     }
 }
+
 export async function download(
     xorname: string,
     fileName?: string,
