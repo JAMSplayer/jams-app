@@ -1,15 +1,19 @@
 // metadata.ts
-import { FileDetail } from "@/types/file-detail";
+import { LocalFileDetail } from "@/types/local-file-detail";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 import { invoke } from "@tauri-apps/api/core";
 
 export async function fetchMetadata(
     filePaths: string[]
-): Promise<FileDetail[]> {
+): Promise<NetworkFileDetail[]> {
     try {
         // Fetch metadata for all files
-        const metadata: FileDetail[] = await invoke("get_file_metadata", {
-            filePaths,
-        });
+        const metadata: NetworkFileDetail[] = await invoke(
+            "get_file_metadata",
+            {
+                filePaths,
+            }
+        );
         return metadata;
     } catch (error) {
         console.error("Failed to fetch metadata for files:", filePaths, error);
@@ -17,7 +21,7 @@ export async function fetchMetadata(
     }
 }
 
-export async function saveMetadata(file: FileDetail): Promise<void> {
+export async function saveMetadata(file: LocalFileDetail): Promise<void> {
     // throw on error
     await invoke("save_file_metadata", { songFile: file });
 }

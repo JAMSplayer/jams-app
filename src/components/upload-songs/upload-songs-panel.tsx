@@ -1,17 +1,21 @@
 import { useState } from "react";
 import Dropzone from "../dropzone";
-import { FileDetail } from "@/types/file-detail";
 import { stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
 import { fetchMetadata } from "@/backend/metadata";
+import { LocalFileDetail } from "@/types/local-file-detail";
+import { extractFromFullPath } from "@/lib/utils/location";
+import { base64ToFilePicture } from "@/lib/utils/images";
+import { useStorage } from "@/providers/storage-provider";
 
 export default function UploadSongsPanel() {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
     const [isMultiFile, setIsMultiFile] = useState(false);
-    const [fileDetails, setFileDetails] = useState<FileDetail[]>([]);
+    const [fileDetails, setFileDetails] = useState<LocalFileDetail[]>([]);
     const [fileKey, setFileKey] = useState(0); // A key to force re-render
     const [errorMessage, setErrorMessage] = useState("");
+    const { store } = useStorage();
 
     const handleFilesAdded = async (inputtedFilePaths: string[]) => {
         if (inputtedFilePaths.length > 0) {
@@ -36,10 +40,23 @@ export default function UploadSongsPanel() {
             if (validFiles.length > 0) {
                 setIsMultiFile(validFiles.length > 1);
 
-                const newFileDetails: FileDetail[] = [];
+                if (!store) {
+                    console.error("Store is not initialized.");
+                    return;
+                }
+
+                const defaultDownloadFolder = await store.get<{ value: string }>(
+                    "download-folder"
+                );
+                if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
+                    console.error("No default download folder found.");
+                    return;
+                }
+
+                const newFileDetails: LocalFileDetail[] = [];
                 for (const filePath of validFiles) {
                     const alreadyExists = fileDetails.some(
-                        (details) => details.fullPath === filePath
+                        (details) => details.folderPath === filePath
                     );
 
                     if (!alreadyExists) {
@@ -59,44 +76,46 @@ export default function UploadSongsPanel() {
 
     async function createFileDetails(
         filePath: string
-    ): Promise<FileDetail | null> {
+    ): Promise<LocalFileDetail | null> {
         try {
             // Fetch file information
-            const location = filePath.substring(0, filePath.lastIndexOf("/"));
+
             const fileNameWithExtension = filePath.split("/").pop();
             if (!fileNameWithExtension) return null;
 
-            const [name, ...extParts] = fileNameWithExtension.split(".");
-            const extension = extParts.join(".");
             const information = await stat(filePath);
 
-            // Fetch metadata for the file
+            // fetch metadata for the file
             const metadata = await fetchMetadata([filePath]);
 
-            // Check if metadata is available
+            // check if metadata is available
             const meta = metadata.length > 0 ? metadata[0] : null;
 
-            // Proceed with whatever information is available
+            if (!meta) {
+                console.log("could not get metadata");
+                return null;
+            }
+
+            const { fileName, extension, folderPath } =
+                extractFromFullPath(filePath);
+
+            // proceed with whatever information is available
             return {
-                fullPath: filePath,
-                name,
+                fileName,
                 extension,
-                location,
+                folderPath,
                 size: information.size,
-                title: meta?.title,
-                artist: meta?.artist,
-                album: meta?.album,
-                genre: meta?.genre?.toLocaleLowerCase(),
-                year: meta?.year,
-                trackNumber: meta?.trackNumber,
-                duration: meta?.duration,
-                channels: meta?.channels,
-                sampleRate: meta?.sampleRate,
-                picture: meta?.picture // test if either data or mime_type is undefined that picture is set to undefined
-                    ? {
-                          data: new Uint8Array(meta.picture.data),
-                          mime_type: meta.picture.mime_type,
-                      }
+                title: meta.title,
+                artist: meta.artist,
+                album: meta.album,
+                genre: meta.genre?.toLocaleLowerCase(),
+                year: meta.year,
+                trackNumber: meta.trackNumber,
+                duration: meta.duration,
+                channels: meta.channels,
+                sampleRate: meta.sampleRate,
+                picture: meta.picture
+                    ? base64ToFilePicture(meta.picture)
                     : undefined,
             };
         } catch (error) {

@@ -30,7 +30,7 @@ function SelectYear({
 
     return (
         <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium mb-3">
                 {t("year")}
             </label>
             <Select

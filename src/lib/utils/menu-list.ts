@@ -1,7 +1,6 @@
 import {
     Tag,
     Settings,
-    Bookmark,
     LayoutGrid,
     LucideIcon,
     Music,

@@ -1,4 +1,6 @@
+import { generateLocation } from "@/lib/utils/location";
 import { Song } from "@/types/songs/song";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { createContext, useContext, useMemo, useReducer, useRef } from "react";
 
 interface PlayerState {
@@ -81,12 +83,22 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 if (song) {
                     dispatch({ type: ActionKind.SET_META, payload: song });
 
+                    if (!song.downloadFolder) {
+                        console.log("download folder not supplied!");
+                        return;
+                    }
+                    const filePath = generateLocation(
+                        song.fileName,
+                        song.extension,
+                        song.downloadFolder
+                    );
+                    const playableURL = convertFileSrc(filePath);
                     // If the song location changes, load the new song
                     if (
                         playerRef.current &&
-                        playerRef.current.currentSrc !== song.location
+                        playerRef.current.currentSrc !== playableURL
                     ) {
-                        playerRef.current.src = song.location;
+                        playerRef.current.src = playableURL;
                         playerRef.current.load();
                         playerRef.current.currentTime = 0;
                     }
@@ -98,15 +110,53 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 playerRef.current?.pause();
             },
             toggle(song) {
-                const isPlaying = song
-                    ? state.playing &&
-                      playerRef.current?.currentSrc === song.location
-                    : state.playing;
+                if (song) {
+                    // When a song is passed in
+                    if (!song.downloadFolder) {
+                        console.log("download folder not supplied!");
+                        return;
+                    }
+                    const filePath = generateLocation(
+                        song.fileName,
+                        song.extension,
+                        song.downloadFolder
+                    );
+                    const playableURL = convertFileSrc(filePath);
+                    const isPlaying =
+                        state.playing &&
+                        playerRef.current?.currentSrc === playableURL;
 
-                if (isPlaying) {
-                    this.pause();
+                    if (isPlaying) {
+                        this.pause();
+                    } else {
+                        this.play(song);
+                    }
                 } else {
-                    this.play(song);
+                    // no song passed in, use state.song (current song in context)
+                    if (state.song) {
+                        const song = state.song; // get the current song from state
+                        if (!song.downloadFolder) {
+                            console.log("download folder not supplied!");
+                            return;
+                        }
+                        const filePath = generateLocation(
+                            song.fileName,
+                            song.extension,
+                            song.downloadFolder
+                        );
+                        const playableURL = convertFileSrc(filePath);
+                        const isPlaying =
+                            state.playing &&
+                            playerRef.current?.currentSrc === playableURL;
+
+                        if (isPlaying) {
+                            this.pause();
+                        } else {
+                            this.play(song);
+                        }
+                    } else {
+                        console.log("No song is currently loaded.");
+                    }
                 }
             },
             seekBy(amount) {
@@ -134,10 +184,24 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                 }
             },
             isPlaying(song) {
-                return song
-                    ? state.playing &&
-                          playerRef.current?.currentSrc === song.location
-                    : state.playing;
+                if (song) {
+                    if (!song.downloadFolder) {
+                        console.log("download folder not supplied!");
+                        return false; // return false if no download folder is provided
+                    }
+                    const filePath = generateLocation(
+                        song.fileName,
+                        song.extension,
+                        song.downloadFolder
+                    );
+                    const playableURL = convertFileSrc(filePath);
+
+                    return (
+                        playerRef.current?.currentSrc === playableURL &&
+                        state.playing
+                    );
+                }
+                return false; // default return value for undefined song
             },
         };
     }, [state.playing, state.song]);

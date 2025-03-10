@@ -7,6 +7,7 @@ import {
     listAccounts,
     sessionSet,
     sessionRead,
+    download as autonomiDownload,
 } from "@/backend/autonomi";
 import {
     AccountUser,
@@ -15,11 +16,14 @@ import {
     RecoverAccountUser,
 } from "@/types/account-user";
 import {
+    getDownloadFolder,
     getSelectedNetwork,
     getTestnetPeerAddress,
 } from "@/backend/backend-store";
 import Networks from "@/enums/networks";
 import { isEthereumAddress } from "@/lib/utils/address";
+import { filePictureToDataURL } from "@/lib/utils/images";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
@@ -197,5 +201,65 @@ export async function registeredAccounts(): Promise<SimpleAccountUser[]> {
             }));
     } else {
         return [];
+    }
+}
+
+export async function download(
+    xorname: string,
+    fileName?: string,
+    destinationDir?: string
+): Promise<NetworkFileDetail | null> {
+    console.log(
+        `Starting download: ${xorname} => ${destinationDir || "default folder"}`
+    );
+
+    try {
+        // get target directory (use provided dir, otherwise fetch default)
+        const targetDir = destinationDir || (await getDownloadFolder());
+
+        if (!targetDir) {
+            console.error("No valid download directory found.");
+            return null;
+        }
+
+        if (typeof targetDir !== "string") {
+            console.error(
+                "Invalid download directory format (should be string):",
+                targetDir
+            );
+            return null;
+        }
+
+        console.log(`Downloading to: ${targetDir}`);
+
+        // start the download
+        const response = (await autonomiDownload(
+            xorname,
+            targetDir,
+            fileName
+        )) as NetworkFileDetail;
+
+        console.log("download response:", response);
+        
+        // ensure response is correctly structured
+        if (!response || typeof response !== "object") {
+            console.error("Invalid response received from download function.");
+            return null;
+        }
+
+        const pictureProp = Object.getOwnPropertyDescriptor(response, "picture");
+        const pictureUrl: string | null = pictureProp ? filePictureToDataURL(pictureProp.value) : null;
+
+        const fileDetail: NetworkFileDetail = {
+            ...response,
+            picture: pictureUrl || undefined,
+        };
+
+        console.log("download fileDetail:", fileDetail);
+
+        return fileDetail;
+    } catch (error) {
+        console.error("Download error:", error);
+        return null;
     }
 }

@@ -9,6 +9,7 @@ import SubDividerLayout from "@/enums/sub-divider-layout";
 import SubDivider from "./sub-divider";
 import { useStorage } from "@/providers/storage-provider";
 import { useTranslation } from "react-i18next";
+import { downloadDir } from "@tauri-apps/api/path";
 
 export default function StorageSettings() {
     const { t } = useTranslation();
@@ -29,10 +30,10 @@ export default function StorageSettings() {
                     "download-folder"
                 );
 
-                const defaultDownloadsPath = await path.downloadDir();
+                const defaultDownloadFolder = await downloadDir();
 
                 if (!downloadFolder || !downloadFolder.value) {
-                    setDownloadFolder(defaultDownloadsPath); // Use default path if none is set
+                    setDownloadFolder(defaultDownloadFolder); // Use default path if none is set
                 } else {
                     setDownloadFolder(downloadFolder.value); // Set stored folder if it exists
                 }

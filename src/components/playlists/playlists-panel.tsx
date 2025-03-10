@@ -54,10 +54,10 @@ export default function PlaylistsPanel() {
         }
 
         try {
-            const defaultDownloadFolder = await store.get<string>(
+            const defaultDownloadFolder = await store.get<{ value: string }>(
                 "download-folder"
             );
-            if (defaultDownloadFolder) {
+            if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
                 console.error("No default download folder found.");
                 return;
             }
@@ -93,7 +93,7 @@ export default function PlaylistsPanel() {
                 importedPlaylist.songs = importedPlaylist.songs.map(
                     (song: Song) => ({
                         ...song,
-                        downloadFolder: defaultDownloadFolder,
+                        downloadFolder: defaultDownloadFolder.value,
                     })
                 );
             }

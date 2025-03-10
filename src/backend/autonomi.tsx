@@ -126,9 +126,10 @@ export async function balance(): Promise<string | null> {
 }
 
 export async function privateKey(
-    username: string,              // which user PK to get
-    password: string,           // user password to decrypt the key
-): Promise<string | null> {     // if password is bad or other error occured, null will be returned
+    username: string, // which user PK to get
+    password: string // user password to decrypt the key
+): Promise<string | null> {
+    // if password is bad or other error occured, null will be returned
     try {
         return await invoke("check_key", {
             login: username,
@@ -158,9 +159,10 @@ export async function sessionRead(key: string): Promise<string | null> {
 
 export async function sessionSet(
     key: string,
-    value: string | null, // null if we want to remove the record.
-): Promise<string | null> { // returns previous value, or null if the value was not present
-    return await invoke("session_set", { key: key, value : value });
+    value: string | null // null if we want to remove the record.
+): Promise<string | null> {
+    // returns previous value, or null if the value was not present
+    return await invoke("session_set", { key: key, value: value });
 }
 
 function prepareMeta(name: string[]): string[] {
@@ -201,10 +203,7 @@ export async function readReg(name: string[]): Promise<object | null> {
     return null;
 }
 
-export async function writeReg(
-    name: string[],
-    data: object
-): Promise<boolean> {
+export async function writeReg(name: string[], data: object): Promise<boolean> {
     prepareMeta(name);
     console.log("writing Reg: " + name + "...");
 
@@ -225,7 +224,7 @@ export async function writeReg(
 
 // returns xorname address
 export async function uploadFile(
-    path: string, // filesystem path
+    path: string // filesystem path
 ): Promise<string | null> {
     console.log("uploading file: " + path + "...");
     try {
@@ -238,7 +237,7 @@ export async function uploadFile(
 
 // returns xorname address
 export async function putData(
-    data: Uint8Array, // file data
+    data: Uint8Array // file data
 ): Promise<string | null> {
     console.log("saving data blob of " + data.length + " bytes...");
     try {
@@ -247,4 +246,16 @@ export async function putData(
         console.error("putData: ", e);
     }
     return null;
+}
+
+export async function download(
+    xorname: string,
+    destinationDir: string,
+    fileName?: string
+): Promise<object> {
+    return await invoke("download", {
+        xorname: xorname,
+        fileName: fileName,
+        destination: destinationDir,
+    });
 }

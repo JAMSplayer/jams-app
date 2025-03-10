@@ -8,10 +8,7 @@ import { Playlist } from "@/types/playlists/playlist";
 import { useStorage } from "@/providers/storage-provider";
 import { AlertConfirmationModal } from "../alert-confirmation-modal";
 import { toast } from "sonner";
-
-//import { useNavigate } from "react-router-dom";
 import Portal from "../portal";
-
 
 interface SongScrollerProps {
     songs: Song[];
@@ -66,7 +63,7 @@ const SongScroller = ({
 
         // Check for exact matches first
         const exactMatches = songs.filter((song) =>
-            [song.title, song.description, song.artist].some(
+            [song.title, song.artist, song.artist].some(
                 (field) => field?.toLowerCase() === trimmedFilterValue // Exact match check
             )
         );
@@ -78,7 +75,7 @@ const SongScroller = ({
 
         // If no exact matches, return partial matches
         return songs.filter((song) =>
-            [song.title, song.description, song.artist].some(
+            [song.title, song.artist, song.artist].some(
                 (field) => field?.toLowerCase().includes(trimmedFilterValue) // Partial match check
             )
         );
@@ -106,11 +103,6 @@ const SongScroller = ({
                 return dateB.getTime() - dateA.getTime();
             }
         });
-    };
-
-    // TODO: to be replaced by lib/utils/images.ts implementation from add-network-song-integration branch
-    const filePictureToDataURL = (fp: FilePicture): string => {
-        return "data:???";
     };
 
     // Apply filter and sort to the songs
@@ -280,12 +272,12 @@ const SongScroller = ({
                             <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.picture ? (
                                     <img
-                                        src={filePictureToDataURL(song.picture)}
+                                        src={song.picture}
                                         alt="Album Art"
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gray-300"></div> // Placeholder
+                                    <div className="w-full h-full bg-gray-300"></div>
                                 )}
 
                                 <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -326,8 +318,7 @@ const SongScroller = ({
                                             </p>
                                             <p>
                                                 <small>
-                                                    Description:{" "}
-                                                    {song.description}
+                                                    Artist: {song.artist}
                                                 </small>
                                             </p>
                                         </h2>

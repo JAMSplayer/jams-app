@@ -1,15 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EditIcon, UploadIcon } from "lucide-react";
-import { FileDetail } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
-import { FilePicture } from "@/types/file-detail"; // Replace with the actual path for FileMeta type
 import { formatBytes, formatDurationFromSeconds } from "@/lib/utils/formatting";
+import { base64ToImageFile } from "@/lib/utils/images";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import SelectYear from "@/components/select-year";
-import { base64ToImageFile } from "@/lib/utils/images";
-import { uploadSong } from "@/backend/uploading";
 import { saveMetadata } from "@/backend/metadata";
 import { SongUpload } from "@/types/songs/song-upload";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -17,10 +14,12 @@ import { useTranslation } from "react-i18next";
 import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../../tag-input";
+import { LocalFileDetail } from "@/types/local-file-detail";
+import { FilePicture } from "@/types/file-picture";
 
 interface SingleFilePanelProps {
     onBack: () => void;
-    fileDetail: FileDetail;
+    fileDetail: LocalFileDetail;
 }
 
 type FormSchema = z.infer<typeof singleFileUploadSchema>;
@@ -33,7 +32,6 @@ export default function SingleFilePanel({
         register,
         handleSubmit,
         setValue,
-        getValues,
         watch,
         formState: { errors, isValid },
     } = useForm<FormSchema>({
@@ -97,7 +95,7 @@ export default function SingleFilePanel({
         try {
             setIsUploading(true);
 
-            let songFile: FileDetail = {
+            let songFile: LocalFileDetail = {
                 ...fileDetail,
                 ...song,
                 picture: undefined,
@@ -120,10 +118,10 @@ export default function SingleFilePanel({
             await saveMetadata(songFile);
 
             // TODO: add a playlist to which the song has to be added
-            const result = await uploadSong(songFile.fullPath);
+            //const result = await uploadSong(generateLocation("", songFile.fileName, songFile.extension, songFile.folderPath));
             // TODO: update song object with songXorname, update playlist data, sync with network
 
-            console.log("The song has been uploaded: ", result);
+            //console.log("The song has been uploaded: ", result);
         } catch (ex) {
             console.log("The song could not be uploaded: ", ex);
         } finally {
@@ -166,14 +164,9 @@ export default function SingleFilePanel({
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                    {fileDetail.name && (
+                    {fileDetail.fileName && (
                         <p className="text-sm text-gray-500">
-                            {t("fileName")}: {fileDetail.name}
-                        </p>
-                    )}
-                    {fileDetail.location && (
-                        <p className="text-sm text-gray-500">
-                            {t("location")}: {fileDetail.location}
+                            {t("fileName")}: {fileDetail.fileName}
                         </p>
                     )}
                     {fileDetail.size && (

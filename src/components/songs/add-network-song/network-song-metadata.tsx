@@ -1,267 +1,176 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, CirclePlusIcon, EditIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, CirclePlusIcon, EditIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { convertToBase64 } from "@/lib/utils/images";
-import { open } from "@tauri-apps/plugin-dialog";
-import { readFile } from "@tauri-apps/plugin-fs";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { editPlaylistSchema } from "@/form-schemas/edit-playlist-schema";
+import { editSongSchema } from "@/form-schemas/edit-song-schema";
 import { useStorage } from "@/providers/storage-provider";
 import { Song } from "@/types/songs/song";
 import { PlaylistSelectionModal } from "@/components/ui/playlist-selection-modal";
-
-type FormSchema = z.infer<typeof editPlaylistSchema>;
+import { v4 as uuidv4 } from "uuid";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { TagInput } from "@/components/tag-input";
+import SelectYear from "@/components/select-year";
+import { useImageSelector } from "@/hooks/use-image-selector";
+import { NetworkFileDetail } from "@/types/network-file-detail";
+import { Playlist } from "@/types/playlists/playlist";
+import { toast } from "sonner";
+import { isIDUnique } from "@/lib/utils/validation";
 
 interface NetworkSongMetadataPanelProps {
-    id: string | null;
+    fileDetail: NetworkFileDetail | null;
     onReturn: () => void;
 }
 
 export default function NetworkSongMetadataPanel({
-    id,
+    fileDetail,
     onReturn,
 }: NetworkSongMetadataPanelProps) {
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        formState: { errors, isValid },
-    } = useForm<FormSchema>({
-        resolver: zodResolver(editPlaylistSchema),
-        mode: "onChange",
+    const networkSongForm = useForm<z.infer<typeof editSongSchema>>({
+        resolver: zodResolver(editSongSchema),
+        mode: "onBlur",
         defaultValues: {
             title: undefined,
-            description: undefined,
+            artist: undefined,
             picture: undefined,
+            tags: [],
+            album: undefined,
+            genre: undefined,
+            year: undefined,
+            trackNumber: undefined,
         },
     });
 
+    const {
+        handleSubmit,
+        register,
+        getValues,
+        setValue,
+        formState: { isValid },
+    } = networkSongForm;
+
+    type networkSongFormData = z.infer<typeof editSongSchema>;
+
     const { store } = useStorage();
 
+    // this song object will be saved once populated
     const [song, setSong] = useState<Song | undefined>(undefined);
 
+    // this playlist selector modal will show when the user clicks save. It allow the user to decide what playlist to place the song.
     const [
         isPlaylistSelectionModalVisible,
         setIsPlaylistSelectionModalVisible,
     ] = useState(false);
 
-    if (!id) {
-        return <p>No Song Network ID provided.</p>;
+    // should never be reached
+    if (!fileDetail) {
+        return (
+            <div>
+                <p className="text-red-500">No file metadata available.</p>
+                <Button onClick={onReturn}>Go Back</Button>
+            </div>
+        );
     }
 
     // Load song metadata and populate form fields and songs ----------------------------------------------------------------
 
+    // this should only happen when the component mounts and the store and id is present
     useEffect(() => {
-        const fetchSongData = async () => {
-            if (!store) {
-                console.error("Store is not initialized.");
-                return;
-            }
-
-            if (!id) {
-                console.error("Song network ID is missing.");
-                return;
-            }
-
+        const updateFields = async () => {
             try {
-                const song: Song = {
-                    id: "123",
-                    xorname: "123",
-                    title: "test",
-                    artist: "test",
-                    dateCreated: new Date(),
-                    location: "test",
-                    picture: "test",
-                };
+                // tags will be empty as they don't exist on a files metadata
+                setValue("tags", []);
 
-                if (!song) {
-                    console.error("Song Metadata not found.");
-                    return;
-                }
-
-                // Set tags from the song if available
-                setTags(song.tags || []);
-
-                // Populate form fields
-                setValue("title", song.title);
-                setValue("description", song.description);
-                setValue("picture", song.picture);
+                // Populate form fields from metadata
+                setValue("title", fileDetail.title ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("artist", fileDetail.artist ?? undefined, {
+                    shouldValidate: true,
+                });
+                setValue("album", fileDetail.album ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("genre", fileDetail.genre ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("year", fileDetail.year ?? 1800, {
+                    shouldValidate: true,
+                });
+                setValue("trackNumber", fileDetail.trackNumber ?? 0, {
+                    shouldValidate: true,
+                });
+                setValue("picture", fileDetail.picture ?? undefined, {
+                    shouldValidate: true,
+                });
             } catch (error) {
                 console.error("Failed to load song data:", error);
             }
         };
 
-        fetchSongData();
-    }, [store, id, setValue]);
+        updateFields();
+    }, [fileDetail]);
 
     // end Load song data and populate form fields and songs ----------------------------------------------------------------
 
     // image ----------------------------------------------------------------
 
-    const [base64Picture, setBase64Picture] = useState<string>("");
+    let { selectedImage, handleImageSelect } = useImageSelector();
 
-    // The image the user selects if they wish to change album art
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    useEffect(() => {
-        const pictureValue = base64Picture || selectedImage;
-        if (pictureValue) {
-            setValue("picture", pictureValue); // Update the form value whenever base64Picture or selectedImage changes
-        }
-    }, [base64Picture, selectedImage, setValue]);
-
-    const handleImageSelect = async () => {
-        const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-
-        try {
-            const selectedFile = await open({
-                multiple: false,
-                filters: [
-                    {
-                        name: "Images",
-                        extensions: ["jpg", "jpeg", "png", "gif"],
-                    },
-                ],
-            });
-
-            if (!selectedFile) {
-                toast("File", {
-                    description: "No file selected.",
-                });
-                return;
-            }
-
-            // Read the file as binary
-            const fileBuffer = await readFile(selectedFile as string);
-
-            // Get extension
-            const fileExtension = selectedFile.split(".").pop()?.toLowerCase();
-
-            if (
-                !fileExtension ||
-                !["jpg", "jpeg", "png", "gif"].includes(fileExtension)
-            ) {
-                toast("Unsupported", {
-                    description:
-                        "Unsupported file format. Please upload a JPG, JPEG, PNG, or GIF file.",
-                });
-                return;
-            }
-
-            const extensionToMime: Record<string, string> = {
-                jpg: "image/jpeg",
-                jpeg: "image/jpeg",
-                png: "image/png",
-                gif: "image/gif",
-            };
-
-            // Validate the extension and find the MIME type
-            const mimeType = extensionToMime[fileExtension];
-
-            // Convert the binary file into a Blob
-            const fileBlob = new Blob([new Uint8Array(fileBuffer)], {
-                type: mimeType,
-            });
-
-            // Create a File object
-            const file = new File(
-                [fileBlob],
-                `image.${fileExtension || "unknown"}`
-            );
-
-            // Check file size
-            if (file.size > MAX_FILE_SIZE) {
-                toast("File Size", {
-                    description:
-                        "File size exceeds 1MB. Please select a smaller file.",
-                });
-                return;
-            }
-
-            // Convert Blob to Base64
-            const base64Image = await convertToBase64(fileBlob);
-            console.log("base64Image: ", base64Image);
-
-            // Update the image state
-            setSelectedImage(base64Image); // Updates the selected image
-            setBase64Picture(base64Image); // Updates the base64Picture state
-
-            // Update the form value
+    const handleImageUpload = () => {
+        handleImageSelect((base64Image) => {
             setValue("picture", base64Image);
-        } catch (error) {
-            console.error("Error processing the selected image:", error);
-            toast("Error Processing Image", {
-                description: "Error processing the selected image.",
-            });
-        }
+        });
     };
 
     // end image ----------------------------------------------------------------
 
-    // tags ----------------------------------------------------------------
-
-    const MAX_TAGS = 5;
-    const MAX_TAG_LENGTH = 20;
-
-    const [tags, setTags] = useState<string[]>([]);
-    const [tagInput, setTagInput] = useState<string>(""); // Input field for adding tags
-
-    const addTag = (e: React.FormEvent) => {
-        e.preventDefault();
-        const trimmedTag = tagInput.trim().toLowerCase();
-
-        // Regular expression to allow only letters and numbers
-        const isValidTag = /^[a-zA-Z0-9]+$/.test(trimmedTag);
-
-        // Only add tag if conditions are met
-        if (
-            isValidTag && // Tag must only contain letters and numbers
-            trimmedTag &&
-            trimmedTag.length <= MAX_TAG_LENGTH &&
-            !tags.includes(trimmedTag) &&
-            tags.length < MAX_TAGS
-        ) {
-            setTags((prevTags) => [...prevTags, trimmedTag]);
-            setTagInput("");
-        } else if (!isValidTag) {
-            toast("Invalid Tag", {
-                description: "Tags can only contain letters and numbers.",
-            });
-        } else if (trimmedTag.length > MAX_TAG_LENGTH) {
-            toast("Tag Length", {
-                description: `Tags must be ${MAX_TAG_LENGTH} characters or less.`,
-            });
-        }
-    };
-
-    const removeTag = (tag: string) => {
-        setTags((prevTags) => prevTags.filter((t) => t !== tag));
-    };
-
-    // end tags ----------------------------------------------------------------
-
     // submit handler
-    const onSubmit = async (data: FormSchema) => {
+    const onSubmit = async (data: networkSongFormData) => {
         if (!store) {
             console.error("Store is not initialized.");
             return;
         }
 
+        console.log(data);
+
+        const defaultDownloadFolder = await store.get<{ value: string }>(
+            "download-folder"
+        );
+        if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
+            console.error("No default download folder found.");
+            return;
+        }
+
         try {
             const updatedSong: Song = {
-                ...data,
-                id,
-                tags,
-                xorname: "123",
-                artist: "test",
+                id: uuidv4(),
                 dateCreated: new Date(),
-                location: "test,",
+                xorname: fileDetail.xorname,
+                fileName: fileDetail.fileName,
+                extension: fileDetail.extension,
+                downloadFolder: defaultDownloadFolder.value,
+                ...data,
             };
+
+            // ensure id is unique throughout all playlists:
+            const playlists: Playlist[] = (await store.get("playlists")) || [];
+            const idUnique = isIDUnique(updatedSong.id, playlists);
+            if (!idUnique) {
+                toast("ID not Unique", {
+                    description: "The id needs to be unique",
+                });
+                return;
+            }
 
             setSong(updatedSong);
 
@@ -318,190 +227,225 @@ export default function NetworkSongMetadataPanel({
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                    <form id="customizeForm" onSubmit={handleSubmit(onSubmit)}>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* Form Fields */}
-                            <div className="md:col-span-2">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    {/* Title */}
-                                    <div className="col-span-3">
-                                        <label className="block text-sm font-medium mb-1">
-                                            Title{" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            {...register("title")}
-                                            className="w-full border px-2 py-1 rounded"
-                                            maxLength={100}
-                                        />
-                                        {errors.title && (
-                                            <div className="text-red-500 text-xs mt-1">
-                                                {errors.title.message}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Description */}
-                                    <div className="col-span-3">
-                                        <label className="block text-sm font-medium mb-1">
-                                            Description{" "}
-                                        </label>
-                                        <input
-                                            {...register("description")}
-                                            className="w-full border px-2 py-1 rounded"
-                                            maxLength={100}
-                                        />
-                                        {errors.description && (
-                                            <div className="text-red-500 text-xs mt-1">
-                                                {errors.description.message}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="col-span-1">
-                                        {/* Tags Input */}
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">
-                                                Tags
-                                            </label>
-                                            <div className="flex gap-2 mb-2">
-                                                <Input
-                                                    type="text"
-                                                    autoCapitalize="off"
-                                                    autoComplete="off"
-                                                    autoCorrect="off"
-                                                    value={tagInput}
-                                                    onChange={(e) =>
-                                                        setTagInput(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    onKeyDown={(e) => {
-                                                        if (
-                                                            e.key === "Enter" &&
-                                                            tagInput.trim()
-                                                        ) {
-                                                            addTag(e); // Call addTag function when Enter is pressed
-                                                        }
-                                                    }}
-                                                    placeholder="Add a tag"
-                                                    className="flex-1"
-                                                    disabled={
-                                                        tags.length >= MAX_TAGS
-                                                    } // Disable input if max tags reached
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="secondary"
-                                                    onClick={addTag}
-                                                    disabled={
-                                                        tags.length >=
-                                                            MAX_TAGS || // Max tags reached
-                                                        tagInput.trim()
-                                                            .length === 0 || // Empty input
-                                                        tagInput.trim().length >
-                                                            MAX_TAG_LENGTH || // Exceeds max length
-                                                        !/^[a-zA-Z0-9]*$/.test(
-                                                            tagInput.trim()
-                                                        ) // Contains invalid characters
-                                                    }
-                                                >
-                                                    Add
-                                                </Button>
-                                            </div>
-                                            {tagInput.trim().length >
-                                                MAX_TAG_LENGTH && (
-                                                <p className="text-red-500 text-xs">
-                                                    Tags cannot exceed{" "}
-                                                    {MAX_TAG_LENGTH} characters.
-                                                </p>
-                                            )}
-                                            {tags.length === MAX_TAGS && (
-                                                <p className="text-red-500 text-xs">
-                                                    Max tags reached.
-                                                </p>
-                                            )}
-                                            {tagInput.trim().length > 0 &&
-                                                !/^[a-zA-Z0-9]*$/.test(
-                                                    tagInput
-                                                ) && (
-                                                    <p className="text-red-500 text-xs">
-                                                        Tags can only contain
-                                                        letters and numbers.
-                                                    </p>
+                    <Form {...networkSongForm}>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Form Fields */}
+                                <div className="md:col-span-2 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Title */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={
+                                                    networkSongForm.control
+                                                }
+                                                name="title"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Title
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter title"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "title"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
                                                 )}
+                                            />
+                                        </div>
+
+                                        {/* Artist */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={
+                                                    networkSongForm.control
+                                                }
+                                                name="artist"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Artist
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter artist"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "artist"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Album */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={
+                                                    networkSongForm.control
+                                                }
+                                                name="album"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Album
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter album"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "album"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+                                        {/* Genre */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={
+                                                    networkSongForm.control
+                                                }
+                                                name="genre"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Genre
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter genre"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "genre"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Year */}
+                                        <div className="w-full">
+                                            <SelectYear
+                                                register={register}
+                                                setValue={setValue}
+                                                height="200px"
+                                            />
+                                        </div>
+
+                                        {/* Track Number */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={
+                                                    networkSongForm.control
+                                                }
+                                                name="trackNumber"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Track Number
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter track number"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "trackNumber"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
                                         </div>
                                     </div>
 
-                                    <div className="col-span-2">
-                                        {/* Tags Display */}
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            {tags.map((tag, index) => (
-                                                <Badge
-                                                    key={index}
-                                                    className="flex items-center space-x-1"
-                                                    size={"sm"}
-                                                    variant={"default"}
-                                                >
-                                                    <span
-                                                        className="truncate max-w-[80px]"
-                                                        title={tag}
-                                                    >
-                                                        {tag}
-                                                    </span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            removeTag(tag)
+                                    <div className="w-full">
+                                        <TagInput
+                                            initialTags={getValues("tags")} // Initial tags from form state
+                                            onChange={
+                                                (updatedTags) =>
+                                                    setValue(
+                                                        "tags",
+                                                        updatedTags,
+                                                        {
+                                                            shouldValidate:
+                                                                false,
                                                         }
-                                                        className="ml-1"
-                                                    >
-                                                        <XIcon size={14} />
-                                                    </button>
-                                                </Badge>
-                                            ))}
-                                        </div>
+                                                    ) // Update form state when tags change
+                                            }
+                                        />
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Song Art */}
-                            <div className="flex justify-center items-center relative">
-                                {selectedImage || base64Picture ? (
-                                    <img
-                                        src={selectedImage || base64Picture} // Update the image source
-                                        alt="Playlist Art"
-                                        className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
-                                        onClick={handleImageSelect} // Handle image selection
-                                    />
-                                ) : (
-                                    <div className="w-full h-full max-w-sm max-h-sm min-h-44 max-h-96 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
-                                        No Song Art
+                                {/* Album Art */}
+                                <div className="flex justify-center items-center relative">
+                                    {getValues("picture") || selectedImage ? (
+                                        <img
+                                            src={
+                                                getValues("picture") ||
+                                                selectedImage ||
+                                                undefined
+                                            }
+                                            alt="Playlist Art"
+                                            className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
+                                            onClick={handleImageUpload}
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full max-w-sm max-h-sm min-h-44 max-h-96 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
+                                            No Song Art
+                                        </div>
+                                    )}
+                                    <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">
+                                        <EditIcon
+                                            size={20}
+                                            onClick={handleImageUpload}
+                                        />
                                     </div>
-                                )}
-                                <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">
-                                    <EditIcon
-                                        size={20}
-                                        onClick={handleImageSelect} // Open file dialog on click
-                                    />
                                 </div>
                             </div>
-                        </div>
-                    </form>
-                    <div className="pt-4">
-                        <Button
-                            size={"sm"}
-                            type="submit"
-                            form="customizeForm"
-                            className="mr-3"
-                            disabled={!isValid}
-                        >
-                            Save <CirclePlusIcon />
-                        </Button>
-                    </div>
+                            <div className="pt-4">
+                                <Button
+                                    size={"sm"}
+                                    type="submit"
+                                    className="mr-3"
+                                    disabled={!isValid}
+                                >
+                                    Save <CirclePlusIcon />
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
                 </div>
             </div>
         </div>
