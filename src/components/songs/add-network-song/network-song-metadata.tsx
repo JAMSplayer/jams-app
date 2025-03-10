@@ -24,6 +24,7 @@ import { useImageSelector } from "@/hooks/use-image-selector";
 import { NetworkFileDetail } from "@/types/network-file-detail";
 import { Playlist } from "@/types/playlists/playlist";
 import { toast } from "sonner";
+import { isIDUnique } from "@/lib/utils/validation";
 
 interface NetworkSongMetadataPanelProps {
     fileDetail: NetworkFileDetail | null;
