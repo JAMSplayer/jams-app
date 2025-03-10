@@ -811,7 +811,7 @@ pub fn run() {
             put_data,
         ])
         .setup(|app| {
-//            server::run(app.handle().clone()); // temporarily disable local server, because streaming from network is not implemented.
+            server::run(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!())
