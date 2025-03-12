@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { load, Store } from "@tauri-apps/plugin-store";
 import { downloadDir } from "@tauri-apps/api/path";
+import { Playlist } from "@/types/playlists/playlist";
+import { v4 as uuidv4 } from "uuid";
 
 // Create a context for the store
 const StorageContext = createContext<{ store: Store | null }>({ store: null });
@@ -32,18 +34,34 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
+            // 1. ensure the download-folder is set if not already
             const downloadFolder = await activeStore.get<{ value: string }>(
                 "download-folder"
             );
 
-            if (downloadFolder && downloadFolder.value) {
-                return;
+            if (!downloadFolder || !downloadFolder.value) {
+                const defaultDownloadFolder = await downloadDir();
+                await activeStore.set("download-folder", defaultDownloadFolder);
             }
 
-            // if not set, use the default download directory
-            const defaultDownloadFolder = await downloadDir();
-            await activeStore.set("download-folder", defaultDownloadFolder);
-            await activeStore.save();
+            // 2. ensure at least one playlist exists
+            let playlists: Playlist[] =
+                (await activeStore.get("playlists")) || [];
+
+            if (playlists.length === 0) {
+                const generalPlaylist: Playlist = {
+                    id: uuidv4(),
+                    title: "general",
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    songs: [],
+                    tags: [],
+                };
+
+                playlists.push(generalPlaylist);
+                await activeStore.set("playlists", playlists);
+                await activeStore.save();
+            }
         } catch (error) {
             console.error(
                 "Failed to set default download folder in store:",
