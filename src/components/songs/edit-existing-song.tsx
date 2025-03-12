@@ -115,7 +115,7 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
 
     // image ----------------------------------------------------------------
 
-    const { selectedImage, handleImageSelect } = useImageSelector();
+    const { handleImageSelect } = useImageSelector();
 
     const handleImageUpload = () => {
         handleImageSelect((base64Image) => {
@@ -265,9 +265,9 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
 
                             {/* Song Art */}
                             <div className="flex justify-center items-center relative">
-                                {selectedImage ? (
+                                {getValues("picture") ? (
                                     <img
-                                        src={selectedImage}
+                                        src={getValues("picture")}
                                         alt="Playlist Art"
                                         className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
                                         onClick={handleImageUpload}
