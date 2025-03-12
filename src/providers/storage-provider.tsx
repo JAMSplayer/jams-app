@@ -18,7 +18,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
                 autoSave: true,
             });
             setStore(storeInstance);
-            sharedStore = storeInstance; // Assign to the shared variable
+            sharedStore = storeInstance; // assign to the shared variable
         } catch (error) {
             console.error("Failed to initialize store:", error);
         }
@@ -26,29 +26,39 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const setDefaults = async () => {
         try {
-            const activeStore = sharedStore;
-            if (!activeStore) {
+            if (!sharedStore) {
                 console.error("Store is not initialized.");
                 return;
             }
 
-            const downloadFolder = await activeStore.get<{ value: string }>(
+            const storedDownloadFolder = await sharedStore.get<string>(
                 "download-folder"
             );
 
-            if (downloadFolder && downloadFolder.value) {
+            if (storedDownloadFolder) {
+                console.log(
+                    "Download folder already set:",
+                    storedDownloadFolder
+                );
                 return;
             }
 
-            // if not set, use the default download directory
+            // Get the default download folder
             const defaultDownloadFolder = await downloadDir();
-            await activeStore.set("download-folder", defaultDownloadFolder);
-            await activeStore.save();
-        } catch (error) {
-            console.error(
-                "Failed to set default download folder in store:",
-                error
+            if (!defaultDownloadFolder) {
+                console.error("Failed to get default download folder.");
+                return;
+            }
+
+            console.log(
+                "Setting default download folder:",
+                defaultDownloadFolder
             );
+            await sharedStore.set("download-folder", defaultDownloadFolder);
+            await sharedStore.save();
+            console.log("Default download folder set successfully");
+        } catch (error) {
+            console.error("Failed to set default download folder:", error);
         }
     };
 

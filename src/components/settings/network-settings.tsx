@@ -46,10 +46,8 @@ export default function StorageSettings() {
 
             try {
                 const retrievedTestnetPeerAddress =
-                    (await store.get<{ value: string }>(
-                        "testnet-peer-address"
-                    )) || null;
-                setTestnetPeerAddress(retrievedTestnetPeerAddress?.value || "");
+                    (await store.get<string>("testnet-peer-address")) || null;
+                setTestnetPeerAddress(retrievedTestnetPeerAddress || "");
             } catch (err) {
                 console.error(
                     "Failed to load testnet peer address setting",

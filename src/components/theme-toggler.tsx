@@ -38,18 +38,15 @@ export function ThemeToggler() {
         }
 
         try {
-            const savedTheme = await store.get<{ value: string }>("theme");
+            const savedTheme = await store.get<string>("theme");
 
             if (!savedTheme) {
                 setTheme("light");
                 await store.set("theme", { value: "light" });
                 setEnabled(false);
-            } else if (
-                savedTheme.value === "dark" ||
-                savedTheme.value === "light"
-            ) {
-                setTheme(savedTheme.value);
-                setEnabled(savedTheme.value === "dark");
+            } else if (savedTheme === "dark" || savedTheme === "light") {
+                setTheme(savedTheme);
+                setEnabled(savedTheme === "dark");
             }
         } catch (error) {
             setTheme("light");

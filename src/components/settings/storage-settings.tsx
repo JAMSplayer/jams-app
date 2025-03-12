@@ -26,16 +26,16 @@ export default function StorageSettings() {
             }
 
             try {
-                const downloadFolder = await store.get<{ value: string }>(
+                const downloadFolder = await store.get<string>(
                     "download-folder"
                 );
 
                 const defaultDownloadFolder = await downloadDir();
 
-                if (!downloadFolder || !downloadFolder.value) {
+                if (!downloadFolder) {
                     setDownloadFolder(defaultDownloadFolder); // Use default path if none is set
                 } else {
-                    setDownloadFolder(downloadFolder.value); // Set stored folder if it exists
+                    setDownloadFolder(downloadFolder); // Set stored folder if it exists
                 }
             } catch (err) {
                 console.error("Failed to load settings", err);

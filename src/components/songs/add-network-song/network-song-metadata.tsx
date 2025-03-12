@@ -143,10 +143,10 @@ export default function NetworkSongMetadataPanel({
 
         console.log(data);
 
-        const defaultDownloadFolder = await store.get<{ value: string }>(
+        const defaultDownloadFolder = await store.get<string>(
             "download-folder"
         );
-        if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
+        if (!defaultDownloadFolder) {
             console.error("No default download folder found.");
             return;
         }
@@ -158,7 +158,7 @@ export default function NetworkSongMetadataPanel({
                 xorname: fileDetail.xorname,
                 fileName: fileDetail.fileName,
                 extension: fileDetail.extension,
-                downloadFolder: defaultDownloadFolder.value,
+                downloadFolder: defaultDownloadFolder,
                 ...data,
             };
 
