@@ -13,6 +13,8 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 mod frontend;
 mod secure_sk;
+
+#[cfg(target_os = "linux")]
 mod server;
 
 use frontend::*;
@@ -787,6 +789,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_os::init())
         .manage(Mutex::new(Session::new()))
         .invoke_handler(tauri::generate_handler![
             list_accounts,
@@ -811,7 +814,10 @@ pub fn run() {
             put_data,
         ])
         .setup(|app| {
+
+            #[cfg(target_os = "linux")]
             server::run(app.handle().clone());
+
             Ok(())
         })
         .run(tauri::generate_context!())
