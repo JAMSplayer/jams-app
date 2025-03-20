@@ -39,6 +39,9 @@
   "plugins": {
     "clipboard": {
       "enabled": true
+    },
+    "os": {
+      "version": "latest"
     }
   }
 }
