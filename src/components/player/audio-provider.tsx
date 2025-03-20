@@ -1,6 +1,5 @@
 import { generateLocation } from "@/lib/utils/location";
 import { Song } from "@/types/songs/song";
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { createContext, useContext, useMemo, useReducer, useRef } from "react";
 
 interface PlayerState {
@@ -75,6 +74,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         song: null,
     });
 
+    let generateServerUrl = (location: string): string => {
+        return "http://localhost:12345/" + encodeURIComponent(location);
+    };
+
     let playerRef = useRef<HTMLAudioElement | null>(null);
 
     let actions = useMemo<PublicPlayerActions>(() => {
@@ -92,7 +95,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                         song.extension,
                         song.downloadFolder
                     );
-                    const playableURL = convertFileSrc(filePath);
+                    const playableURL = generateServerUrl(filePath);
+                    console.log("URL: ", playableURL);
                     // If the song location changes, load the new song
                     if (
                         playerRef.current &&
@@ -121,7 +125,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                         song.extension,
                         song.downloadFolder
                     );
-                    const playableURL = convertFileSrc(filePath);
+                    const playableURL = generateServerUrl(filePath);
                     const isPlaying =
                         state.playing &&
                         playerRef.current?.currentSrc === playableURL;
@@ -144,7 +148,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                             song.extension,
                             song.downloadFolder
                         );
-                        const playableURL = convertFileSrc(filePath);
+                        const playableURL = generateServerUrl(filePath);
                         const isPlaying =
                             state.playing &&
                             playerRef.current?.currentSrc === playableURL;
@@ -194,7 +198,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
                         song.extension,
                         song.downloadFolder
                     );
-                    const playableURL = convertFileSrc(filePath);
+                    const playableURL = generateServerUrl(filePath);
 
                     return (
                         playerRef.current?.currentSrc === playableURL &&

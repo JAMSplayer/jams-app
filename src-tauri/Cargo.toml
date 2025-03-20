@@ -25,7 +25,8 @@ argon2 = "0.5"
 password-hash = "0.5"
 aes-gcm = "*"
 warp = "*"
-tauri = { version = "2.2", features = ["protocol-asset"] }
+serde_urlencoded = "*"
+tauri = { version = "2.2", features = [] }
 tauri-plugin-shell = "2.2"
 tauri-plugin-store = "2.2"
 tauri-plugin-fs = "2.2"
