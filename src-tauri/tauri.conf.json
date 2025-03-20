@@ -20,7 +20,11 @@
       }
     ],
     "security": {
-       "csp": null
+      "csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost;",
+      "assetProtocol": {
+       "enable": true,
+       "scope": ["**", "**/*"]
+     }
     }
   },
   "bundle": {
