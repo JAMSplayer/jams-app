@@ -7,6 +7,12 @@ import { invoke } from "@tauri-apps/api/core";
 
 const REG_META_PREFIX = "jams";
 
+enum LogLevel {
+    TRACE,
+    INFO,
+    ERROR,
+}
+
 export async function listAccounts(): Promise<[string, string][] | null> {
     try {
         return await invoke<[string, string][]>("list_accounts");
@@ -163,6 +169,19 @@ export async function sessionSet(
 ): Promise<string | null> {
     // returns previous value, or null if the value was not present
     return await invoke("session_set", { key: key, value: value });
+}
+
+export async function logLevel(
+    level: keyof typeof LogLevel
+): Promise<boolean> {
+    console.log("logLevel: ", level);
+    try {
+        await invoke("log_level", { level: level });
+        return true;
+    } catch (e) {
+        console.error("logLevel: ", e);
+    }
+    return false;
 }
 
 function prepareMeta(name: string[]): string[] {
