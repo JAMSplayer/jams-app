@@ -20,20 +20,16 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
                 autoSave: true,
             });
             setStore(storeInstance);
-            sharedStore = storeInstance; // Assign to the shared variable
+            sharedStore = storeInstance; // assign to the shared variable
+
+            await setDefaults(storeInstance); // set defaults
         } catch (error) {
             console.error("Failed to initialize store:", error);
         }
     };
 
-    const setDefaults = async () => {
+    const setDefaults = async (activeStore: Store) => {
         try {
-            const activeStore = sharedStore;
-            if (!activeStore) {
-                console.error("Store is not initialized.");
-                return;
-            }
-
             // 1. ensure the download-folder is set if not already
             const downloadFolder = await activeStore.get<{ value: string }>(
                 "download-folder"
@@ -49,6 +45,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
                 (await activeStore.get("playlists")) || [];
 
             if (playlists.length === 0) {
+                console.log("playlist is empty, creating default one now!");
                 const generalPlaylist: Playlist = {
                     id: uuidv4(),
                     title: "general",
@@ -63,6 +60,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
                 playlists.push(generalPlaylist);
                 await activeStore.set("playlists", playlists);
                 await activeStore.save();
+                console.log("playlist saved!");
             }
         } catch (error) {
             console.error(
@@ -74,21 +72,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Initialize the store
     useEffect(() => {
-        const setupStore = async () => {
-            await initializeStore();
-            await setDefaults();
-        };
-
-        setupStore();
+        initializeStore();
     }, []);
 
-    return (
-        store && (
-            <StorageContext.Provider value={{ store }}>
-                {children}
-            </StorageContext.Provider>
-        )
-    );
+    return store ? (
+        <StorageContext.Provider value={{ store }}>
+            {children}
+        </StorageContext.Provider>
+    ) : null;
 };
 
 // Custom hook to access the storage context
