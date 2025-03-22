@@ -15,6 +15,8 @@
     "dialog:default",
     "fs:default",
     "fs:read-all",
+    "fs:allow-read",
+    "fs:allow-read-file",
     "core:event:default",
     "core:event:allow-emit",
     "core:event:allow-listen",
@@ -32,10 +34,7 @@
       "identifier": "fs:scope",
       "allow": [
         {
-          "path": "$DOWNLOAD/**"
-        },
-        {
-          "path": "$HOME/**"
+          "path": "*/**"
         }
       ]
     }

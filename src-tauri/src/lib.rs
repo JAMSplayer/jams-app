@@ -1,18 +1,20 @@
 use futures::lock::Mutex;
 use lofty::config::{ParseOptions, WriteOptions};
+use lofty::file::FileType;
 use lofty::file::{AudioFile, TaggedFile};
 use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
 use lofty::tag::{Accessor, Tag, TagExt};
-use lofty::file::{FileType};
 use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey, XorName};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf, io::Cursor};
+use std::{fs, io::Cursor, path::PathBuf};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 mod frontend;
 mod secure_sk;
+
+#[cfg(target_os = "linux")]
 mod server;
 
 use frontend::*;
@@ -236,8 +238,7 @@ async fn sign_in(
     let pk = load_create_import_key(&app_root, login.clone(), password, eth_pk_import, register)?;
     println!("\n\nEth Private Key: {}", pk);
 
-    app
-        .try_state::<Mutex<Option<Safe>>>()
+    app.try_state::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?
         .lock()
         .await
@@ -246,10 +247,10 @@ async fn sign_in(
         .login_with_eth(Some(pk))?; // sign in
 
     let address = client_address(
-        app
-            .try_state::<Mutex<Option<Safe>>>()
-            .ok_or(Error::NotConnected)?
-    ).await?;
+        app.try_state::<Mutex<Option<Safe>>>()
+            .ok_or(Error::NotConnected)?,
+    )
+    .await?;
     println!("ETH wallet address: {}", address);
 
     // Prepare the address directory and file
@@ -477,8 +478,14 @@ fn check_key(login: String, password: String, mut app: AppHandle) -> Result<Stri
 fn delete_account(login: String, mut app: AppHandle) -> Result<(), Error> {
     let app_root = make_root(&mut app)?;
     let sk_dir = user_root(&app_root, login);
-    if sk_dir.try_exists().map_err(|_| Error::Common(format!("Could not check existence of {}.", sk_dir.display())))? {
-        fs::remove_dir_all(&sk_dir).map_err(|e| Error::Common(format!("Could not remove {}: {}", sk_dir.display(), e)))?
+    if sk_dir.try_exists().map_err(|_| {
+        Error::Common(format!(
+            "Could not check existence of {}.",
+            sk_dir.display()
+        ))
+    })? {
+        fs::remove_dir_all(&sk_dir)
+            .map_err(|e| Error::Common(format!("Could not remove {}: {}", sk_dir.display(), e)))?
     }
     Ok(())
 }
@@ -586,9 +593,11 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
         .map(|file_path| {
             match read_from_path(&file_path) {
                 Ok(tagged_file) => {
-                    let size = std::fs::File::open(&file_path).unwrap()
-                            .metadata().unwrap()
-                            .len();
+                    let size = std::fs::File::open(&file_path)
+                        .unwrap()
+                        .metadata()
+                        .unwrap()
+                        .len();
                     let mut meta = FileMetadata::from_tagged_file(&tagged_file);
                     meta.size = Some(size as u32);
                     meta
@@ -606,16 +615,16 @@ async fn get_file_metadata(file_paths: Vec<String>) -> Result<Vec<FileMetadata>,
 }
 
 fn normalize_cover_art(input: FilePicture) -> Result<FilePicture, image::error::ImageError> {
-    let img = image::ImageReader::new(Cursor::new(input.data.clone())).with_guessed_format()?.decode()?;
+    let img = image::ImageReader::new(Cursor::new(input.data.clone()))
+        .with_guessed_format()?
+        .decode()?;
 
     if img.width() > 200 || img.height() > 200 {
-
         let img = if img.width() > 200 && img.height() > 200 {
             img.resize_to_fill(200, 200, image::imageops::FilterType::CatmullRom)
         } else {
             img.resize(200, 200, image::imageops::FilterType::CatmullRom)
         };
-
     } else if input.data.len() < 40_000 {
         return Ok(input);
     }
@@ -633,12 +642,8 @@ fn normalize_cover_art(input: FilePicture) -> Result<FilePicture, image::error::
 async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(), Error> {
     let full_path = String::from(song_file.full_path()?.to_string_lossy().as_ref());
 
-    let mut tagged_file = read_from_path(&full_path).map_err(|e| {
-        Error::Common(format!(
-            "Cannot read tags from file {}",
-            full_path
-        ))
-    })?;
+    let mut tagged_file = read_from_path(&full_path)
+        .map_err(|e| Error::Common(format!("Cannot read tags from file {}", full_path)))?;
     tagged_file.clear();
     let mut new_tag = Tag::new(tagged_file.primary_tag_type());
 
@@ -660,7 +665,12 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
         .inspect(|track_number| new_tag.set_track(*track_number));
 
     if let Some(pic) = song_file.picture {
-        let pic = normalize_cover_art(pic).map_err(|e| Error::Common(format!("Could not resize cover art for {}. {}", full_path, e)))?;
+        let pic = normalize_cover_art(pic).map_err(|e| {
+            Error::Common(format!(
+                "Could not resize cover art for {}. {}",
+                full_path, e
+            ))
+        })?;
         let new_pic = Picture::new_unchecked(
             PictureType::CoverFront,
             pic.mime_type.map(|mime| MimeType::from_str(&mime)),
@@ -680,7 +690,7 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
 async fn download(
     xorname: String,
     file_name: Option<String>, // name with extension
-    destination: String, // directory to download to
+    destination: String,       // directory to download to
     app: AppHandle,
 ) -> Result<FileMetadata, Error> {
     let xorname_bytes: [u8; 32] = hex::decode(xorname)
@@ -696,7 +706,7 @@ async fn download(
         .await
         .as_mut()
         .ok_or(Error::NotConnected)?
-        .download(&xorname)
+        .download(xorname)
         .await?;
 
     let size = data.len();
@@ -709,23 +719,40 @@ async fn download(
     metadata.size = Some(size as u32);
     metadata.xorname = Some(xorname.clone());
     metadata.folder_path = Some(destination.clone());
-    metadata.picture = metadata.picture.map(|pic| normalize_cover_art(pic).map_err(|e| Error::Common(format!("Could not resize cover art for {}. {}", xorname, e)))).transpose()?;
+    metadata.picture = metadata
+        .picture
+        .map(|pic| {
+            normalize_cover_art(pic).map_err(|e| {
+                Error::Common(format!("Could not resize cover art for {}. {}", xorname, e))
+            })
+        })
+        .transpose()?;
 
     let mut path = PathBuf::from(destination);
     if let Some(file_name) = file_name {
         let file_name = PathBuf::from(file_name);
 
-        metadata.file_name = file_name.file_stem().map(|s| String::from(s.to_string_lossy().as_ref()));
-        metadata.extension = file_name.extension().map(|s| String::from(s.to_string_lossy().as_ref()));
+        metadata.file_name = file_name
+            .file_stem()
+            .map(|s| String::from(s.to_string_lossy().as_ref()));
+        metadata.extension = file_name
+            .extension()
+            .map(|s| String::from(s.to_string_lossy().as_ref()));
 
         path.push(file_name);
     } else {
         let filename_meta = metadata.clone();
         let mut songname_parts: Vec<String> = vec![];
-        filename_meta.track_number.inspect(|track| songname_parts.push(format!("{:0>3}", track)));
-        filename_meta.artist.inspect(|artist| songname_parts.push(artist.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
-        filename_meta.title.inspect(|title| songname_parts.push(title.replace(|c: char| { !c.is_ascii_alphanumeric() }, "_")));
-        
+        filename_meta
+            .track_number
+            .inspect(|track| songname_parts.push(format!("{:0>3}", track)));
+        filename_meta.artist.inspect(|artist| {
+            songname_parts.push(artist.replace(|c: char| !c.is_ascii_alphanumeric(), "_"))
+        });
+        filename_meta.title.inspect(|title| {
+            songname_parts.push(title.replace(|c: char| !c.is_ascii_alphanumeric(), "_"))
+        });
+
         let songname = songname_parts.join(" - ");
         let extension = String::from(match tagged_file.file_type() {
             FileType::Aac => "aac",
@@ -747,20 +774,16 @@ async fn download(
         metadata.extension = Some(extension.clone());
 
         let mut filename_parts: Vec<String> = vec![];
-//        filename_parts.push(hex::encode(xorname));
-//        filename_parts.push("__".into());
+        //        filename_parts.push(hex::encode(xorname));
+        //        filename_parts.push("__".into());
         filename_parts.push(songname);
         filename_parts.push(String::from("."));
         filename_parts.push(extension);
         path.push(filename_parts.join(""));
     }
 
-    fs::write(&path, data).map_err(|_| {
-        Error::Common(format!(
-            "Could not save song: {}",
-            path.display()
-        ))
-    })?;
+    fs::write(&path, data)
+        .map_err(|_| Error::Common(format!("Could not save song: {}", path.display())))?;
 
     Ok(metadata)
 }
@@ -801,6 +824,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_os::init())
         .manage(Mutex::new(Session::new()))
         .invoke_handler(tauri::generate_handler![
             list_accounts,
@@ -826,7 +850,8 @@ pub fn run() {
             put_data,
         ])
         .setup(|app| {
-//            server::run(app.handle().clone()); // temporarily disable local server, because streaming from network is not implemented.
+            #[cfg(target_os = "linux")]
+            server::run(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!())
