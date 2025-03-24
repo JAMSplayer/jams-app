@@ -20,11 +20,11 @@
       }
     ],
     "security": {
-       "csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost;",
-       "assetProtocol": {
-        "enable": true,
-        "scope": ["**", "**/*"]
-      }
+      "csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost;",
+      "assetProtocol": {
+       "enable": true,
+       "scope": ["**", "**/*"]
+     }
     }
   },
   "bundle": {
@@ -43,6 +43,9 @@
   "plugins": {
     "clipboard": {
       "enabled": true
+    },
+    "os": {
+      "version": "latest"
     }
   }
 }
