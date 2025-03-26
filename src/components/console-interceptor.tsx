@@ -4,8 +4,12 @@ import { useEffect } from "react";
 
 export default function ConsoleInterceptor() {
     const addLog = frontendLogsStore((state) => state.addLog);
+    const clearLogs = frontendLogsStore((state) => state.clearLogs);
 
     useEffect(() => {
+        // clear logs at start of application
+        clearLogs();
+
         const captureLog = (type: FrontendLogs) => {
             return (...args: any[]) => {
                 const message = `[${type.toUpperCase()}] ${args
@@ -39,7 +43,7 @@ export default function ConsoleInterceptor() {
             console.warn = originalConsole.warn;
             console.error = originalConsole.error;
         };
-    }, [addLog]);
+    }, [addLog, clearLogs]);
 
     return null; // this component does not render anything
 }
