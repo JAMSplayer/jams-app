@@ -231,7 +231,7 @@ export default function SingleFilePanel({
                 >
                     {isUploading ? (
                         <span className="inline-flex items-center gap-x-2">
-                            {"Loading"}
+                            {"Downloading"}
                             <LoadingSpinner />
                         </span>
                     ) : (
