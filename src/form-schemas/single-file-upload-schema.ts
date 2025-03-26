@@ -8,8 +8,8 @@ export const singleFileUploadSchema = z.object({
         .max(100, t("titleCannotExceed100Characters")),
     artist: z
         .string()
-        .min(1, t("artistIsRequired"))
-        .max(100, t("artistCannotExceed100Characters")),
+        .max(100, "Artist cannot exceed 100 characters")
+        .optional(),
     album: z.string().max(100, t("albumCannotExceed100Characters")).optional(),
     genre: z.string().max(30, t("genreCannotExceed30Characters")).optional(),
     year: z
