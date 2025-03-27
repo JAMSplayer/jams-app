@@ -205,9 +205,9 @@ export default function SingleFilePanel({
             );
 
             if (!result.success && result.error) {
-                console.log("Upload failed due to:", result.error);
-                toast(result.error, {
-                    description: result.error,
+                console.log("Upload failed due to:", result.error.title);
+                toast(result.error.title, {
+                    description: result.error.description,
                 });
                 return;
             }
