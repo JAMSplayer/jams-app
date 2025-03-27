@@ -34,6 +34,7 @@ import {
     filePictureToBase64,
     readToArray,
 } from "@/lib/utils/images";
+import { toast } from "sonner";
 
 interface SingleFilePanelProps {
     onBack: () => void;
@@ -203,7 +204,15 @@ export default function SingleFilePanel({
                 )
             );
 
-            console.log("result of upload: ", result);
+            if (!result.success && result.error) {
+                console.log("Upload failed due to:", result.error);
+                toast(result.error, {
+                    description: result.error,
+                });
+                return;
+            }
+
+            console.log("Result of upload: ", result);
         } catch (ex) {
             console.log("The song could not be uploaded: ", ex);
         } finally {
