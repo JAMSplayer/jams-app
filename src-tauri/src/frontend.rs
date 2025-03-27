@@ -34,17 +34,21 @@ pub(crate) struct FileMetadata {
 impl FileMetadata {
     pub fn full_path(&self) -> Result<PathBuf, Error> {
         let mut path = PathBuf::from(
-            self.folder_path.clone().ok_or(Error::Common("Cannot construct full path without folder_path.".into()))?);
-
-        path.push(
-            self.file_name.clone()
-                .or_else(|| self.xorname.clone().map(hex::encode))
-                .ok_or(Error::Common("Need file_name or xorname to construct full path.".into()))?
+            self.folder_path.clone()
+                .ok_or(Error::Common("Need folder_path to construct full path.".into()))?
         );
 
-        if let Some(ext) = self.extension.clone() {
-            path.push(ext);
-        }
+        path.push(
+            format!("{}.{}",
+
+                self.file_name.clone()
+                    .ok_or(Error::Common("Need file_name to construct full path.".into()))?,
+
+                self.extension.clone()
+                    .ok_or(Error::Common("Need extension to construct full path.".into()))?
+            )
+        );
+
         Ok(path)
     }
 }
@@ -53,4 +57,20 @@ impl FileMetadata {
 pub(crate) struct FilePicture {
     pub(crate) data: Vec<u8>,             // Image data
     pub(crate) mime_type: Option<String>, // MIME type of the image (e.g., image/jpeg)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn meta_full_path() {
+        let meta = FileMetadata {
+            folder_path: Some("/test/folder".into()),
+            file_name: Some("file".into()),
+            extension: Some("mp3".into()),
+            ..Default::default()
+        };
+        assert_eq!(PathBuf::from("/test/folder/file.mp3"), meta.full_path().unwrap());
+    }
 }
