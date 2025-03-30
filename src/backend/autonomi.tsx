@@ -171,9 +171,7 @@ export async function sessionSet(
     return await invoke("session_set", { key: key, value: value });
 }
 
-export async function logLevel(
-    level: keyof typeof LogLevel
-): Promise<boolean> {
+export async function logLevel(level: keyof typeof LogLevel): Promise<boolean> {
     console.log("logLevel: ", level);
     try {
         await invoke("log_level", { level: level });
@@ -246,11 +244,9 @@ export async function uploadFile(
     path: string // filesystem path
 ): Promise<string | null> {
     console.log("uploading file: " + path + "...");
-    try {
-        return await invoke("upload", { file: path });
-    } catch (e) {
-        console.error("uploadFile: ", e);
-    }
+
+    return await invoke("upload", { file: path });
+
     return null;
 }
 

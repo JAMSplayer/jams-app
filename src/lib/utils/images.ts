@@ -62,6 +62,42 @@ export const base64ToFilePicture = (base64String: string): FilePicture => {
     };
 };
 
+export function filePictureToBase64(
+    filePicture: FilePicture | undefined
+): string | undefined {
+    if (!filePicture || !filePicture.data || filePicture.data.length === 0) {
+        return undefined; // Return undefined if no valid image data
+    }
+
+    try {
+        // Efficient binary to Base64 conversion
+        const binaryString = String.fromCharCode(...filePicture.data);
+        const base64String = btoa(binaryString);
+
+        return `data:${filePicture.mime_type};base64,${base64String}`;
+    } catch (error) {
+        console.error("Error converting image to Base64:", error);
+        return undefined;
+    }
+}
+
+export async function readToArray(file: File): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+
+        reader.addEventListener("load", () => {
+            if (reader.result instanceof ArrayBuffer) {
+                resolve(new Uint8Array(reader.result));
+            } else {
+                reject(reader.result);
+            }
+        });
+        reader.addEventListener("error", reject);
+
+        reader.readAsArrayBuffer(file);
+    });
+}
+
 export function filePictureToDataURL(
     filePicture: FilePicture | null
 ): string | null {
