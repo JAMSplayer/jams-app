@@ -3,8 +3,6 @@ import { SongLoadButton } from "./player/song-load-button";
 import { Button } from "./ui/button";
 import { logLevel } from "@/backend/autonomi";
 import { registeredAccounts } from "@/backend/logic";
-import { resolveResource } from "@tauri-apps/api/path";
-import { extractFromFullPath } from "@/lib/utils/location";
 import { useStorage } from "@/providers/storage-provider";
 
 export default function Dashboard() {

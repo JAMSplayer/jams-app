@@ -25,9 +25,13 @@ export async function downloadPlaylist(
                 return null;
             }
             try {
+                let filename = null;
+                if (song.fileName && song.extension) {
+                    filename = song.fileName + "." + song.extension;
+                }
                 const downloadedFile = await download(
                     song.xorname,
-                    song.fileName ?? null
+                    filename
                 );
                 return downloadedFile;
             } catch (error) {
