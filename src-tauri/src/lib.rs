@@ -753,7 +753,10 @@ async fn download(
             songname_parts.push(title.replace(|c: char| !c.is_ascii_alphanumeric(), "_"))
         });
 
-        let songname = songname_parts.join(" - ");
+        let mut songname = songname_parts.join(" - ");
+        if songname.is_empty() && filename_meta.xorname.is_some() {
+        	songname = hex::encode(filename_meta.xorname.clone().expect("xorname should not be empty"));
+        }
         let extension = String::from(match tagged_file.file_type() {
             FileType::Aac => "aac",
             FileType::Ape => "ape",
