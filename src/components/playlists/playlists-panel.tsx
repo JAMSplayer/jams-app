@@ -17,8 +17,12 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { Button } from "../ui/button";
 import { DownloadIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
+import { NetworkFileDetail } from "@/types/network-file-detail";
+import { downloadPlaylist } from "@/lib/utils/downloading";
+import { LoadingSpinner } from "../ui/loading-spinner";
 
 export default function PlaylistsPanel() {
+    const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
 
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
@@ -114,6 +118,20 @@ export default function PlaylistsPanel() {
             if (playlistExists) {
                 console.log("Playlist already exists in the store.");
             } else {
+                // download the songs in the playlist
+                console.log("starting downloading of songs in playlist");
+                setIsLoading(true);
+                const networkFiles: NetworkFileDetail[] | null =
+                    await downloadPlaylist(importedPlaylist).finally(() => {
+                        setIsLoading(false);
+                    });
+                console.log("finished downloading of songs in playlist");
+
+                if (!networkFiles) {
+                    console.log("No songs found in playlist to download");
+                    return null;
+                }
+
                 // append the imported playlist to the stored playlists
                 storedPlaylists.push(importedPlaylist);
 
@@ -164,12 +182,21 @@ export default function PlaylistsPanel() {
                         </SelectContent>
                     </Select>
                     <Button
+                        disabled={isLoading}
                         onClick={async () => {
                             await importPlaylistData();
                         }}
                     >
-                        <DownloadIcon size={16} />
-                        Import Playlist
+                        {isLoading ? (
+                            <>
+                                Downloading... <LoadingSpinner />
+                            </>
+                        ) : (
+                            <>
+                                <DownloadIcon size={16} />
+                                Import Playlist
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>
