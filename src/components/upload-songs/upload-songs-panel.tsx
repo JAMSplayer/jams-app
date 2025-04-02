@@ -3,7 +3,7 @@ import Dropzone from "../dropzone";
 import { stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
-import { fetchLocalMetadata, fetchMetadata } from "@/backend/metadata";
+import { fetchLocalMetadata } from "@/backend/metadata";
 import { LocalFileDetail } from "@/types/local-file-detail";
 import { extractFromFullPath } from "@/lib/utils/location";
 import { useStorage } from "@/providers/storage-provider";

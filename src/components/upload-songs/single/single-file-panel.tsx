@@ -13,9 +13,7 @@ import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../../tag-input";
 import { LocalFileDetail } from "@/types/local-file-detail";
-import { FilePicture } from "@/types/file-picture";
 import { useStorage } from "@/providers/storage-provider";
-import { Song } from "@/types/songs/song";
 import { uploadSong } from "@/backend/uploading";
 import { generateLocation } from "@/lib/utils/location";
 import {
@@ -27,12 +25,9 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { NetworkFileDetail } from "@/types/network-file-detail";
 import {
     base64ToFilePicture,
-    base64ToImageFile,
     filePictureToBase64,
-    readToArray,
 } from "@/lib/utils/images";
 import { toast } from "sonner";
 
@@ -67,7 +62,7 @@ export default function SingleFilePanel({
         handleSubmit,
         setValue,
         getValues,
-        formState: { errors, isValid },
+        formState: { isValid },
     } = localSongForm;
 
     type singleFileUploadData = z.infer<typeof singleFileUploadSchema>;
