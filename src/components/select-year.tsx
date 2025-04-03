@@ -5,44 +5,38 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 function SelectYear({
-    setValue,
+    currentYear,
+    onChange,
     height = "auto",
 }: {
-    register: any;
-    setValue: any;
+    currentYear?: number;
+    onChange: (year: number) => void;
     height?: string;
 }) {
-    const { t } = useTranslation();
-    const [years, setYears] = useState<number[]>([]);
-
-    useEffect(() => {
-        const currentYear = new Date().getFullYear();
-        const yearList = [];
-        for (let year = currentYear; year >= 1800; year--) {
-            yearList.push(year);
-        }
-        setYears(yearList);
-    }, []);
-
     return (
         <div>
-            <label className="block text-sm font-medium mb-3">
-                {t("year")}
-            </label>
+            <label className="block text-sm font-medium mb-3">Year</label>
             <Select
-                onValueChange={(value) =>
-                    setValue("year", value ? parseInt(value, 10) : undefined)
-                }
+                value={currentYear ? currentYear.toString() : ""}
+                onValueChange={(selectedYear) => {
+                    const year = selectedYear
+                        ? parseInt(selectedYear, 10)
+                        : NaN;
+                    if (!isNaN(year)) {
+                        onChange(year); // Pass the new year up to parent
+                    }
+                }}
             >
                 <SelectTrigger className="w-full border px-2 py-1 rounded">
                     <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent style={{ maxHeight: height, overflowY: "auto" }}>
-                    {years.map((year) => (
+                    {Array.from(
+                        { length: 2023 - 1800 + 1 },
+                        (_, i) => 2023 - i
+                    ).map((year) => (
                         <SelectItem key={year} value={year.toString()}>
                             {year}
                         </SelectItem>

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, CirclePlusIcon, EditIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
@@ -58,6 +58,7 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
     const { store } = useStorage();
     const [song, setSong] = useState<Song | undefined>(undefined);
     const { xorname } = useParams<{ xorname: string }>();
+    const { control } = useForm();
     if (!xorname) {
         return <p>No Song xorname provided.</p>;
     }
@@ -117,7 +118,7 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
                 } else {
                     // set the song with these values - later if the user updates the fields, just those fields should be updated on the song object
                     setSong(foundSong);
-                    console.log("found: ", foundSong);
+                    console.log("setting song: ", foundSong);
                 }
 
                 // set tags from the song if available
@@ -125,16 +126,27 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
                     shouldValidate: true,
                 });
 
-                // set track number from the song if available
-                setValue("trackNumber", foundSong.trackNumber);
-
-                // Populate form fields
-                setValue("title", foundSong.title);
-                setValue("artist", foundSong.artist);
-
-                if (foundSong.picture) {
-                    setValue("picture", foundSong.picture);
-                }
+                setValue("title", foundSong.title, {
+                    shouldValidate: true,
+                });
+                setValue("artist", foundSong.artist ?? undefined, {
+                    shouldValidate: true,
+                });
+                setValue("album", foundSong.album ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("genre", foundSong.genre ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("year", foundSong.year ?? undefined, {
+                    shouldValidate: true,
+                });
+                setValue("trackNumber", foundSong.trackNumber ?? 0, {
+                    shouldValidate: true,
+                });
+                setValue("picture", foundSong.picture ?? undefined, {
+                    shouldValidate: true,
+                });
             } catch (error) {
                 console.error("Failed to load song data:", error);
             }
@@ -156,6 +168,12 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
     };
 
     // end image ----------------------------------------------------------------
+
+    const handleYearChange = async (newYear: number) => {
+        setSong((prevSong) =>
+            prevSong ? { ...prevSong, year: newYear } : undefined
+        );
+    };
 
     // submit handler
     const onSubmit = async (data: editSongFormData) => {
@@ -191,9 +209,6 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
         }
         if (data.tags) {
             updatedSong.tags = data.tags;
-        }
-        if (data.year) {
-            updatedSong.year = data.year;
         }
 
         setSong(updatedSong); // update the state with the modified song
@@ -374,9 +389,8 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
                                         {/* Year */}
                                         <div className="w-full">
                                             <SelectYear
-                                                register={register}
-                                                setValue={setValue}
-                                                height="200px"
+                                                currentYear={song?.year}
+                                                onChange={handleYearChange}
                                             />
                                         </div>
 

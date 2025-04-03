@@ -25,10 +25,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-    base64ToFilePicture,
-    filePictureToBase64,
-} from "@/lib/utils/images";
+import { base64ToFilePicture, filePictureToBase64 } from "@/lib/utils/images";
 import { toast } from "sonner";
 
 interface SingleFilePanelProps {
@@ -93,7 +90,7 @@ export default function SingleFilePanel({
                 setValue("genre", fileDetail.genre ?? "", {
                     shouldValidate: true,
                 });
-                setValue("year", fileDetail.year ?? 1800, {
+                setValue("year", fileDetail.year ?? undefined, {
                     shouldValidate: true,
                 });
                 setValue("trackNumber", fileDetail.trackNumber ?? 0, {
@@ -168,6 +165,13 @@ export default function SingleFilePanel({
         };
 
         return localSongFile;
+    };
+
+    const handleYearChange = async (newYear: number) => {
+        fileDetail.year = newYear;
+        setValue("year", fileDetail.year ?? undefined, {
+            shouldValidate: true,
+        });
     };
 
     const onSubmit = async (data: singleFileUploadData) => {
@@ -418,9 +422,8 @@ export default function SingleFilePanel({
                                         {/* Year */}
                                         <div className="w-full">
                                             <SelectYear
-                                                register={register}
-                                                setValue={setValue}
-                                                height="200px"
+                                                currentYear={fileDetail?.year}
+                                                onChange={handleYearChange}
                                             />
                                         </div>
 

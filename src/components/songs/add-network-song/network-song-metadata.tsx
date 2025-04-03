@@ -61,6 +61,7 @@ export default function NetworkSongMetadataPanel({
     type networkSongFormData = z.infer<typeof editSongSchema>;
 
     const { store } = useStorage();
+    const { control } = useForm();
 
     // this song object will be saved once populated
     const [song, setSong] = useState<Song | undefined>(undefined);
@@ -187,6 +188,12 @@ export default function NetworkSongMetadataPanel({
         } catch (ex) {
             console.error("The save operation could not be completed:", ex);
         }
+    };
+
+    const handleYearChange = async (newYear: number) => {
+        setSong((prevSong) =>
+            prevSong ? { ...prevSong, year: newYear } : undefined
+        );
     };
 
     const handleReturn = async () => {
@@ -354,9 +361,8 @@ export default function NetworkSongMetadataPanel({
                                         {/* Year */}
                                         <div className="w-full">
                                             <SelectYear
-                                                register={register}
-                                                setValue={setValue}
-                                                height="200px"
+                                                currentYear={song?.year}
+                                                onChange={handleYearChange}
                                             />
                                         </div>
 
