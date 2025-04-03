@@ -54,7 +54,13 @@ export default function StatusRow() {
         setHasBalance(false);
         const checkBalance = async () => {
             const balance = await autonomiBalance();
-            setHasBalance(balance !== null && !isNaN(parseFloat(balance)));
+            setHasBalance(
+                balance !== null &&
+                    !isNaN(parseFloat(balance)) &&
+                    balance !== "0" &&
+                    balance !== "0.0" &&
+                    account != null
+            );
         };
         checkBalance();
     }, [account]);
