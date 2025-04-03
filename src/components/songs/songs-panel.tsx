@@ -38,13 +38,11 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
     const [songs, setSongs] = useState<Song[]>([]);
 
     useEffect(() => {
-
         const fetchAllSongs = async () => {
             if (!store) {
                 console.error("Store is not initialized.");
                 return;
             }
-
 
             try {
                 // Fetch all playlists from the store
@@ -78,7 +76,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
     return (
         <div className="w-full">
             {/* Filters */}
-            <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-4 border-l">
+            <div className="w-full sticky top-[3.5rem] bg-background z-10 border-b border-t border-secondary p-4 border-l">
                 <div className="flex items-center space-x-2">
                     <Input
                         type="text"
@@ -109,7 +107,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
             </div>
 
             {/* Song Scroller */}
-            <div className="relative z-0">
+            <div className="relative">
                 <SongScroller
                     songs={songs}
                     filterValue={filterValue}
