@@ -9,6 +9,7 @@ import { useStorage } from "@/providers/storage-provider";
 import { AlertConfirmationModal } from "../alert-confirmation-modal";
 import { toast } from "sonner";
 import Portal from "../portal";
+import { useNavigate } from "react-router-dom";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -25,6 +26,7 @@ const SongScroller = ({
 }: SongScrollerProps) => {
     const { t } = useTranslation();
     const { store } = useStorage();
+    const navigate = useNavigate();
 
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
@@ -140,6 +142,10 @@ const SongScroller = ({
     const handleDeleteClick = (id: string) => {
         setSelectedSongId(id); // Set the song ID
         setDeleteConfirmationModalVisible(true); // Show the modal
+    };
+
+    const handleEditClick = (xorname: string) => {
+        navigate(`/edit-song/${xorname}`);
     };
 
     const handleConfirm = async () => {
@@ -388,9 +394,9 @@ const SongScroller = ({
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    // TODO if song id exists in favorites store show favorited
-                                                    // if song id exists in favorites store this button will remove it
-                                                    // if song id does not exist in favorites store, this button will add it
+                                                    handleEditClick(
+                                                        song.xorname
+                                                    );
                                                 }}
                                                 className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
                                             >
@@ -450,6 +456,7 @@ const SongScroller = ({
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            handleEditClick(song.xorname);
                                         }}
                                         className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
                                     >

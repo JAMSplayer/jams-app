@@ -16,6 +16,7 @@ import CreatePlaylist from "./pages/create-playlist";
 import EditPlaylist from "./pages/edit-playlist";
 import AddNetworkSong from "./pages/add-network-song";
 import Favorites from "./pages/favorites";
+import EditSongPanel from "./components/songs/edit-existing-song";
 
 const AppRoutes = () => {
     return (
@@ -26,6 +27,7 @@ const AppRoutes = () => {
             <Route path="/upload-songs" element={<UploadSongs />} />
             <Route path="/playlists" element={<Playlists />} />
             <Route path="/create-playlist" element={<CreatePlaylist />} />
+            <Route path="/edit-song/:xorname" element={<EditSongPanel />} />
             <Route path="/edit-playlist" element={<EditPlaylist />} />
             <Route path="/favorites" element={<Favorites />} />
             {/* <Route path="*" element={<NotFound />} /> */}
