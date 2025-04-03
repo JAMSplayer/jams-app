@@ -233,7 +233,7 @@ export default function SingleFilePanel({
                 xorname: result.songXorname!,
                 fileName: fileDetail.fileName,
                 extension: fileDetail.extension,
-                downloadFolder: defaultDownloadFolder,
+                downloadFolder: fileDetail.folderPath,
                 ...data,
             };
 
