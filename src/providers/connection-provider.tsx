@@ -15,6 +15,7 @@ import { AccountUser } from "@/types/account-user";
 import { isConnected as checkNetworkConnection } from "@/backend/autonomi";
 import { disconnect } from "@/backend/autonomi";
 import Networks from "@/enums/networks";
+import { useNavigate } from "react-router-dom";
 
 interface ConnectionContextType {
     isConnected: boolean;
@@ -46,6 +47,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     const [isConnected, setIsConnected] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
     const [account, setAccount] = useState<AccountUser | null>(null);
+    const navigate = useNavigate();
 
     const disconnectNetwork = async () => {
         try {
@@ -66,6 +68,7 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
         console.log("Signing out user sign out user...");
         setAccount(null);
         await backendSignOut();
+        navigate("/");
     };
 
     // connect to network
