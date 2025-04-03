@@ -5,7 +5,7 @@ import DisconnectButton from "../disconnect-button";
 
 export function Navbar() {
     return (
-        <header className="sticky top-0 z-10 w-full bg-background">
+        <header className="sticky top-0 z-40 w-full bg-background">
             <div className="mx-4 sm:mx-8 flex h-14 items-center">
                 <div className="flex items-center space-x-4 lg:space-x-0">
                     <SheetMenu />

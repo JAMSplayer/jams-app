@@ -92,10 +92,10 @@ export default function AccountConnect() {
                     )}
 
                     {panelVisible && (
-                        <div className="absolute right-3 mt-4 w-73 origin-top-right rounded-lg bg-card shadow-large border">
+                        <div className="absolute right-3 mt-4 w-73 origin-top-right rounded-lg bg-card shadow-large border ">
                             {account && <SignedInPanel account={account} />}
 
-                            <div className="p-3 flex justify-center">
+                            <div className="p-3 flex justify-center z-20">
                                 <div
                                     className="flex cursor-pointer items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:bg-secondary w-full"
                                     onClick={() => signOut()}
