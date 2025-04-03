@@ -13,8 +13,12 @@ import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../../tag-input";
 import { LocalFileDetail } from "@/types/local-file-detail";
+import { FilePicture } from "@/types/file-picture";
+import { v4 as uuidv4 } from "uuid";
 import { useStorage } from "@/providers/storage-provider";
+import { Song } from "@/types/songs/song";
 import { uploadSong } from "@/backend/uploading";
+import { useNavigate } from "react-router-dom";
 import { generateLocation } from "@/lib/utils/location";
 import {
     Form,
@@ -25,11 +29,15 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { NetworkFileDetail } from "@/types/network-file-detail";
 import {
     base64ToFilePicture,
+    base64ToImageFile,
     filePictureToBase64,
+    readToArray,
 } from "@/lib/utils/images";
 import { toast } from "sonner";
+import { PlaylistSelectionModal } from "@/components/ui/playlist-selection-modal";
 
 interface SingleFilePanelProps {
     onBack: () => void;
@@ -62,14 +70,24 @@ export default function SingleFilePanel({
         handleSubmit,
         setValue,
         getValues,
-        formState: { isValid },
+        formState: { errors, isValid },
     } = localSongForm;
 
     type singleFileUploadData = z.infer<typeof singleFileUploadSchema>;
     const { t } = useTranslation();
     const { store } = useStorage();
+    const navigate = useNavigate();
 
     const [isUploading, setIsUploading] = useState<boolean>(false);
+
+    // this song object will be saved to playlist once song is uploaded
+    const [song, setSong] = useState<Song | undefined>(undefined);
+
+    // this playlist selector modal will show when the user clicks save. It allow the user to decide what playlist to place the song.
+    const [
+        isPlaylistSelectionModalVisible,
+        setIsPlaylistSelectionModalVisible,
+    ] = useState(false);
 
     // Load song metadata and populate form fields and songs ----------------------------------------------------------------
 
@@ -208,6 +226,19 @@ export default function SingleFilePanel({
             }
 
             console.log("Result of upload: ", result);
+
+            const localSongToSave: Song = {
+                id: uuidv4(),
+                dateCreated: new Date(),
+                xorname: result.songXorname!,
+                fileName: fileDetail.fileName,
+                extension: fileDetail.extension,
+                downloadFolder: fileDetail.folderPath,
+                ...data,
+            };
+
+            setSong(localSongToSave);
+            setIsPlaylistSelectionModalVisible(true);
         } catch (ex) {
             console.log("The song could not be uploaded: ", ex);
         } finally {
@@ -217,8 +248,25 @@ export default function SingleFilePanel({
 
     return (
         <div>
+            {isPlaylistSelectionModalVisible && song && (
+                <PlaylistSelectionModal
+                    onConfirm={(playlistId) => {
+                        console.log(
+                            "Song added to playlist with ID:",
+                            playlistId
+                        );
+                        setIsPlaylistSelectionModalVisible(false); // close modal after confirming
+                        onBack();
+                    }}
+                    onCancel={() => {
+                        setIsPlaylistSelectionModalVisible(false);
+                        onBack();
+                    }} // close modal on cancel
+                    song={song}
+                />
+            )}
             {/* Header */}
-            <div className="w-full sticky top-[3.5rem] bg-background z-50 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
+            <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                     {/* Back Button */}
                     <Button variant={"ghost"} onClick={onBack}>
