@@ -5,44 +5,39 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 function SelectYear({
-    setValue,
+    currentYear,
+    onChange,
     height = "auto",
 }: {
-    register: any;
-    setValue: any;
+    currentYear?: number;
+    onChange: (year: number | undefined) => void;
     height?: string;
 }) {
-    const { t } = useTranslation();
-    const [years, setYears] = useState<number[]>([]);
-
-    useEffect(() => {
-        const currentYear = new Date().getFullYear();
-        const yearList = [];
-        for (let year = currentYear; year >= 1800; year--) {
-            yearList.push(year);
-        }
-        setYears(yearList);
-    }, []);
-
+    const currentYearValue = new Date().getFullYear();
     return (
         <div>
-            <label className="block text-sm font-medium mb-3">
-                {t("year")}
-            </label>
+            <label className="block text-sm font-medium mb-3">Year</label>
             <Select
-                onValueChange={(value) =>
-                    setValue("year", value ? parseInt(value, 10) : undefined)
-                }
+                value={currentYear ? currentYear.toString() : "no-year"}
+                onValueChange={(selectedYear) => {
+                    const year =
+                        selectedYear === "no-year"
+                            ? undefined
+                            : parseInt(selectedYear, 10);
+                    onChange(year); // pass the year or undefined up to parent
+                }}
             >
                 <SelectTrigger className="w-full border px-2 py-1 rounded">
                     <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent style={{ maxHeight: height, overflowY: "auto" }}>
-                    {years.map((year) => (
+                    <SelectItem value="no-year">No Year</SelectItem>
+                    {Array.from(
+                        { length: currentYearValue - 1800 + 1 },
+                        (_, i) => currentYearValue - i
+                    ).map((year) => (
                         <SelectItem key={year} value={year.toString()}>
                             {year}
                         </SelectItem>
