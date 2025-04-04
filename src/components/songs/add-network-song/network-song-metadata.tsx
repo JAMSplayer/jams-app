@@ -363,6 +363,7 @@ export default function NetworkSongMetadataPanel({
                                             <SelectYear
                                                 currentYear={song?.year}
                                                 onChange={handleYearChange}
+                                                height="200px"
                                             />
                                         </div>
 

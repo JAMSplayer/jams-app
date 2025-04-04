@@ -391,6 +391,7 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
                                             <SelectYear
                                                 currentYear={song?.year}
                                                 onChange={handleYearChange}
+                                                height="200px"
                                             />
                                         </div>
 

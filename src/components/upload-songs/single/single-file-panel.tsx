@@ -475,6 +475,7 @@ export default function SingleFilePanel({
                                             <SelectYear
                                                 currentYear={fileDetail?.year}
                                                 onChange={handleYearChange}
+                                                height="200px"
                                             />
                                         </div>
 
