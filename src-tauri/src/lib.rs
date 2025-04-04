@@ -546,7 +546,10 @@ impl FileMetadata {
 
         let year = tagged_file
             .primary_tag()
-            .and_then(|tag| tag.get_string(&ItemKey::Year))
+            .and_then(|tag| {
+            	tag.get_string(&ItemKey::RecordingDate)
+            		.or(tag.get_string(&ItemKey::Year))
+			})
             .and_then(|s| s.parse::<u32>().ok())
             .map(|value| truncate_number(value, MAX_YEAR_LENGTH)); // Truncate if needed
 
@@ -659,7 +662,10 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
     song_file
         .genre
         .inspect(|genre| new_tag.set_genre(genre.clone()));
-    song_file.year.inspect(|year| new_tag.set_year(*year));
+    song_file.year.inspect(|year| {
+    	new_tag.set_year(*year);
+    	new_tag.insert_text(ItemKey::RecordingDate, year.to_string());
+	});
     song_file
         .track_number
         .inspect(|track_number| new_tag.set_track(*track_number));
