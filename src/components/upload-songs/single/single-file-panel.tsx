@@ -188,7 +188,7 @@ export default function SingleFilePanel({
         return localSongFile;
     };
 
-    const handleYearChange = async (newYear: number) => {
+    const handleYearChange = async (newYear: number | undefined) => {
         fileDetail.year = newYear;
         setValue("year", fileDetail.year ?? undefined, {
             shouldValidate: true,

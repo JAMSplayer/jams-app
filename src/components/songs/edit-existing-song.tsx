@@ -169,7 +169,7 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
 
     // end image ----------------------------------------------------------------
 
-    const handleYearChange = async (newYear: number) => {
+    const handleYearChange = async (newYear: number | undefined) => {
         setSong((prevSong) =>
             prevSong ? { ...prevSong, year: newYear } : undefined
         );
