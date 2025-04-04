@@ -13,9 +13,9 @@ export const editSongSchema = z.object({
         .max(100, "Artist cannot exceed 100 characters")
         .optional(),
     picture: z.string().optional(),
-    album: z.any().optional(),
-    genre: z.any().optional(),
-    year: z.any().optional(),
+    album: z.string().optional(),
+    genre: z.string().optional(),
+    year: z.number().optional(),
     trackNumber: z
         .preprocess((val) => {
             const parsed = typeof val === "string" ? parseInt(val, 10) : val;

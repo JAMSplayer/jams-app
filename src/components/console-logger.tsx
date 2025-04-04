@@ -15,7 +15,7 @@ export default function ConsoleLogger() {
         <div className="p-3 bg-black text-green-400 font-mono text-sm h-64 overflow-y-auto">
             <button
                 onClick={clearLogs}
-                className="bg-red-500 text-white px-3 py-1 mb-2 rounded"
+                className="bg-red-500 text-white px-3 py-1 mb-2 rounded fixed right-8"
             >
                 Clear Logs
             </button>

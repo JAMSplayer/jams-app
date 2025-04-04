@@ -3,8 +3,6 @@ import { SongLoadButton } from "./player/song-load-button";
 import { Button } from "./ui/button";
 import { logLevel } from "@/backend/autonomi";
 import { registeredAccounts } from "@/backend/logic";
-import { resolveResource } from "@tauri-apps/api/path";
-import { extractFromFullPath } from "@/lib/utils/location";
 import { useStorage } from "@/providers/storage-provider";
 import { useEffect, useState } from "react";
 import { Playlist } from "@/types/playlists/playlist";
@@ -38,20 +36,29 @@ export default function Dashboard() {
             <div className="flex flex-row">
                 <SongLoadButton
                     song={async () => {
-                        const pathData = extractFromFullPath(
-                            await resolveResource(
-                                "resources/A_Lazy_Farmer_Boy_by_Buster_Carter_And_Preston_Young.mp3"
-                            )
-                        );
-                        console.log("pathData: ", pathData);
-                        const { fileName, extension, folderPath } = pathData;
+                        if (!store) {
+                            throw new Error("Store is not initialized.");
+                        }
+
+                        const defaultDownloadFolder = await store.get<{
+                            value: string;
+                        }>("download-folder");
+
+                        if (
+                            !defaultDownloadFolder ||
+                            !defaultDownloadFolder.value
+                        ) {
+                            throw new Error(
+                                "No default download folder found."
+                            );
+                        }
 
                         return {
                             id: "123",
                             xorname: "124",
-                            downloadFolder: folderPath,
-                            fileName,
-                            extension,
+                            downloadFolder: defaultDownloadFolder.value,
+                            fileName: "wow",
+                            extension: "mp3",
                             title: "BegBlag",
                             artist: "BegBlag",
                             dateCreated: new Date(),

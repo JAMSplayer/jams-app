@@ -1,7 +1,6 @@
 use futures::lock::Mutex;
 use lofty::config::{ParseOptions, WriteOptions};
-use lofty::file::FileType;
-use lofty::file::{AudioFile, TaggedFile};
+use lofty::file::{AudioFile, FileType, TaggedFile};
 use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
@@ -13,6 +12,8 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 mod frontend;
 mod secure_sk;
+
+#[cfg(target_os = "linux")]
 mod server;
 
 use frontend::*;
@@ -544,7 +545,10 @@ impl FileMetadata {
 
         let year = tagged_file
             .primary_tag()
-            .and_then(|tag| tag.get_string(&ItemKey::Year))
+            .and_then(|tag| {
+                tag.get_string(&ItemKey::RecordingDate)
+                    .or(tag.get_string(&ItemKey::Year))
+            })
             .and_then(|s| s.parse::<u32>().ok())
             .map(|value| truncate_number(value, MAX_YEAR_LENGTH)); // Truncate if needed
 
@@ -657,7 +661,10 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
     song_file
         .genre
         .inspect(|genre| new_tag.set_genre(genre.clone()));
-    song_file.year.inspect(|year| new_tag.set_year(*year));
+    song_file.year.inspect(|year| {
+        new_tag.set_year(*year);
+        new_tag.insert_text(ItemKey::RecordingDate, year.to_string());
+    });
     song_file
         .track_number
         .inspect(|track_number| new_tag.set_track(*track_number));
@@ -822,6 +829,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_os::init())
         .manage(Mutex::new(Session::new()))
         .invoke_handler(tauri::generate_handler![
             list_accounts,

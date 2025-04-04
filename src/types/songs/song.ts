@@ -3,6 +3,8 @@ export type Song = {
     xorname: string;
     title: string;
     artist?: string;
+    album?: string;
+    genre?: string;
     dateCreated: Date;
     dateUpdated?: Date;
     fileName: string;
@@ -11,4 +13,5 @@ export type Song = {
     tags?: string[];
     picture?: string;
     trackNumber?: number;
+    year?: number;
 };

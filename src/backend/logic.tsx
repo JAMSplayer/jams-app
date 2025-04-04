@@ -22,8 +22,8 @@ import {
 } from "@/backend/backend-store";
 import Networks from "@/enums/networks";
 import { isEthereumAddress } from "@/lib/utils/address";
-import { filePictureToDataURL } from "@/lib/utils/images";
 import { NetworkFileDetail } from "@/types/network-file-detail";
+import { filePictureToDataURL } from "@/lib/utils/images";
 
 // =======
 // This file contains higher-level backend code with some application logic, and can use frontend types.
@@ -240,15 +240,20 @@ export async function download(
         )) as NetworkFileDetail;
 
         console.log("download response:", response);
-        
+
         // ensure response is correctly structured
         if (!response || typeof response !== "object") {
             console.error("Invalid response received from download function.");
             return null;
         }
 
-        const pictureProp = Object.getOwnPropertyDescriptor(response, "picture");
-        const pictureUrl: string | null = pictureProp ? filePictureToDataURL(pictureProp.value) : null;
+        const pictureProp = Object.getOwnPropertyDescriptor(
+            response,
+            "picture"
+        );
+        const pictureUrl: string | null = pictureProp
+            ? filePictureToDataURL(pictureProp.value)
+            : null;
 
         const fileDetail: NetworkFileDetail = {
             ...response,

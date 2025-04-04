@@ -21,6 +21,21 @@ export async function fetchMetadata(
     }
 }
 
+export async function fetchLocalMetadata(
+    filePaths: string[]
+): Promise<LocalFileDetail[]> {
+    try {
+        // Fetch metadata for all files
+        const metadata: LocalFileDetail[] = await invoke("get_file_metadata", {
+            filePaths,
+        });
+        return metadata;
+    } catch (error) {
+        console.error("Failed to fetch metadata for files:", filePaths, error);
+        return []; // Return an empty array to avoid breaking the flow
+    }
+}
+
 export async function saveMetadata(file: LocalFileDetail): Promise<void> {
     // throw on error
     await invoke("save_file_metadata", { songFile: file });

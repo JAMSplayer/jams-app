@@ -772,9 +772,9 @@ dependencies = [
 
 [[package]]
 name = "ant-bootstrap"
-version = "0.1.6"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "668cbc0227eca1bc83ff40b4acf19b0b71e0e7d28491da410a6501f58a002347"
+checksum = "c8e657207232c1dc36a4d3f2a4f550e0305cca9b2c264f3aafb15051dc031bcb"
 dependencies = [
  "ant-logging",
  "ant-protocol",
@@ -795,9 +795,9 @@ dependencies = [
 
 [[package]]
 name = "ant-build-info"
-version = "0.1.25"
+version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9aa6c61776d7c7530b5e17e0b86ce93e0b58cb4e126795ecfb62d15ec0cbf2c0"
+checksum = "e7eabcdd54b85f4a6ef5180eeb103be8209fffad39081642663418e9937e810c"
 dependencies = [
  "chrono",
  "tracing",
@@ -806,9 +806,9 @@ dependencies = [
 
 [[package]]
 name = "ant-evm"
-version = "0.1.10"
+version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d662ad327aeac4bf46815b959a3395221448cb127fd544a84cb83eb2db3138e"
+checksum = "31057cdfc9e35640d5f639f3271d027c714cc03a9a59cf96f973867c4b74721b"
 dependencies = [
  "custom_debug",
  "evmlib",
@@ -829,9 +829,9 @@ dependencies = [
 
 [[package]]
 name = "ant-logging"
-version = "0.2.47"
+version = "0.2.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "578ee538351487a231a15f70d014976e4931db6d6b9806ae997efa321a014854"
+checksum = "3d6d0b1da19bc866959890e3e7529950b09efc6e9eeb408c326af238833436dc"
 dependencies = [
  "chrono",
  "dirs-next",
@@ -847,9 +847,9 @@ dependencies = [
 
 [[package]]
 name = "ant-networking"
-version = "0.3.6"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66e5c0f139b65890ea16831038693bd9132fd07c9732d412f3a81b341aecd30d"
+checksum = "e648a52e239e836b6a7cc69c3a6e9968381c4ded98fef7bc22f8b58480cc6a5c"
 dependencies = [
  "aes-gcm-siv",
  "ant-bootstrap",
@@ -882,9 +882,9 @@ dependencies = [
 
 [[package]]
 name = "ant-protocol"
-version = "1.0.1"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "814ecc9a771e6c0eb8ad160bc274d5a3e178848f3062dd6f73304a903d4b8e28"
+checksum = "446aa39e22121d86bd8522f8154460e8137e458e5dc76d369a173e2f5b16c45d"
 dependencies = [
  "ant-build-info",
  "ant-evm",
@@ -1351,9 +1351,9 @@ checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 
 [[package]]
 name = "autonomi"
-version = "0.4.0"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "809d3a3d7c53356477fee101bdb9e6ad45d84efbddc0abb4058306d9d7c6a2b2"
+checksum = "c23de5febb61e57e46b6923c1f3ea4b06b9872c12f88d6ade9c31e0574c3876b"
 dependencies = [
  "ant-bootstrap",
  "ant-evm",
@@ -2938,9 +2938,9 @@ dependencies = [
 
 [[package]]
 name = "evmlib"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fbd18a5e198bdacfe3c71d2787b5ac50661323a03ab923d03cc354452944057"
+checksum = "7e2d49e242eed3c3549a14925cc5be67e37ee4f90b7e0617bf06cbf870a5a6aa"
 dependencies = [
  "alloy",
  "dirs-next",
@@ -3461,6 +3461,16 @@ checksum = "0176e0459c2e4a1fe232f984bca6890e681076abb9934f6cea7c326f3fc47818"
 dependencies = [
  "libc",
  "windows-targets 0.48.5",
+]
+
+[[package]]
+name = "gethostname"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fd4b8790c0792e3b11895efdf5f289ebe8b59107a6624f1cce68f24ff8c7035"
+dependencies = [
+ "rustix",
+ "windows-targets 0.52.6",
 ]
 
 [[package]]
@@ -4576,12 +4586,14 @@ dependencies = [
  "safe",
  "serde",
  "serde_json",
+ "serde_urlencoded",
  "sqlx",
  "tauri",
  "tauri-build",
  "tauri-plugin-clipboard-manager",
  "tauri-plugin-dialog",
  "tauri-plugin-fs",
+ "tauri-plugin-os",
  "tauri-plugin-shell",
  "tauri-plugin-sql",
  "tauri-plugin-store",
@@ -5890,7 +5902,7 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
- "proc-macro-crate 3.2.0",
+ "proc-macro-crate 2.0.0",
  "proc-macro2",
  "quote",
  "syn 2.0.99",
@@ -6236,6 +6248,17 @@ checksum = "9aa2b01e1d916879f73a53d01d1d6cee68adbb31d6d9177a8cfce093cced1d50"
 dependencies = [
  "futures-core",
  "pin-project-lite",
+]
+
+[[package]]
+name = "os_info"
+version = "3.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a604e53c24761286860eba4e2c8b23a0161526476b1de520139d69cdb85a6b5"
+dependencies = [
+ "log",
+ "serde",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -7716,8 +7739,8 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "safe"
-version = "0.2.2"
-source = "git+ssh://git@github.com/JAMSplayer/safe.git#f4f16902d8e8134ad11c1a9e73447c4225dbeee5"
+version = "0.2.4"
+source = "git+ssh://git@github.com/JAMSplayer/safe.git#6a7038ba187f00546761ede90790d2c9aff182d7"
 dependencies = [
  "alloy-primitives",
  "ant-logging",
@@ -8644,6 +8667,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sys-locale"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8eab9a99a024a169fe8a903cf9d4a3b3601109bcc13bd9e3c6fff259138626c4"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "system-configuration"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8930,6 +8962,24 @@ dependencies = [
  "toml",
  "url",
  "uuid",
+]
+
+[[package]]
+name = "tauri-plugin-os"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "424f19432397850c2ddd42aa58078630c15287bbce3866eb1d90e7dbee680637"
+dependencies = [
+ "gethostname 1.0.0",
+ "log",
+ "os_info",
+ "serde",
+ "serde_json",
+ "serialize-to-javascript",
+ "sys-locale",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -10888,7 +10938,7 @@ version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d91ffca73ee7f68ce055750bf9f6eca0780b8c85eff9bc046a3b0da41755e12"
 dependencies = [
- "gethostname",
+ "gethostname 0.4.3",
  "rustix",
  "x11rb-protocol",
 ]

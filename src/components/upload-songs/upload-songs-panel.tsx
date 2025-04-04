@@ -3,10 +3,9 @@ import Dropzone from "../dropzone";
 import { stat } from "@tauri-apps/plugin-fs";
 import SingleFilePanel from "./single/single-file-panel";
 import MultipleFilePanel from "./multiple/multiple-file-panel";
-import { fetchMetadata } from "@/backend/metadata";
+import { fetchLocalMetadata } from "@/backend/metadata";
 import { LocalFileDetail } from "@/types/local-file-detail";
 import { extractFromFullPath } from "@/lib/utils/location";
-import { base64ToFilePicture } from "@/lib/utils/images";
 import { useStorage } from "@/providers/storage-provider";
 
 export default function UploadSongsPanel() {
@@ -45,9 +44,9 @@ export default function UploadSongsPanel() {
                     return;
                 }
 
-                const defaultDownloadFolder = await store.get<{ value: string }>(
-                    "download-folder"
-                );
+                const defaultDownloadFolder = await store.get<{
+                    value: string;
+                }>("download-folder");
                 if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
                     console.error("No default download folder found.");
                     return;
@@ -86,7 +85,7 @@ export default function UploadSongsPanel() {
             const information = await stat(filePath);
 
             // fetch metadata for the file
-            const metadata = await fetchMetadata([filePath]);
+            const metadata = await fetchLocalMetadata([filePath]);
 
             // check if metadata is available
             const meta = metadata.length > 0 ? metadata[0] : null;
@@ -114,9 +113,7 @@ export default function UploadSongsPanel() {
                 duration: meta.duration,
                 channels: meta.channels,
                 sampleRate: meta.sampleRate,
-                picture: meta.picture
-                    ? base64ToFilePicture(meta.picture)
-                    : undefined,
+                picture: meta.picture,
             };
         } catch (error) {
             console.error(
