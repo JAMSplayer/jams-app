@@ -123,7 +123,7 @@ export const PlaylistSelectionModal: React.FC<PlaylistSelectionModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm m-4">
                 {/* Title */}
                 <h2 className="text-xl font-semibold mb-4">Add to Playlist</h2>
@@ -183,7 +183,7 @@ export const PlaylistSelectionModal: React.FC<PlaylistSelectionModalProps> = ({
                         disabled={!selectedPlaylistId} // Disable if no playlist is selected
                         className={`px-4 py-2 rounded transition ${
                             selectedPlaylistId
-                                ? "bg-blue-600 text-white hover:bg-blue-700"
+                                ? ""
                                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
                         }`}
                     >
