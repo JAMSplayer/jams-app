@@ -39,7 +39,6 @@ export const PlaylistSelectionModal: React.FC<PlaylistSelectionModalProps> = ({
                 const storedPlaylists: Playlist[] =
                     (await store.get("playlists")) || [];
                 setPlaylists(storedPlaylists);
-                setFilteredPlaylists(storedPlaylists);
             } catch (error) {
                 console.error("Failed to fetch playlists:", error);
             }

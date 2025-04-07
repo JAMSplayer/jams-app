@@ -37,7 +37,9 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({
 
             if (!downloadFolder || !downloadFolder.value) {
                 const defaultDownloadFolder = await downloadDir();
-                await activeStore.set("download-folder", defaultDownloadFolder);
+                await activeStore.set("download-folder", {
+                    value: defaultDownloadFolder,
+                });
             }
 
             // 2. ensure at least one playlist exists
