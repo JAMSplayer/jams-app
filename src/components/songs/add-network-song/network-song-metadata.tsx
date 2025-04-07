@@ -25,6 +25,7 @@ import { NetworkFileDetail } from "@/types/network-file-detail";
 import { Playlist } from "@/types/playlists/playlist";
 import { toast } from "sonner";
 import { isIDUnique } from "@/lib/utils/validation";
+import { usePlayerStore } from "@/store/player-store";
 
 interface NetworkSongMetadataPanelProps {
     fileDetail: NetworkFileDetail | null;
@@ -62,6 +63,8 @@ export default function NetworkSongMetadataPanel({
 
     const { store } = useStorage();
     const { control } = useForm();
+
+    const { isPlayerVisible } = usePlayerStore();
 
     // this song object will be saved once populated
     const [song, setSong] = useState<Song | undefined>(undefined);
@@ -201,7 +204,7 @@ export default function NetworkSongMetadataPanel({
     };
 
     return (
-        <div className="pb-16">
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"}`}>
             {isPlaylistSelectionModalVisible && song && (
                 <PlaylistSelectionModal
                     onConfirm={(playlistId) => {

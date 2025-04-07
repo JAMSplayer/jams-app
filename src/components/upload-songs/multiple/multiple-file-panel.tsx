@@ -11,6 +11,7 @@ import { useState } from "react";
 import { formatBytes } from "@/lib/utils/formatting";
 import { useTranslation } from "react-i18next";
 import { LocalFileDetail } from "@/types/local-file-detail";
+import { usePlayerStore } from "@/store/player-store";
 
 interface MultipleFilePanelProps {
     onBack: () => void;
@@ -22,6 +23,7 @@ export default function MultipleFilePanel({
     fileDetails,
 }: MultipleFilePanelProps) {
     const { t } = useTranslation();
+    const { isPlayerVisible } = usePlayerStore();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [minimizedStates, setMinimizedStates] = useState(
         fileDetails.map(() => false) // Initialize all as not minimized
@@ -51,7 +53,7 @@ export default function MultipleFilePanel({
     const isMinimized = minimizedStates[currentIndex];
 
     return (
-        <div>
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"}`}>
             {/* Header */}
             <div className="w-full sticky top-[3.5rem] bg-background z-50 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
@@ -82,7 +84,7 @@ export default function MultipleFilePanel({
                         </Button>
                     </div>
                 )}
-                <Button size={"sm"} className="mr-3">
+                <Button disabled size={"sm"} className="mr-3">
                     {t("uploadAll")} <UploadIcon />
                 </Button>
             </div>

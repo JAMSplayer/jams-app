@@ -23,6 +23,7 @@ import { Input } from "../ui/input";
 import SelectYear from "../select-year";
 import { Playlist } from "@/types/playlists/playlist";
 import { toast } from "sonner";
+import { usePlayerStore } from "@/store/player-store";
 
 interface EditSongPanelProps {
     onReturn?: () => void;
@@ -59,6 +60,8 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
     const [song, setSong] = useState<Song | undefined>(undefined);
     const { xorname } = useParams<{ xorname: string }>();
     const { control } = useForm();
+    const { isPlayerVisible } = usePlayerStore();
+
     if (!xorname) {
         return <p>No Song xorname provided.</p>;
     }
@@ -252,7 +255,7 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
     };
 
     return (
-        <div className="pb-16">
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"}`}>
             {/* Header */}
             <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
