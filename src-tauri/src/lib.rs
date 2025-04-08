@@ -5,13 +5,12 @@ use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
 use lofty::tag::{Accessor, Tag, TagExt};
-use safe::{registers::XorNameBuilder, Multiaddr, Safe, SecretKey, XorName};
+use safe_api::{Safe, XorNameBuilder, Multiaddr, SecretKey, XorName};
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Cursor, path::PathBuf};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 mod frontend;
-mod secure_sk;
 
 #[cfg(target_os = "linux")]
 mod server;
@@ -55,8 +54,8 @@ impl From<tauri::Error> for Error {
     }
 }
 
-impl From<safe::Error> for Error {
-    fn from(safe_error: safe::Error) -> Self {
+impl From<safe_api::Error> for Error {
+    fn from(safe_error: safe_api::Error) -> Self {
         Self::Common(format!("Safe: {}", safe_error))
     }
 }
@@ -106,7 +105,7 @@ fn load_create_import_key(
 
         let bytes = fs::read(&sk_file).map_err(|_| Error::Common(not_readable_msg.clone()))?;
 
-        secure_sk::decrypt_eth(&bytes, &password)?
+        Safe::decrypt_eth(&bytes, &password)?
     } else {
         if !register {
             return Err(Error::BadLogin);
@@ -114,7 +113,7 @@ fn load_create_import_key(
 
         let pk = eth_pk.unwrap_or(SecretKey::random().to_hex()); // bls secret key can be used as eth privkey
 
-        let file_bytes = secure_sk::encrypt_eth(pk.clone(), &password)?;
+        let file_bytes = Safe::encrypt_eth(pk.clone(), &password)?;
         fs::create_dir_all(sk_dir.clone()).map_err(|_| {
             Error::Common(format!("Could not create user dir: {}", &sk_dir.display()))
         })?;
@@ -235,7 +234,7 @@ async fn sign_in(
     println!("register: {:?}", register);
 
     let pk = load_create_import_key(&app_root, login.clone(), password, eth_pk_import, register)?;
-    println!("\n\nEth Private Key: {}", pk);
+    println!("\n\nEth Private Key: {:.4}(...)", pk);
 
     app.try_state::<Mutex<Option<Safe>>>()
         .ok_or(Error::NotConnected)?

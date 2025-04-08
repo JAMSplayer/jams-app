@@ -21,9 +21,6 @@ serde_json = "1"
 serde = { version = "1", features = ["derive"] }
 futures = "*"
 hex = "*"
-argon2 = "0.5"
-password-hash = "0.5"
-aes-gcm = "*"
 warp = "*"
 serde_urlencoded = "*"
 tauri = { version = "2.2", features = ["protocol-asset"] }
@@ -41,7 +38,7 @@ lofty = "0.22"
 image = "0.25"
 # needs to have Git command installed and be able to authenticate the GitHub repository
 # configuration in .cargo/config.toml
-safe = { version = "0.2.4", git = "ssh://git@github.com/JAMSplayer/safe.git" }
+safe_api = { version = "0.3.0", git = "ssh://git@github.com/JAMSplayer/safe.git" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 warp = "*"
