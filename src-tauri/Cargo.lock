@@ -4575,15 +4575,12 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 name = "jams-desktop"
 version = "0.1.1"
 dependencies = [
- "aes-gcm",
- "argon2",
  "futures",
  "hex",
  "image",
  "lazy_static",
  "lofty",
- "password-hash",
- "safe",
+ "safe_api",
  "serde",
  "serde_json",
  "serde_urlencoded",
@@ -7738,20 +7735,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
-name = "safe"
-version = "0.2.4"
-source = "git+ssh://git@github.com/JAMSplayer/safe.git#6a7038ba187f00546761ede90790d2c9aff182d7"
+name = "safe_api"
+version = "0.3.0"
 dependencies = [
+ "aes-gcm",
  "alloy-primitives",
  "ant-logging",
  "ant-protocol",
+ "argon2",
  "autonomi",
  "blsttc",
  "bytes",
  "evmlib",
  "libp2p",
+ "password-hash",
  "rand 0.8.5",
  "rmp-serde",
+ "serde",
+ "serde_json",
  "tokio",
  "tracing",
  "xor_name",
