@@ -4,11 +4,32 @@ import { Button } from "./ui/button";
 import { logLevel } from "@/backend/autonomi";
 import { registeredAccounts } from "@/backend/logic";
 import { useStorage } from "@/providers/storage-provider";
+import { useEffect, useState } from "react";
+import { Playlist } from "@/types/playlists/playlist";
 
 export default function Dashboard() {
     const { isConnected, account } = useConnection();
-
     const { store } = useStorage();
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+
+    if (!store) {
+        console.error("Store is not initialized.");
+        return;
+    }
+
+    useEffect(() => {
+        const fetchPlaylists = async () => {
+            try {
+                const result = await store.get<Playlist[]>("playlists");
+                setPlaylists(result || []);
+            } catch (error) {
+                console.error("Failed to fetch playlists:", error);
+                setPlaylists([]);
+            }
+        };
+
+        fetchPlaylists();
+    }, [store]);
 
     return (
         <div className="p-4 space-y-2">
@@ -80,6 +101,16 @@ export default function Dashboard() {
                 >
                     {" "}
                     log: TRACE{" "}
+                </Button>
+            </div>
+            <div>
+                <Button
+                    onClick={async () => {
+                        console.log("playlists amount: ", playlists.length);
+                    }}
+                >
+                    {" "}
+                    Playlists{" "}
                 </Button>
             </div>
             <div className="flex flex-col">

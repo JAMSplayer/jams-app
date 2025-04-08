@@ -1,7 +1,6 @@
 use futures::lock::Mutex;
 use lofty::config::{ParseOptions, WriteOptions};
-use lofty::file::FileType;
-use lofty::file::{AudioFile, TaggedFile};
+use lofty::file::{AudioFile, FileType, TaggedFile};
 use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
@@ -547,9 +546,9 @@ impl FileMetadata {
         let year = tagged_file
             .primary_tag()
             .and_then(|tag| {
-            	tag.get_string(&ItemKey::RecordingDate)
-            		.or(tag.get_string(&ItemKey::Year))
-			})
+                tag.get_string(&ItemKey::RecordingDate)
+                    .or(tag.get_string(&ItemKey::Year))
+            })
             .and_then(|s| s.parse::<u32>().ok())
             .map(|value| truncate_number(value, MAX_YEAR_LENGTH)); // Truncate if needed
 
@@ -663,9 +662,9 @@ async fn save_file_metadata(song_file: FileMetadata, app: AppHandle) -> Result<(
         .genre
         .inspect(|genre| new_tag.set_genre(genre.clone()));
     song_file.year.inspect(|year| {
-    	new_tag.set_year(*year);
-    	new_tag.insert_text(ItemKey::RecordingDate, year.to_string());
-	});
+        new_tag.set_year(*year);
+        new_tag.insert_text(ItemKey::RecordingDate, year.to_string());
+    });
     song_file
         .track_number
         .inspect(|track_number| new_tag.set_track(*track_number));
@@ -759,10 +758,7 @@ async fn download(
             songname_parts.push(title.replace(|c: char| !c.is_ascii_alphanumeric(), "_"))
         });
 
-        let mut songname = songname_parts.join(" - ");
-        if songname.is_empty() && filename_meta.xorname.is_some() {
-        	songname = hex::encode(filename_meta.xorname.clone().expect("xorname should not be empty"));
-        }
+        let songname = songname_parts.join(" - ");
         let extension = String::from(match tagged_file.file_type() {
             FileType::Aac => "aac",
             FileType::Ape => "ape",
@@ -859,8 +855,7 @@ pub fn run() {
             put_data,
         ])
         .setup(|app| {
-            #[cfg(target_os = "linux")]
-            server::run(app.handle().clone());
+            //            server::run(app.handle().clone()); // temporarily disable local server, because streaming from network is not implemented.
             Ok(())
         })
         .run(tauri::generate_context!())

@@ -95,6 +95,12 @@ export function Slider(
     let currentTime = parseTime(state.getThumbValue(0));
     let totalTime = parseTime(state.getThumbMaxValue(0));
 
+    function formatClockTime([h, m, s]: number[]) {
+        const mm = String(h * 60 + m).padStart(2, "0");
+        const ss = String(s).padStart(2, "0");
+        return `${mm}:${ss}`;
+    }
+
     return (
         <div
             {...groupProps}
@@ -157,7 +163,7 @@ export function Slider(
                             : "text-primary"
                     )}
                 >
-                    {formatTime(currentTime, totalTime)}
+                    {formatClockTime(currentTime)}
                 </output>
                 <span
                     className="text-sm leading-6 text-primary"
@@ -171,7 +177,7 @@ export function Slider(
                         state.getThumbMaxValue(0) === 0 && "opacity-0"
                     )}
                 >
-                    {formatTime(totalTime)}
+                    {formatClockTime(totalTime)}
                 </span>
             </div>
         </div>
