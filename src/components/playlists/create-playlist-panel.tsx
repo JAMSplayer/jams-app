@@ -18,6 +18,7 @@ import { ArrowLeftRightIcon } from "lucide-react";
 import { Song } from "@/types/songs/song";
 import { ScrollArea } from "../ui/scroll-area";
 import { useNavigate } from "react-router-dom";
+import { usePlayerStore } from "@/store/player-store";
 
 type FormSchema = z.infer<typeof createPlaylistSchema>;
 
@@ -39,6 +40,7 @@ export default function CreatePlaylistPanel() {
 
     const { store } = useStorage();
     const navigate = useNavigate();
+    const { isPlayerVisible } = usePlayerStore();
 
     // add songs ----------------------------------------------------------------
 
@@ -293,7 +295,7 @@ export default function CreatePlaylistPanel() {
     };
 
     return (
-        <div className="pb-16">
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"}`}>
             {/* Create Playlist Card */}
             <div className="p-4">
                 <div
