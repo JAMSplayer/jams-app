@@ -20,16 +20,6 @@ function parseTime(seconds: number) {
     return [hours, minutes, seconds];
 }
 
-function formatTime(seconds: Array<number>, totalSeconds = seconds) {
-    let totalWithoutLeadingZeroes = totalSeconds.slice(
-        totalSeconds.findIndex((x) => x !== 0)
-    );
-    return seconds
-        .slice(seconds.length - totalWithoutLeadingZeroes.length)
-        .map((x) => x.toString().padStart(2, "0"))
-        .join(":");
-}
-
 function Thumb(props: {
     index: number;
     state: SliderState;

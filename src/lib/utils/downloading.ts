@@ -31,7 +31,7 @@ export async function downloadPlaylist(
                 }
                 const downloadedFile = await download(
                     song.xorname,
-                    filename
+                    filename ? filename : undefined
                 );
                 return downloadedFile;
             } catch (error) {

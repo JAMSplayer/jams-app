@@ -7737,6 +7737,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 [[package]]
 name = "safe_api"
 version = "0.3.0"
+source = "git+ssh://git@github.com/JAMSplayer/safe.git#55a3ced48ea3348c7d9f3cf5f8d599ebecf5cbfd"
 dependencies = [
  "aes-gcm",
  "alloy-primitives",

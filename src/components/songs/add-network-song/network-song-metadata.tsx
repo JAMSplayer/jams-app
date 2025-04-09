@@ -61,7 +61,6 @@ export default function NetworkSongMetadataPanel({
     type networkSongFormData = z.infer<typeof editSongSchema>;
 
     const { store } = useStorage();
-    const { control } = useForm();
 
     // this song object will be saved once populated
     const [song, setSong] = useState<Song | undefined>(undefined);

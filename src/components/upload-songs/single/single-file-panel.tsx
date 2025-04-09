@@ -13,12 +13,10 @@ import { singleFileUploadSchema } from "@/form-schemas/single-file-upload-schema
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../../tag-input";
 import { LocalFileDetail } from "@/types/local-file-detail";
-import { FilePicture } from "@/types/file-picture";
 import { v4 as uuidv4 } from "uuid";
 import { useStorage } from "@/providers/storage-provider";
 import { Song } from "@/types/songs/song";
 import { uploadSong } from "@/backend/uploading";
-import { useNavigate } from "react-router-dom";
 import { generateLocation } from "@/lib/utils/location";
 import {
     Form,
@@ -29,13 +27,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { NetworkFileDetail } from "@/types/network-file-detail";
-import {
-    base64ToFilePicture,
-    base64ToImageFile,
-    filePictureToBase64,
-    readToArray,
-} from "@/lib/utils/images";
+import { base64ToFilePicture, filePictureToBase64 } from "@/lib/utils/images";
 import { toast } from "sonner";
 import { PlaylistSelectionModal } from "@/components/ui/playlist-selection-modal";
 
@@ -70,13 +62,12 @@ export default function SingleFilePanel({
         handleSubmit,
         setValue,
         getValues,
-        formState: { errors, isValid },
+        formState: { isValid },
     } = localSongForm;
 
     type singleFileUploadData = z.infer<typeof singleFileUploadSchema>;
     const { t } = useTranslation();
     const { store } = useStorage();
-    const navigate = useNavigate();
 
     const [isUploading, setIsUploading] = useState<boolean>(false);
 
