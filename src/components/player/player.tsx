@@ -53,7 +53,7 @@ const Player = () => {
             </button>
 
             {/* Artwork on Medium and Above */}
-            {player.song.artUrl && (
+            {player.song.picture && (
                 <div
                     className={`hidden md:block absolute left-0 flex-shrink-0 overflow-hidden transition-all duration-500 ease-in-out ${
                         !isPlayerVisible ? "translate-y-5" : "translate-y-0"
@@ -61,7 +61,7 @@ const Player = () => {
                     style={{ height: "6.95rem", width: "6.75rem" }}
                 >
                     <img
-                        src={player.song.artUrl}
+                        src={player.song.picture}
                         alt={player.song.title || "Album Art"}
                         className="w-full h-full object-cover"
                     />
@@ -96,9 +96,11 @@ const Player = () => {
                         value={[currentTime ?? player.currentTime]}
                         onChange={([value]) => setCurrentTime(value)}
                         onChangeEnd={([value]) => {
-                            player.seek(value);
-                            if (wasPlayingRef.current) {
-                                player.play();
+                            if (player.song) {
+                                player.seek(value);
+                                if (wasPlayingRef.current) {
+                                    player.play(player.song);
+                                }
                             }
                         }}
                         numberFormatter={

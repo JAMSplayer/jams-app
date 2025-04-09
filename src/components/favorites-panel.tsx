@@ -12,15 +12,18 @@ import { useTranslation } from "react-i18next";
 import SongScroller from "./songs/songs-scroller";
 import { useStorage } from "@/providers/storage-provider";
 import { Playlist } from "@/types/playlists/playlist";
+import { usePlayerStore } from "@/store/player-store";
 
 const FavoritesPanel = () => {
     const { t } = useTranslation();
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
     const { store } = useStorage();
+    const { isPlayerVisible } = usePlayerStore();
 
     // This will be filled from the fetchedFavoriteSongs below
     const [songs, setSongs] = useState<Song[]>([]);
+    const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchFavoriteSongs = async () => {
@@ -30,21 +33,20 @@ const FavoritesPanel = () => {
             }
 
             try {
-                // get all playlists from the store
                 const playlists: Playlist[] =
                     (await store.get("playlists")) || [];
                 const favoriteIds: string[] =
                     (await store.get("favorites")) || [];
+                setFavoriteIds(favoriteIds); // store the latest favorites list
 
                 if (!playlists || !favoriteIds.length) {
-                    setSongs([]); // No playlists or favorites, set empty list
+                    setSongs([]);
                     return;
                 }
 
-                // filter songs that match the favorite IDs
                 const fetchedSongs: Song[] = playlists
-                    .flatMap((playlist) => playlist.songs || []) // combine all songs from all playlists
-                    .filter((song) => favoriteIds.includes(song.id)); // filter by favorite IDs
+                    .flatMap((playlist) => playlist.songs || [])
+                    .filter((song) => favoriteIds.includes(song.id));
 
                 setSongs(fetchedSongs);
             } catch (error) {
@@ -53,10 +55,10 @@ const FavoritesPanel = () => {
         };
 
         fetchFavoriteSongs();
-    }, []);
+    }, [store, favoriteIds]); // re-run when favorites change
 
     return (
-        <div className="w-full">
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"} w-full`}>
             {/* Filters */}
             <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-4 border-l">
                 <div className="flex items-center space-x-2">

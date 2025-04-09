@@ -9,41 +9,68 @@ import { useStorage } from "@/providers/storage-provider";
 import { Song } from "@/types/songs/song";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../tag-input";
-import { t } from "i18next";
-
-type FormSchema = z.infer<typeof editSongSchema>;
+import { useNavigate, useParams } from "react-router-dom";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import SelectYear from "../select-year";
+import { Playlist } from "@/types/playlists/playlist";
+import { toast } from "sonner";
+import { usePlayerStore } from "@/store/player-store";
 
 interface EditSongPanelProps {
-    id: string | null;
-    onReturn: () => void;
+    onReturn?: () => void;
 }
 
-export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        getValues,
-        formState: { errors, isValid },
-    } = useForm<FormSchema>({
+export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
+    const editSongForm = useForm<z.infer<typeof editSongSchema>>({
         resolver: zodResolver(editSongSchema),
         mode: "onBlur",
         defaultValues: {
             title: undefined,
-            description: undefined,
+            artist: undefined,
             picture: undefined,
             tags: [],
+            album: undefined,
+            genre: undefined,
+            year: undefined,
             trackNumber: undefined,
         },
     });
 
+    const {
+        handleSubmit,
+        register,
+        getValues,
+        setValue,
+        formState: { isValid },
+    } = editSongForm;
+
+    type editSongFormData = z.infer<typeof editSongSchema>;
+
+    const navigate = useNavigate();
     const { store } = useStorage();
+    const [song, setSong] = useState<Song | undefined>(undefined);
+    const { xorname } = useParams<{ xorname: string }>();
+    const { isPlayerVisible } = usePlayerStore();
 
-    const [_, setSong] = useState<Song | undefined>(undefined);
-
-    if (!id) {
-        return <p>No Song ID provided.</p>;
+    if (!xorname) {
+        return <p>No Song xorname provided.</p>;
     }
+
+    const handleReturn = () => {
+        if (onReturn) {
+            onReturn();
+        } else {
+            navigate(-1); // Go back if no onReturn provided
+        }
+    };
 
     // Load song metadata and populate form fields and songs ----------------------------------------------------------------
 
@@ -54,46 +81,80 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 return;
             }
 
-            if (!id) {
-                console.error("Song network ID is missing.");
+            if (!xorname) {
+                console.error("Song xorname is missing.");
+                return;
+            }
+
+            const defaultDownloadFolder = await store.get<{ value: string }>(
+                "download-folder"
+            );
+            if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
+                console.error("No default download folder found.");
                 return;
             }
 
             try {
-                const song: Song = {
-                    id: "123",
-                    xorname: "123",
-                    title: "test",
-                    artist: "test",
-                    dateCreated: new Date(),
-                    location: "test",
-                    picture: undefined,
-                    tags: [],
-                    trackNumber: undefined,
-                };
+                // fetch all playlists from the store
+                const storedPlaylists = await store.get("playlists");
 
-                if (!song) {
-                    console.error("Song Metadata not found.");
+                if (!storedPlaylists || !Array.isArray(storedPlaylists)) {
+                    console.error("Playlists not found or invalid format.");
                     return;
                 }
 
-                // Set tags from the song if available
-                setValue("tags", song.tags || [], { shouldValidate: true });
+                // flatten all songs from all playlists
+                const allSongs: Song[] = storedPlaylists.flatMap(
+                    (playlist: Playlist) => playlist.songs || []
+                );
 
-                // set track number from the song if available
-                setValue("trackNumber", song.trackNumber);
+                // find the song with the matching xorname
+                const foundSong = allSongs.find((s) => s.xorname === xorname);
 
-                // Populate form fields
-                setValue("title", song.title);
-                setValue("description", song.description);
-                setValue("picture", song.picture);
+                console.log("found: ", foundSong);
+
+                if (!foundSong) {
+                    console.error("Song Metadata not found.");
+                    return;
+                } else {
+                    // set the song with these values - later if the user updates the fields, just those fields should be updated on the song object
+                    setSong(foundSong);
+                    console.log("setting song: ", foundSong);
+                }
+
+                // set tags from the song if available
+                setValue("tags", foundSong.tags || [], {
+                    shouldValidate: true,
+                });
+
+                setValue("title", foundSong.title, {
+                    shouldValidate: true,
+                });
+                setValue("artist", foundSong.artist ?? undefined, {
+                    shouldValidate: true,
+                });
+                setValue("album", foundSong.album ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("genre", foundSong.genre ?? "", {
+                    shouldValidate: true,
+                });
+                setValue("year", foundSong.year ?? undefined, {
+                    shouldValidate: true,
+                });
+                setValue("trackNumber", foundSong.trackNumber ?? 0, {
+                    shouldValidate: true,
+                });
+                setValue("picture", foundSong.picture ?? undefined, {
+                    shouldValidate: true,
+                });
             } catch (error) {
                 console.error("Failed to load song data:", error);
             }
         };
 
         fetchSongData();
-    }, [store, id, setValue]);
+    }, [store, xorname, setValue]);
 
     // end Load song data and populate form fields and songs ----------------------------------------------------------------
 
@@ -109,46 +170,90 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
 
     // end image ----------------------------------------------------------------
 
+    const handleYearChange = async (newYear: number | undefined) => {
+        setSong((prevSong) =>
+            prevSong ? { ...prevSong, year: newYear } : undefined
+        );
+    };
+
     // submit handler
-    const onSubmit = async (data: FormSchema) => {
+    const onSubmit = async (data: editSongFormData) => {
         if (!store) {
             console.error("Store is not initialized.");
             return;
         }
 
-        try {
-            const updatedSong: Song = {
-                ...data,
-                id,
-                tags: [],
-                xorname: "123",
-                artist: "test",
-                dateCreated: new Date(),
-                location: "test,",
-                picture: undefined,
-            };
+        if (!song) {
+            console.error("Song not found.");
+            return;
+        }
 
-            setSong(updatedSong);
+        const updatedSong: Song = { ...song }; // copy properties from existing song
 
-            // find which playlist to update to add new song to.
-            // await store.set("playlists", updatedPlaylists);
-            // await store.save();
+        if (data.title) {
+            updatedSong.title = data.title;
+        }
+        if (data.artist) {
+            updatedSong.artist = data.artist;
+        }
+        if (data.picture) {
+            updatedSong.picture = data.picture;
+        }
+        if (data.album) {
+            updatedSong.album = data.album;
+        }
+        if (data.genre) {
+            updatedSong.genre = data.genre;
+        }
+        if (data.trackNumber) {
+            updatedSong.trackNumber = data.trackNumber;
+        }
+        if (data.tags) {
+            updatedSong.tags = data.tags;
+        }
 
-            // toast("Song Updated Locally", {
-            //     description:
-            //         "Your song has been successfully updated.",
-            // });
-        } catch (ex) {
-            console.error("The save operation could not be completed:", ex);
+        setSong(updatedSong); // update the state with the modified song
+        await updateSongInStore(updatedSong);
+        handleReturn();
+    };
+
+    const updateSongInStore = async (updatedSong: Song) => {
+        if (store) {
+            try {
+                // fetch playlists from the store
+                const storedPlaylists: Playlist[] =
+                    (await store.get("playlists")) || [];
+
+                // loop through each playlist and find the song
+                for (let playlist of storedPlaylists) {
+                    if (playlist.songs) {
+                        // ensure songs exists
+                        const songIndex = playlist.songs.findIndex(
+                            (song) => song.xorname === xorname
+                        );
+
+                        if (songIndex !== -1) {
+                            // ensure song is found
+                            playlist.songs[songIndex] = updatedSong; // update the song
+                            await store.set("playlists", storedPlaylists); // save updated playlists
+                            await store.save();
+                            break;
+                        } else {
+                            toast("Song Not Found", {
+                                description:
+                                    "The song with the provided xorname does not exist in the store.",
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to update song:", error);
+            }
         }
     };
 
-    const handleReturn = async () => {
-        onReturn(); // Pass the ID to the parent component
-    };
-
     return (
-        <div className="pb-16">
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"}`}>
             {/* Header */}
             <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
@@ -166,70 +271,160 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
-                    <form id="customizeForm" onSubmit={handleSubmit(onSubmit)}>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* Form Fields */}
-                            <div className="md:col-span-2">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    {/* Title */}
-                                    <div className="col-span-3">
-                                        <label className="block text-sm font-medium mb-1">
-                                            Title{" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            {...register("title")}
-                                            className="w-full border px-2 py-1 rounded"
-                                            maxLength={100}
-                                        />
-                                        {errors.title && (
-                                            <div className="text-red-500 text-xs mt-1">
-                                                {errors.title.message}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Description */}
-                                    <div className="col-span-3">
-                                        <label className="block text-sm font-medium mb-1">
-                                            Description{" "}
-                                        </label>
-                                        <input
-                                            {...register("description")}
-                                            className="w-full border px-2 py-1 rounded"
-                                            maxLength={100}
-                                        />
-                                        {errors.description && (
-                                            <div className="text-red-500 text-xs mt-1">
-                                                {errors.description.message}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="md:col-span-2">
-                                        {/* Track Number */}
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">
-                                                {t("trackNumber")}
-                                            </label>
-                                            <input
-                                                type="number"
-                                                {...register("trackNumber")}
-                                                className="w-full border px-2 py-1 rounded"
-                                                placeholder={t(
-                                                    "enterTrackNumber"
+                    <Form {...editSongForm}>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Form Fields */}
+                                <div className="md:col-span-2 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Title */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={editSongForm.control}
+                                                name="title"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Title
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter title"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "title"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
                                                 )}
                                             />
-
-                                            {errors.trackNumber && (
-                                                <span className="text-red-500 text-sm">
-                                                    {errors.trackNumber.message}
-                                                </span>
-                                            )}
                                         </div>
 
+                                        {/* Artist */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={editSongForm.control}
+                                                name="artist"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Artist
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter artist"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "artist"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Album */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={editSongForm.control}
+                                                name="album"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Album
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter album"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "album"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+                                        {/* Genre */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={editSongForm.control}
+                                                name="genre"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Genre
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter genre"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "genre"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Year */}
+                                        <div className="w-full">
+                                            <SelectYear
+                                                currentYear={song?.year}
+                                                onChange={handleYearChange}
+                                                height="200px"
+                                            />
+                                        </div>
+
+                                        {/* Track Number */}
+                                        <div className="w-full">
+                                            <FormField
+                                                control={editSongForm.control}
+                                                name="trackNumber"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Track Number
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter track number"
+                                                                autoCapitalize="off"
+                                                                autoComplete="off"
+                                                                autoCorrect="off"
+                                                                {...register(
+                                                                    "trackNumber"
+                                                                )}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="w-full">
                                         <TagInput
                                             initialTags={getValues("tags")} // Initial tags from form state
                                             onChange={
@@ -237,48 +432,54 @@ export default function EditSongPanel({ id, onReturn }: EditSongPanelProps) {
                                                     setValue(
                                                         "tags",
                                                         updatedTags,
-                                                        { shouldValidate: true }
+                                                        {
+                                                            shouldValidate:
+                                                                false,
+                                                        }
                                                     ) // Update form state when tags change
                                             }
                                         />
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Song Art */}
-                            <div className="flex justify-center items-center relative">
-                                {selectedImage ? ( // ✅ Only check for selectedImage
-                                    <img
-                                        src={selectedImage}
-                                        alt="Playlist Art"
-                                        className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
-                                        onClick={handleImageUpload}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full max-w-sm max-h-sm min-h-44 max-h-96 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
-                                        No Song Art
+                                {/* Album Art */}
+                                <div className="flex justify-center items-center relative">
+                                    {getValues("picture") || selectedImage ? (
+                                        <img
+                                            src={
+                                                getValues("picture") ||
+                                                selectedImage ||
+                                                undefined
+                                            }
+                                            alt="Playlist Art"
+                                            className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
+                                            onClick={handleImageUpload}
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full max-w-sm max-h-sm min-h-44 max-h-96 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
+                                            No Song Art
+                                        </div>
+                                    )}
+                                    <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">
+                                        <EditIcon
+                                            size={20}
+                                            onClick={handleImageUpload}
+                                        />
                                     </div>
-                                )}
-                                <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">
-                                    <EditIcon
-                                        size={20}
-                                        onClick={handleImageUpload}
-                                    />
                                 </div>
                             </div>
-                        </div>
-                    </form>
-                    <div className="pt-4">
-                        <Button
-                            size={"sm"}
-                            type="submit"
-                            form="customizeForm"
-                            className="mr-3"
-                            disabled={!isValid}
-                        >
-                            Save <CirclePlusIcon />
-                        </Button>
-                    </div>
+                            <div className="pt-4">
+                                <Button
+                                    size={"sm"}
+                                    type="submit"
+                                    className="mr-3"
+                                    disabled={!isValid}
+                                >
+                                    Save <CirclePlusIcon />
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
                 </div>
             </div>
         </div>

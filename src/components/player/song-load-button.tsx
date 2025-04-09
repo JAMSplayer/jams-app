@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 export function SongLoadButton({
     song,
 }: React.ComponentPropsWithoutRef<"button"> & {
-    song: Song;
+    song: () => Promise<Song>;
 }) {
     const { t } = useTranslation();
     let player = useAudioPlayer();
@@ -15,12 +15,12 @@ export function SongLoadButton({
 
     return (
         <Button
-            onClick={(e) => {
+            onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setPlayerVisibility(true);
                 setHasLoaded(true);
-                player.play(song);
+                player.play(await song());
             }}
         >
             {t("loadSong")}

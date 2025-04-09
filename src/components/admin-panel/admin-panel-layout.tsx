@@ -26,7 +26,7 @@ export default function AdminPanelLayout({
             </main>
             <footer
                 className={cn(
-                    "transition-[margin-left] ease-in-out duration-300 fixed bottom-0 left-0 w-full", // Always take full width on smaller screens
+                    "transition-[margin-left] ease-in-out duration-300 fixed bottom-0 left-0 w-full z-10", // Always take full width on smaller screens
                     !settings.disabled &&
                         (getOpenState()
                             ? "lg:ml-72" // When sidebar is open on large screens

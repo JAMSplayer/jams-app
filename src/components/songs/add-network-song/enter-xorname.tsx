@@ -3,24 +3,49 @@ import { Input } from "@/components/ui/input";
 import { isValidXorname } from "@/lib/utils/validation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
+import { NetworkFileDetail } from "@/types/network-file-detail";
+import { download } from "@/backend/logic";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface EnterXornameProps {
-    onSearch: (id: string) => void;
+    onSearchSuccess: (fileDetail: NetworkFileDetail) => void;
 }
 
-const EnterXorname: React.FC<EnterXornameProps> = ({ onSearch }) => {
+const EnterXorname: React.FC<EnterXornameProps> = ({ onSearchSuccess }) => {
     const [xorname, setXorname] = useState("");
     const [isValid, setIsValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setXorname(value);
         setIsValid(isValidXorname(value));
+        setErrorMessage(null);
     };
 
     const handleSearch = async () => {
-        if (xorname.trim() !== "") {
-            onSearch(xorname);
+        if (!isValid) return;
+
+        setIsLoading(true);
+        setErrorMessage(null);
+
+        try {
+            const fileDetail = await download(xorname);
+            console.log("fileDetail: ", fileDetail);
+
+            if (!fileDetail) {
+                console.error("File metadata not found.");
+                return;
+            }
+
+            // valid FileDetail
+            onSearchSuccess(fileDetail);
+        } catch (error) {
+            console.error("Download failed:", error);
+            setErrorMessage("Failed to fetch file metadata.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -39,19 +64,25 @@ const EnterXorname: React.FC<EnterXornameProps> = ({ onSearch }) => {
                         autoCapitalize="off"
                         autoComplete="off"
                         autoCorrect="off"
+                        disabled={isLoading}
                     />
                     <Button
                         onClick={handleSearch}
-                        disabled={!isValid} // disable the button if the input is invalid
+                        disabled={!isValid || isLoading}
                     >
-                        Search <MagnifyingGlassIcon />
+                        {isLoading ? (
+                            <>
+                                Downloading... <LoadingSpinner />
+                            </>
+                        ) : (
+                            <>
+                                Search <MagnifyingGlassIcon />
+                            </>
+                        )}
                     </Button>
                 </div>
-                {!isValid && xorname && (
-                    <p className="text-red-500 text-sm mt-2">
-                        Please enter a valid 64-character network ID consisting
-                        of lowercase letters and numbers.
-                    </p>
+                {errorMessage && (
+                    <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
                 )}
             </div>
         </div>

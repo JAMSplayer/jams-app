@@ -7,6 +7,12 @@ import { invoke } from "@tauri-apps/api/core";
 
 const REG_META_PREFIX = "jams";
 
+enum LogLevel {
+    TRACE,
+    INFO,
+    ERROR,
+}
+
 export async function listAccounts(): Promise<[string, string][] | null> {
     try {
         return await invoke<[string, string][]>("list_accounts");
@@ -126,9 +132,10 @@ export async function balance(): Promise<string | null> {
 }
 
 export async function privateKey(
-    username: string,              // which user PK to get
-    password: string,           // user password to decrypt the key
-): Promise<string | null> {     // if password is bad or other error occured, null will be returned
+    username: string, // which user PK to get
+    password: string // user password to decrypt the key
+): Promise<string | null> {
+    // if password is bad or other error occured, null will be returned
     try {
         return await invoke("check_key", {
             login: username,
@@ -158,9 +165,21 @@ export async function sessionRead(key: string): Promise<string | null> {
 
 export async function sessionSet(
     key: string,
-    value: string | null, // null if we want to remove the record.
-): Promise<string | null> { // returns previous value, or null if the value was not present
-    return await invoke("session_set", { key: key, value : value });
+    value: string | null // null if we want to remove the record.
+): Promise<string | null> {
+    // returns previous value, or null if the value was not present
+    return await invoke("session_set", { key: key, value: value });
+}
+
+export async function logLevel(level: keyof typeof LogLevel): Promise<boolean> {
+    console.log("logLevel: ", level);
+    try {
+        await invoke("log_level", { level: level });
+        return true;
+    } catch (e) {
+        console.error("logLevel: ", e);
+    }
+    return false;
 }
 
 function prepareMeta(name: string[]): string[] {
@@ -201,10 +220,7 @@ export async function readReg(name: string[]): Promise<object | null> {
     return null;
 }
 
-export async function writeReg(
-    name: string[],
-    data: object
-): Promise<boolean> {
+export async function writeReg(name: string[], data: object): Promise<boolean> {
     prepareMeta(name);
     console.log("writing Reg: " + name + "...");
 
@@ -225,20 +241,18 @@ export async function writeReg(
 
 // returns xorname address
 export async function uploadFile(
-    path: string, // filesystem path
+    path: string // filesystem path
 ): Promise<string | null> {
     console.log("uploading file: " + path + "...");
-    try {
-        return await invoke("upload", { file: path });
-    } catch (e) {
-        console.error("uploadFile: ", e);
-    }
+
+    return await invoke("upload", { file: path });
+
     return null;
 }
 
 // returns xorname address
 export async function putData(
-    data: Uint8Array, // file data
+    data: Uint8Array // file data
 ): Promise<string | null> {
     console.log("saving data blob of " + data.length + " bytes...");
     try {
@@ -247,4 +261,16 @@ export async function putData(
         console.error("putData: ", e);
     }
     return null;
+}
+
+export async function download(
+    xorname: string,
+    destinationDir: string,
+    fileName?: string
+): Promise<object> {
+    return await invoke("download", {
+        xorname: xorname,
+        fileName: fileName,
+        destination: destinationDir,
+    });
 }

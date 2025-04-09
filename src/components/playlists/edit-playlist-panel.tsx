@@ -48,6 +48,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
     const [leftSongs, setLeftSongs] = useState<Song[]>([]);
     const [rightSongs, setRightSongs] = useState<Song[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [deleteEnabled, setDeleteEnabled] = useState(true);
 
     // Load playlist data and populate form fields and songs ----------------------------------------------------------------
 
@@ -85,6 +86,9 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
 
                 // Populate form fields
                 setValue("title", playlist.title);
+                if (playlist.title?.toLocaleLowerCase() === "general") {
+                    setDeleteEnabled(false);
+                }
                 setValue("description", playlist.description);
                 setValue("picture", playlist.picture);
 
@@ -399,6 +403,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
             <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-2 border-l flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                     {/* Back Button */}
+
                     <Button variant={"ghost"} onClick={handleBackButtonClick}>
                         <ArrowLeftIcon size={20} />
                     </Button>
@@ -409,13 +414,17 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
             <div className="p-4">
                 <div className="bg-background text-primary px-4 py-2 rounded-t-lg border border-secondary flex justify-between items-center">
                     <h1 className="text-lg font-bold">Edit Playlist</h1>
-                    <Button
-                        onClick={() => setDeleteConfirmationModalVisible(true)}
-                        variant="destructive"
-                        className=" text-white hover:bg-red-700 transition-colors duration-200 focus:outline-none"
-                    >
-                        Delete
-                    </Button>
+                    {deleteEnabled && (
+                        <Button
+                            onClick={() =>
+                                setDeleteConfirmationModalVisible(true)
+                            }
+                            variant="destructive"
+                            className=" text-white hover:bg-red-700 transition-colors duration-200 focus:outline-none"
+                        >
+                            Delete
+                        </Button>
+                    )}
                 </div>
 
                 <div className="border border-t-0 rounded-b-lg p-4 bg-background border-secondary">
@@ -649,7 +658,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                 </div>
                             </div>
 
-                            {/* Platlist Art */}
+                            {/* Playlist Art */}
                             <div className="flex justify-center items-center relative">
                                 {selectedImage || base64Picture ? (
                                     <img

@@ -1,5 +1,4 @@
 import {
-    Tag,
     Settings,
     LayoutGrid,
     LucideIcon,
@@ -86,11 +85,6 @@ export function getMenuList(_pathname: string): Group[] {
                     href: "/favorites",
                     label: t("favorites"),
                     icon: Heart,
-                },
-                {
-                    href: "/tags",
-                    label: t("tags"),
-                    icon: Tag,
                 },
             ],
         },

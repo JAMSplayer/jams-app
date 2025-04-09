@@ -1,5 +1,5 @@
-use safe::XorName;
-use std::{path::PathBuf, str::FromStr};
+use safeapi::XorName;
+use std::{path::PathBuf};
 use tauri::path::BaseDirectory;
 use tauri::AppHandle;
 use tauri::Manager;
@@ -22,23 +22,19 @@ pub(crate) fn autonomi(path: &str) -> Result<(XorName, PathBuf), String> {
     Ok((xorname, String::from(filename).into()))
 }
 
-fn data(_path: String, app: &AppHandle) -> Result<Vec<u8>, String> {
-    let resource_path = app
-        .path()
-        .resolve(
-            "resources/A_Lazy_Farmer_Boy_by_Buster_Carter_And_Preston_Young.mp3",
-            BaseDirectory::Resource,
-        )
-        .or(Err("Error getting resources".to_string()))?;
-    println!("RES{:?}", resource_path);
+fn data(path: String, app: &AppHandle) -> Result<Vec<u8>, String> {
+    let path_decoded = serde_urlencoded::from_str::<Vec<(String, String)>>(&path).map_err(|_e| "Not properly urlencoded path.".to_string())?;
+    let path_decoded = &path_decoded.first().ok_or("Urlencoded path is empty.".to_string())?.0;
 
-    std::fs::read(resource_path).or(Err("Error reading file".to_string()))
+    println!("DATA PATH {:?}", path);
+    println!("DATA PATH {:?}", path_decoded);
+    std::fs::read(path_decoded).or(Err("Error reading file".to_string()))
 }
 
 pub fn run(app: AppHandle) {
     tauri::async_runtime::spawn(async {
         warp::serve(warp::path::param::<String>().map(move |path: String| {
-            let _ = autonomi(&path).inspect_err(|e| println!("Error: {e}"));
+//            let _ = autonomi(&path).inspect_err(|e| println!("Error: {e}"));
             Response::new(data(path, &app).unwrap())
         }))
         .run(([127, 0, 0, 1], 12345))

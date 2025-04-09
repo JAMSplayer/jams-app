@@ -8,10 +8,8 @@ import { Playlist } from "@/types/playlists/playlist";
 import { useStorage } from "@/providers/storage-provider";
 import { AlertConfirmationModal } from "../alert-confirmation-modal";
 import { toast } from "sonner";
-
-//import { useNavigate } from "react-router-dom";
 import Portal from "../portal";
-
+import { useNavigate } from "react-router-dom";
 
 interface SongScrollerProps {
     songs: Song[];
@@ -28,6 +26,7 @@ const SongScroller = ({
 }: SongScrollerProps) => {
     const { t } = useTranslation();
     const { store } = useStorage();
+    const navigate = useNavigate();
 
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
@@ -66,7 +65,7 @@ const SongScroller = ({
 
         // Check for exact matches first
         const exactMatches = songs.filter((song) =>
-            [song.title, song.description, song.artist].some(
+            [song.title, song.artist, song.artist].some(
                 (field) => field?.toLowerCase() === trimmedFilterValue // Exact match check
             )
         );
@@ -78,7 +77,7 @@ const SongScroller = ({
 
         // If no exact matches, return partial matches
         return songs.filter((song) =>
-            [song.title, song.description, song.artist].some(
+            [song.title, song.artist, song.artist].some(
                 (field) => field?.toLowerCase().includes(trimmedFilterValue) // Partial match check
             )
         );
@@ -143,6 +142,10 @@ const SongScroller = ({
     const handleDeleteClick = (id: string) => {
         setSelectedSongId(id); // Set the song ID
         setDeleteConfirmationModalVisible(true); // Show the modal
+    };
+
+    const handleEditClick = (xorname: string) => {
+        navigate(`/edit-song/${xorname}`);
     };
 
     const handleConfirm = async () => {
@@ -273,14 +276,14 @@ const SongScroller = ({
                         >
                             {/* Album art */}
                             <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
-                                {song.artUrl ? (
+                                {song.picture ? (
                                     <img
-                                        src={song.artUrl}
+                                        src={song.picture}
                                         alt="Album Art"
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gray-300"></div> // Placeholder
+                                    <div className="w-full h-full bg-gray-300"></div>
                                 )}
 
                                 <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -321,8 +324,7 @@ const SongScroller = ({
                                             </p>
                                             <p>
                                                 <small>
-                                                    Description:{" "}
-                                                    {song.description}
+                                                    Artist: {song.artist}
                                                 </small>
                                             </p>
                                         </h2>
@@ -392,9 +394,9 @@ const SongScroller = ({
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    // TODO if song id exists in favorites store show favorited
-                                                    // if song id exists in favorites store this button will remove it
-                                                    // if song id does not exist in favorites store, this button will add it
+                                                    handleEditClick(
+                                                        song.xorname
+                                                    );
                                                 }}
                                                 className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
                                             >
@@ -454,6 +456,7 @@ const SongScroller = ({
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            handleEditClick(song.xorname);
                                         }}
                                         className="bg-background border border-primary text-primary p-2 rounded-full hover:bg-primary hover:text-background transition-colors duration-200 focus:outline-none"
                                     >

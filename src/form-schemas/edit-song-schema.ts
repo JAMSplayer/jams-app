@@ -4,13 +4,18 @@ import { z } from "zod";
 export const editSongSchema = z.object({
     title: z
         .string()
-        .min(1, "Title is required")
+        .min(1, {
+            message: "Title is required",
+        })
         .max(100, "Title cannot exceed 100 characters"),
-    description: z
+    artist: z
         .string()
-        .max(100, "Description cannot exceed 100 characters")
+        .max(100, "Artist cannot exceed 100 characters")
         .optional(),
     picture: z.string().optional(),
+    album: z.string().optional(),
+    genre: z.string().optional(),
+    year: z.number().optional(),
     trackNumber: z
         .preprocess((val) => {
             const parsed = typeof val === "string" ? parseInt(val, 10) : val;

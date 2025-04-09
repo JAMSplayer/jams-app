@@ -12,6 +12,8 @@ import {
 import { useEffect, useState } from "react";
 import isOnline from "is-online";
 import { useTranslation } from "react-i18next";
+import { useConnection } from "@/providers/connection-provider";
+import { balance as autonomiBalance } from "@/backend/autonomi";
 
 interface StatusItem {
     name: string;
@@ -22,10 +24,9 @@ interface StatusItem {
 
 export default function StatusRow() {
     const { t } = useTranslation();
-
-    const { address, balance } = { address: "someAddress", balance: 12.24 }; // TODO get from signed in user, if they are signed in
+    const [hasBalance, setHasBalance] = useState<boolean | null>(null);
+    const { account } = useConnection();
     const [onlineStatus, setOnlineStatus] = useState(false);
-    const hasUserBalance = balance > 0;
 
     // have initial checks completed before showing the UI
     const [isInternetCheckedInitially, setIsInternetCheckedInitially] =
@@ -49,14 +50,29 @@ export default function StatusRow() {
         return () => clearInterval(intervalId);
     }, []);
 
+    useEffect(() => {
+        setHasBalance(false);
+        const checkBalance = async () => {
+            const balance = await autonomiBalance();
+            setHasBalance(
+                balance !== null &&
+                    !isNaN(parseFloat(balance)) &&
+                    balance !== "0" &&
+                    balance !== "0.0" &&
+                    account != null
+            );
+        };
+        checkBalance();
+    }, [account]);
+
     const statusList: StatusItem[] = [
         {
             name: t("tokenBalance"),
-            icon: hasUserBalance ? CheckIcon : OctagonXIcon,
-            description: hasUserBalance
+            icon: hasBalance ? CheckIcon : OctagonXIcon,
+            description: hasBalance
                 ? t("yourWalletAddressContainsTokens")
                 : t("YourWalletAddressIsEmpty"),
-            bgColor: hasUserBalance ? "bg-green-600" : "bg-red-600",
+            bgColor: hasBalance ? "bg-green-600" : "bg-red-600",
         },
         {
             name: t("internetConnection"),
@@ -74,11 +90,11 @@ export default function StatusRow() {
         },
         {
             name: t("walletConnected"),
-            icon: address ? CheckIcon : OctagonXIcon,
-            description: address
+            icon: account ? CheckIcon : OctagonXIcon,
+            description: account
                 ? t("yourWalletIsConnected")
                 : t("yourWalletIsNotConnected"),
-            bgColor: address ? "bg-green-600" : "bg-red-600",
+            bgColor: account ? "bg-green-600" : "bg-red-600",
         },
     ];
 

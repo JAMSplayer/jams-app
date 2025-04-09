@@ -2257,64 +2257,71 @@
   resolved "https://registry.npmjs.org/@tanstack/virtual-core/-/virtual-core-3.10.8.tgz"
   integrity sha512-PBu00mtt95jbKFi6Llk9aik8bnR3tR/oQP1o3TSi+iG//+Q2RTIzCEgKkHG8BB86kxMNW6O8wku+Lmi+QFR6jA==
 
-"@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.0.1":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@tauri-apps/api/-/api-2.0.2.tgz"
-  integrity sha512-3wSwmG+1kr6WrgAFKK5ijkNFPp8TT3FLj3YHUb5EwMO+3FxX4uWlfSWkeeBy+Kc1RsKzugtYLuuya+98Flj+3w==
+"@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.2":
+  version "2.3.0"
+  resolved "https://registry.npmjs.org/@tauri-apps/api/-/api-2.3.0.tgz"
+  integrity sha512-33Z+0lX2wgZbx1SPFfqvzI6su63hCBkbzv+5NexeYjIx7WA9htdOKoRR7Dh3dJyltqS5/J8vQFyybiRoaL0hlA==
 
-"@tauri-apps/cli-darwin-arm64@2.0.2":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@tauri-apps/cli-darwin-arm64/-/cli-darwin-arm64-2.0.2.tgz"
-  integrity sha512-B+/a8Q6wAqmB4A4HVeK0oQP5TdQGKW60ZLOI9O2ktH2HPr9ETr3XkwXPuJ2uAOuGEgtRZHBgFOIgG000vMnKlg==
+"@tauri-apps/cli-darwin-arm64@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/@tauri-apps/cli-darwin-arm64/-/cli-darwin-arm64-2.3.1.tgz"
+  integrity sha512-TOhSdsXYt+f+asRU+Dl+Wufglj/7+CX9h8RO4hl5k7D6lR4L8yTtdhpS7btaclOMmjYC4piNfJE70GoxhOoYWw==
 
-"@tauri-apps/cli@^2.0.1":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@tauri-apps/cli/-/cli-2.0.2.tgz"
-  integrity sha512-R4ontHZvXORArERAHIidp5zRfZEshZczTiK+poslBv7AGKpQZoMw+E49zns7mOmP64i2Cq9Ci0pJvi4Rm8Okzw==
+"@tauri-apps/cli@^2.2":
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/@tauri-apps/cli/-/cli-2.3.1.tgz"
+  integrity sha512-xewcw/ZsCqgilTy2h7+pp2Baxoy7zLR2wXOV7SZLzkb6SshHVbm1BFAjn8iFATURRW85KLzl6wSGJ2dQHjVHqw==
   optionalDependencies:
-    "@tauri-apps/cli-darwin-arm64" "2.0.2"
-    "@tauri-apps/cli-darwin-x64" "2.0.2"
-    "@tauri-apps/cli-linux-arm-gnueabihf" "2.0.2"
-    "@tauri-apps/cli-linux-arm64-gnu" "2.0.2"
-    "@tauri-apps/cli-linux-arm64-musl" "2.0.2"
-    "@tauri-apps/cli-linux-x64-gnu" "2.0.2"
-    "@tauri-apps/cli-linux-x64-musl" "2.0.2"
-    "@tauri-apps/cli-win32-arm64-msvc" "2.0.2"
-    "@tauri-apps/cli-win32-ia32-msvc" "2.0.2"
-    "@tauri-apps/cli-win32-x64-msvc" "2.0.2"
+    "@tauri-apps/cli-darwin-arm64" "2.3.1"
+    "@tauri-apps/cli-darwin-x64" "2.3.1"
+    "@tauri-apps/cli-linux-arm-gnueabihf" "2.3.1"
+    "@tauri-apps/cli-linux-arm64-gnu" "2.3.1"
+    "@tauri-apps/cli-linux-arm64-musl" "2.3.1"
+    "@tauri-apps/cli-linux-x64-gnu" "2.3.1"
+    "@tauri-apps/cli-linux-x64-musl" "2.3.1"
+    "@tauri-apps/cli-win32-arm64-msvc" "2.3.1"
+    "@tauri-apps/cli-win32-ia32-msvc" "2.3.1"
+    "@tauri-apps/cli-win32-x64-msvc" "2.3.1"
 
-"@tauri-apps/plugin-clipboard-manager@^2.2.1":
+"@tauri-apps/plugin-clipboard-manager@^2.2":
   version "2.2.1"
   resolved "https://registry.npmjs.org/@tauri-apps/plugin-clipboard-manager/-/plugin-clipboard-manager-2.2.1.tgz"
   integrity sha512-+7YDULB9Bk4fejxYrVNBQcxs3KsjPA3A3r53wwn7K8zOQvxjNBSYBRx/FW1OUBPGzm8BrreJFBkPVzQZSF2R4A==
   dependencies:
     "@tauri-apps/api" "^2.0.0"
 
-"@tauri-apps/plugin-dialog@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@tauri-apps/plugin-dialog/-/plugin-dialog-2.0.0.tgz"
-  integrity sha512-ApNkejXP2jpPBSifznPPcHTXxu9/YaRW+eJ+8+nYwqp0lLUtebFHG4QhxitM43wwReHE81WAV1DQ/b+2VBftOA==
+"@tauri-apps/plugin-dialog@^2.2":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@tauri-apps/plugin-dialog/-/plugin-dialog-2.2.0.tgz"
+  integrity sha512-6bLkYK68zyK31418AK5fNccCdVuRnNpbxquCl8IqgFByOgWFivbiIlvb79wpSXi0O+8k8RCSsIpOquebusRVSg==
   dependencies:
     "@tauri-apps/api" "^2.0.0"
 
-"@tauri-apps/plugin-fs@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@tauri-apps/plugin-fs/-/plugin-fs-2.0.0.tgz"
-  integrity sha512-BNEeQQ5aH8J5SwYuWgRszVyItsmquRuzK2QRkVj8Z0sCsLnSvJFYI3JHRzzr3ltZGq1nMPtblrlZzuKqVzRawA==
+"@tauri-apps/plugin-fs@^2.2":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@tauri-apps/plugin-fs/-/plugin-fs-2.2.0.tgz"
+  integrity sha512-+08mApuONKI8/sCNEZ6AR8vf5vI9DXD4YfrQ9NQmhRxYKMLVhRW164vdW5BSLmMpuevftpQ2FVoL9EFkfG9Z+g==
   dependencies:
     "@tauri-apps/api" "^2.0.0"
 
-"@tauri-apps/plugin-shell@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@tauri-apps/plugin-shell/-/plugin-shell-2.0.0.tgz"
-  integrity sha512-OpW2+ycgJLrEoZityWeWYk+6ZWP9VyiAfbO+N/O8VfLkqyOym8kXh7odKDfINx9RAotkSGBtQM4abyKfJDkcUg==
+"@tauri-apps/plugin-os@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.npmjs.org/@tauri-apps/plugin-os/-/plugin-os-2.2.1.tgz"
+  integrity sha512-cNYpNri2CCc6BaNeB6G/mOtLvg8dFyFQyCUdf2y0K8PIAKGEWdEcu8DECkydU2B+oj4OJihDPD2de5K6cbVl9A==
   dependencies:
     "@tauri-apps/api" "^2.0.0"
 
-"@tauri-apps/plugin-store@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.npmjs.org/@tauri-apps/plugin-store/-/plugin-store-2.1.0.tgz"
-  integrity sha512-GADqrc17opUKYIAKnGHIUgEeTZ2wJGu1ZITKQ1WMuOFdv8fvXRFBAqsqPjE3opgWohbczX6e1NpwmZK1AnuWVw==
+"@tauri-apps/plugin-shell@^2.2":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@tauri-apps/plugin-shell/-/plugin-shell-2.2.0.tgz"
+  integrity sha512-iC3Ic1hLmasoboG7BO+7p+AriSoqAwKrIk+Hpk+S/bjTQdXqbl2GbdclghI4gM32X0bls7xHzIFqhRdrlvJeaA==
+  dependencies:
+    "@tauri-apps/api" "^2.0.0"
+
+"@tauri-apps/plugin-store@^2.2":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@tauri-apps/plugin-store/-/plugin-store-2.2.0.tgz"
+  integrity sha512-hJTRtuJis4w5fW1dkcgftsYxKXK0+DbAqurZ3CURHG5WkAyyZgbxpeYctw12bbzF9ZbZREXZklPq8mocCC3Sgg==
   dependencies:
     "@tauri-apps/api" "^2.0.0"
 
@@ -2670,9 +2677,9 @@ camelcase-css@^2.0.1:
   integrity sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==
 
 caniuse-lite@^1.0.30001646, caniuse-lite@^1.0.30001663:
-  version "1.0.30001664"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001664.tgz"
-  integrity sha512-AmE7k4dXiNKQipgn7a2xg558IRqPN3jMQY/rOsbxDhrd0tyChwbITBfiwtnqz8bi2M5mIWbxAYBvk7W7QBUS2g==
+  version "1.0.30001707"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001707.tgz"
+  integrity sha512-3qtRjw/HQSMlDWf+X79N206fepf4SOOU6SQLMaq/0KkZLmSjPxAkBOQQ+FxbHKfHmYLZFfdWsO3KA90ceHPSnw==
 
 chalk@^2.4.2:
   version "2.4.2"
