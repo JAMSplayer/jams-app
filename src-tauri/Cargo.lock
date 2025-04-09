@@ -4580,7 +4580,7 @@ dependencies = [
  "image",
  "lazy_static",
  "lofty",
- "safe_api",
+ "safeapi",
  "serde",
  "serde_json",
  "serde_urlencoded",
@@ -5899,7 +5899,7 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
- "proc-macro-crate 2.0.0",
+ "proc-macro-crate 3.2.0",
  "proc-macro2",
  "quote",
  "syn 2.0.99",
@@ -7735,8 +7735,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
-name = "safe_api"
-version = "0.3.0"
+name = "safeapi"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70668ef3e3f696b4f4ed64b4c84e5094517c1a6e0d7427c0693ce545322e9a82"
 dependencies = [
  "aes-gcm",
  "alloy-primitives",

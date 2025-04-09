@@ -5,7 +5,7 @@ use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
 use lofty::tag::{Accessor, Tag, TagExt};
-use safe_api::{Safe, XorNameBuilder, Multiaddr, SecretKey, XorName};
+use safeapi::{Safe, XorNameBuilder, Multiaddr, SecretKey, XorName};
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Cursor, path::PathBuf};
 use tauri::{AppHandle, Emitter, Manager, State};
@@ -54,8 +54,8 @@ impl From<tauri::Error> for Error {
     }
 }
 
-impl From<safe_api::Error> for Error {
-    fn from(safe_error: safe_api::Error) -> Self {
+impl From<safeapi::Error> for Error {
+    fn from(safe_error: safeapi::Error) -> Self {
         Self::Common(format!("Safe: {}", safe_error))
     }
 }
@@ -202,7 +202,7 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
 
     println!("\n\nConnecting...");
 
-    let safe = Safe::connect(peers, add_network_contacts, None, DEFAULT_LOG_LEVEL.into())
+    let safe = Safe::connect(peers, add_network_contacts, None, DEFAULT_LOG_LEVEL)
         .await
         .inspect_err(|_| {
             app.unmanage::<Mutex<Option<Safe>>>();
@@ -230,8 +230,6 @@ async fn sign_in(
     mut app: AppHandle,
 ) -> Result<(), Error> {
     let app_root = make_root(&mut app)?;
-    println!("eth_pk_import: {:?}", eth_pk_import);
-    println!("register: {:?}", register);
 
     let pk = load_create_import_key(&app_root, login.clone(), password, eth_pk_import, register)?;
     println!("\n\nEth Private Key: {:.4}(...)", pk);
@@ -310,7 +308,7 @@ async fn log_level(level: String, app: AppHandle) -> Result<(), Error> {
         .await
         .as_mut()
         .ok_or(Error::NotConnected)? // safe
-        .log_level(level)?;
+        .log_level(&level)?;
 
     Ok(())
 }
@@ -854,7 +852,7 @@ pub fn run() {
             put_data,
         ])
         .setup(|app| {
-            //            server::run(app.handle().clone()); // temporarily disable local server, because streaming from network is not implemented.
+            server::run(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!())

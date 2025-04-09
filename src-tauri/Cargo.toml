@@ -36,9 +36,7 @@ tauri-plugin-sql = { version = "2.2", features = ["sqlite"] }
 tauri-plugin-os = "2.2"
 lofty = "0.22"
 image = "0.25"
-# needs to have Git command installed and be able to authenticate the GitHub repository
-# configuration in .cargo/config.toml
-safe_api = { version = "0.3.0", git = "ssh://git@github.com/JAMSplayer/safe.git" }
+safeapi = { version = "0.3.1" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 warp = "*"

@@ -1,4 +1,4 @@
-use safe_api::XorName;
+use safeapi::XorName;
 use std::{path::PathBuf};
 use tauri::path::BaseDirectory;
 use tauri::AppHandle;
