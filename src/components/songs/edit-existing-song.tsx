@@ -1,15 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, CirclePlusIcon, EditIcon } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { editSongSchema } from "@/form-schemas/edit-song-schema";
 import { useStorage } from "@/providers/storage-provider";
 import { Song } from "@/types/songs/song";
 import { useImageSelector } from "@/hooks/use-image-selector";
 import { TagInput } from "../tag-input";
-import { t } from "i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     Form,
@@ -59,7 +58,6 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
     const { store } = useStorage();
     const [song, setSong] = useState<Song | undefined>(undefined);
     const { xorname } = useParams<{ xorname: string }>();
-    const { control } = useForm();
     const { isPlayerVisible } = usePlayerStore();
 
     if (!xorname) {

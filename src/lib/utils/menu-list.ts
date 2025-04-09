@@ -1,5 +1,4 @@
 import {
-    Tag,
     Settings,
     LayoutGrid,
     LucideIcon,

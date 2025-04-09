@@ -62,7 +62,6 @@ export default function NetworkSongMetadataPanel({
     type networkSongFormData = z.infer<typeof editSongSchema>;
 
     const { store } = useStorage();
-    const { control } = useForm();
 
     const { isPlayerVisible } = usePlayerStore();
 
