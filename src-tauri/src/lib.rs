@@ -13,21 +13,15 @@ use tauri::{AppHandle, Emitter, Manager, State};
 mod frontend;
 use frontend::*;
 
+#[cfg(target_os = "linux")]
+mod server;
+
+
 const ACCOUNTS_DIR: &str = "accounts";
 const SK_FILENAME: &str = "sk.key";
 const ADDRESS_FILENAME: &str = "evm_address";
 
 const DEFAULT_LOG_LEVEL: &str = "INFO";
-
-
-#[cfg(target_os = "linux")]
-mod server;
-
-#[cfg(target_os = "linux")]
-const RUN_MEDIA_SERVER: bool = true;
-
-#[cfg(not(target_os = "linux"))]
-const RUN_MEDIA_SERVER: bool = false;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -859,9 +853,9 @@ pub fn run() {
             put_data,
         ])
         .setup(|app| {
-        	if RUN_MEDIA_SERVER {
-            	server::run(app.handle().clone());
-        	}
+			#[cfg(target_os = "linux")]
+			server::run(app.handle().clone());
+
             Ok(())
         })
         .run(tauri::generate_context!())
