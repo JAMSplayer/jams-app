@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { base64ToFilePicture, filePictureToBase64 } from "@/lib/utils/images";
 import { toast } from "sonner";
 import { PlaylistSelectionModal } from "@/components/ui/playlist-selection-modal";
+import { usePlayerStore } from "@/store/player-store";
 
 interface SingleFilePanelProps {
     onBack: () => void;
@@ -68,6 +69,7 @@ export default function SingleFilePanel({
     type singleFileUploadData = z.infer<typeof singleFileUploadSchema>;
     const { t } = useTranslation();
     const { store } = useStorage();
+    const { isPlayerVisible } = usePlayerStore();
 
     const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -245,7 +247,7 @@ export default function SingleFilePanel({
     };
 
     return (
-        <div>
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"}`}>
             {isPlaylistSelectionModalVisible && song && (
                 <PlaylistSelectionModal
                     onConfirm={(playlistId) => {

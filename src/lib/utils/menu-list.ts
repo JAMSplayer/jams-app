@@ -87,11 +87,6 @@ export function getMenuList(_pathname: string): Group[] {
                     label: t("favorites"),
                     icon: Heart,
                 },
-                {
-                    href: "/tags",
-                    label: t("tags"),
-                    icon: Tag,
-                },
             ],
         },
         {

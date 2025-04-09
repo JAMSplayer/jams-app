@@ -12,12 +12,14 @@ import { useTranslation } from "react-i18next";
 import SongScroller from "./songs/songs-scroller";
 import { useStorage } from "@/providers/storage-provider";
 import { Playlist } from "@/types/playlists/playlist";
+import { usePlayerStore } from "@/store/player-store";
 
 const FavoritesPanel = () => {
     const { t } = useTranslation();
     const [filterValue, setFilterValue] = useState(""); // Filter/search text
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
     const { store } = useStorage();
+    const { isPlayerVisible } = usePlayerStore();
 
     // This will be filled from the fetchedFavoriteSongs below
     const [songs, setSongs] = useState<Song[]>([]);
@@ -56,7 +58,7 @@ const FavoritesPanel = () => {
     }, [store, favoriteIds]); // re-run when favorites change
 
     return (
-        <div className="w-full">
+        <div className={` ${isPlayerVisible ? "pb-48" : "pb-16"} w-full`}>
             {/* Filters */}
             <div className="w-full sticky top-[3.5rem] bg-background z-30 border-b border-t border-secondary p-4 border-l">
                 <div className="flex items-center space-x-2">
