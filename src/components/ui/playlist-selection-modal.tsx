@@ -123,8 +123,8 @@ export const PlaylistSelectionModal: React.FC<PlaylistSelectionModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm m-4">
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-background border p-6 rounded-lg shadow-lg w-full max-w-sm m-4">
                 {/* Title */}
                 <h2 className="text-xl font-semibold mb-4">Add to Playlist</h2>
 
@@ -153,8 +153,8 @@ export const PlaylistSelectionModal: React.FC<PlaylistSelectionModalProps> = ({
                                 }
                                 className={`p-3 border-b cursor-pointer ${
                                     selectedPlaylistId === playlist.id
-                                        ? "bg-blue-100"
-                                        : "hover:bg-gray-100"
+                                        ? "bg-secondary"
+                                        : "hover:bg-secondary"
                                 }`}
                             >
                                 <p className="font-medium">{playlist.title}</p>
