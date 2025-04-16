@@ -382,7 +382,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                                                         song
                                                                     )
                                                                 }
-                                                                className="p-2 border-b hover:bg-gray-100 cursor-pointer"
+                                                                className="p-2 border-b hover:bg-secondary cursor-pointer"
                                                             >
                                                                 <p className="font-medium break-words">
                                                                     {song.title}
@@ -419,7 +419,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                                                     song
                                                                 )
                                                             }
-                                                            className="p-2 border-b hover:bg-gray-100 cursor-pointer"
+                                                            className="p-2 border-b hover:bg-secondary cursor-pointer"
                                                         >
                                                             <p className="font-medium break-words">
                                                                 {song.title}
