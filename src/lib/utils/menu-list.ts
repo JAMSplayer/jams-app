@@ -33,17 +33,6 @@ export function getMenuList(_pathname: string): Group[] {
     const { t } = useTranslation();
     return [
         {
-            groupLabel: "",
-            menus: [
-                {
-                    href: "/",
-                    label: t("dashboard"),
-                    icon: LayoutGrid,
-                    submenus: [],
-                },
-            ],
-        },
-        {
             groupLabel: t("music"),
             menus: [
                 {
