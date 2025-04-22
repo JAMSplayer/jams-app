@@ -32,7 +32,6 @@ export default function CreatePlaylistPanel() {
             title: undefined,
             description: undefined,
             picture: undefined,
-            tags: [],
         },
     });
     const {
@@ -49,6 +48,7 @@ export default function CreatePlaylistPanel() {
     const { isPlayerVisible } = usePlayerStore();
 
     const titleValue = watch("title");
+    const [tags, setTags] = useState<string[]>([]);
 
     // add songs ----------------------------------------------------------------
 
@@ -134,6 +134,7 @@ export default function CreatePlaylistPanel() {
             createdAt,
             updatedAt,
             songs: rightSongs,
+            tags,
         };
 
         try {
@@ -225,17 +226,10 @@ export default function CreatePlaylistPanel() {
                                     <div className="col-span-3">
                                         {/* Tags Input */}
                                         <TagInput
-                                            initialTags={getValues("tags")} // Initial tags from form state
+                                            tags={tags} // Initial tags from form state
                                             onChange={
                                                 (updatedTags) =>
-                                                    setValue(
-                                                        "tags",
-                                                        updatedTags,
-                                                        {
-                                                            shouldValidate:
-                                                                false,
-                                                        }
-                                                    ) // Update form state when tags change
+                                                    setTags(updatedTags) // Update form state when tags change
                                             }
                                         />
                                     </div>

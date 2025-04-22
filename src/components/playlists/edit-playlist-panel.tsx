@@ -31,7 +31,6 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
             title: undefined,
             description: undefined,
             picture: undefined,
-            tags: [],
         },
     });
     const {
@@ -52,7 +51,12 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
     const [deleteEnabled, setDeleteEnabled] = useState(true);
 
     const titleValue = watch("title");
+    const [tags, setTags] = useState<string[]>([]);
     // Load playlist data and populate form fields and songs ----------------------------------------------------------------
+
+    useEffect(() => {
+        console.log("TAGS from tags value!: ", tags);
+    }, [tags]);
 
     useEffect(() => {
         const fetchPlaylistData = async () => {
@@ -91,10 +95,12 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                 setValue("description", playlist.description, {
                     shouldValidate: true,
                 });
+
                 setValue("picture", playlist.picture, { shouldValidate: true });
-                setValue("tags", playlist.tags || [], {
-                    shouldValidate: true,
-                });
+                console.log("POP: ", playlist.tags);
+                if (playlist.tags && playlist.tags.length > 0) {
+                    setTags(playlist.tags);
+                }
 
                 // Populate rightSongs with playlist songs
                 setRightSongs(playlist.songs || []);
@@ -237,6 +243,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                 createdAt: originalPlaylist.createdAt, // Retain the original createdAt value
                 updatedAt: new Date(),
                 songs: rightSongs,
+                tags,
             };
 
             const updatedPlaylists = storedPlaylists.map((p: Playlist) =>
@@ -339,17 +346,10 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                         {/* Tags Input */}
 
                                         <TagInput
-                                            initialTags={getValues("tags")} // Initial tags from form state
+                                            tags={tags} // Initial tags from form state
                                             onChange={
                                                 (updatedTags) =>
-                                                    setValue(
-                                                        "tags",
-                                                        updatedTags,
-                                                        {
-                                                            shouldValidate:
-                                                                false,
-                                                        }
-                                                    ) // Update form state when tags change
+                                                    setTags(updatedTags) // Update form state when tags change
                                             }
                                         />
                                     </div>
