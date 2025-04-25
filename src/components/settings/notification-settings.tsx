@@ -4,6 +4,9 @@ import SubDivider from "./sub-divider";
 import SubDividerLayout from "@/enums/sub-divider-layout";
 import { useStorage } from "@/providers/storage-provider";
 import { useTranslation } from "react-i18next";
+import { logLevel } from "@/backend/autonomi";
+import { Button } from "../ui/button";
+import { toast } from "sonner";
 
 export default function NotificationSettings() {
     const { t } = useTranslation();
@@ -117,6 +120,55 @@ export default function NotificationSettings() {
                             {t("info")}
                         </label>
                     </div>
+                </div>
+            )}
+
+            <SubDivider
+                title={"Backend Notification Levels"}
+                layout={SubDividerLayout.DEFAULT}
+            />
+
+            {isLoading !== null && !isLoading && (
+                <div className="flex flex-col p-4 space-y-2">
+                    <Button
+                        className="w-28"
+                        onClick={async () => {
+                            await logLevel("ERROR").then(() => {
+                                toast("Backend Log Level Change", {
+                                    description:
+                                        "The backend log level has changed to error",
+                                });
+                            });
+                        }}
+                    >
+                        ERROR
+                    </Button>
+                    <Button
+                        className="w-28"
+                        onClick={async () => {
+                            await logLevel("INFO").then(() => {
+                                toast("Backend Log Level Change", {
+                                    description:
+                                        "The backend log level has changed to info",
+                                });
+                            });
+                        }}
+                    >
+                        INFO
+                    </Button>
+                    <Button
+                        className="w-28"
+                        onClick={async () => {
+                            await logLevel("TRACE").then(() => {
+                                toast("Backend Log Level Change", {
+                                    description:
+                                        "The backend log level has changed to trace",
+                                });
+                            });
+                        }}
+                    >
+                        TRACE
+                    </Button>
                 </div>
             )}
         </div>
