@@ -1,67 +1,57 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X as XIcon } from "lucide-react";
-import {
-    useTagManager,
-    MAX_TAGS,
-    MAX_TAG_LENGTH,
-} from "../hooks/use-tag-manager";
-import { useDebounce } from "use-debounce";
+
+export const MAX_TAGS = 5;
+export const MAX_TAG_LENGTH = 20;
 
 interface TagInputProps {
-    initialTags?: string[];
-    onChange?: (tags: string[]) => void;
+    tags: string[];
+    onChange: (tags: string[]) => void;
 }
 
-export const TagInput: React.FC<TagInputProps> = ({
-    initialTags = [],
-    onChange,
-}) => {
-    const { tags, tagInput, setTagInput, addTag, removeTag } =
-        useTagManager(initialTags);
-    const [debouncedTags] = useDebounce(tags, 300);
+export const TagInput: React.FC<TagInputProps> = ({ tags, onChange }) => {
+    const [tagInput, setTagInput] = useState<string>("");
 
-    useEffect(() => {
-        if (onChange) onChange(debouncedTags);
-    }, [debouncedTags, onChange]);
+    const addTag = () => {
+        const trimmedTag = tagInput.trim().toLowerCase();
+        const isValidTag = /^[a-zA-Z0-9]+$/.test(trimmedTag);
 
-    const handleInputChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            setTagInput(e.target.value);
-        },
-        [setTagInput]
-    );
+        if (
+            isValidTag &&
+            trimmedTag &&
+            trimmedTag.length <= MAX_TAG_LENGTH &&
+            !tags.includes(trimmedTag) &&
+            tags.length < MAX_TAGS
+        ) {
+            onChange([...tags, trimmedTag]);
+            setTagInput("");
+        }
+    };
 
-    const handleKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === "Enter" && tagInput.trim()) {
-                e.preventDefault();
-                addTag(e);
-            }
-        },
-        [tagInput, addTag]
-    );
+    const removeTag = (tagToRemove: string) => {
+        onChange(tags.filter((tag) => tag !== tagToRemove));
+    };
 
-    const handleAddTagClick = useCallback(
-        (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
             e.preventDefault();
-            addTag(e);
-        },
-        [addTag]
-    );
+            addTag();
+        }
+    };
 
     return (
         <div className="w-full flex flex-col md:flex-row gap-4">
-            {/* Tag Input on the Left */}
+            {/* Input + Add Button */}
             <div className="w-full md:w-1/2">
                 <label className="block text-sm font-medium mb-1">Tags</label>
                 <div className="flex gap-2">
                     <Input
                         type="text"
                         value={tagInput}
-                        onChange={handleInputChange}
+                        onChange={(e) => setTagInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Add a tag"
                         className="flex-1"
@@ -71,7 +61,7 @@ export const TagInput: React.FC<TagInputProps> = ({
                         type="button"
                         size="sm"
                         variant="secondary"
-                        onClick={handleAddTagClick}
+                        onClick={addTag}
                         disabled={
                             tags.length >= MAX_TAGS ||
                             tagInput.trim().length === 0 ||
@@ -102,7 +92,7 @@ export const TagInput: React.FC<TagInputProps> = ({
                     )}
             </div>
 
-            {/* Tags Display on the Right */}
+            {/* Tag Badges */}
             <div className="w-full md:w-1/2 flex flex-wrap gap-2 items-start p-3 min-h-[50px]">
                 {tags.length === 0 ? (
                     <p className="text-gray-500 text-sm">No tags added.</p>

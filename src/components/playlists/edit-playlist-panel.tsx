@@ -4,11 +4,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { convertToBase64 } from "@/lib/utils/images";
-import { open } from "@tauri-apps/plugin-dialog";
-import { readFile } from "@tauri-apps/plugin-fs";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { editPlaylistSchema } from "@/form-schemas/edit-playlist-schema";
 import { Playlist } from "@/types/playlists/playlist";
@@ -18,6 +13,8 @@ import { Song } from "@/types/songs/song";
 import { ScrollArea } from "../ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import { AlertConfirmationModal } from "../alert-confirmation-modal";
+import { useImageSelector } from "@/hooks/use-image-selector";
+import { TagInput } from "../tag-input";
 // import Portal from "../portal";
 
 type FormSchema = z.infer<typeof editPlaylistSchema>;
@@ -27,20 +24,23 @@ interface EditPlaylistPanelProps {
 }
 
 export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        formState: { errors, isValid },
-    } = useForm<FormSchema>({
+    const editPlaylistForm = useForm<z.infer<typeof editPlaylistSchema>>({
         resolver: zodResolver(editPlaylistSchema),
-        mode: "onChange",
+        mode: "onBlur",
         defaultValues: {
             title: undefined,
             description: undefined,
             picture: undefined,
         },
     });
+    const {
+        handleSubmit,
+        register,
+        getValues,
+        setValue,
+        watch,
+        formState: { isValid },
+    } = editPlaylistForm;
 
     const { store } = useStorage();
     const navigate = useNavigate();
@@ -50,7 +50,13 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
     const [searchTerm, setSearchTerm] = useState("");
     const [deleteEnabled, setDeleteEnabled] = useState(true);
 
+    const titleValue = watch("title");
+    const [tags, setTags] = useState<string[]>([]);
     // Load playlist data and populate form fields and songs ----------------------------------------------------------------
+
+    useEffect(() => {
+        console.log("TAGS from tags value!: ", tags);
+    }, [tags]);
 
     useEffect(() => {
         const fetchPlaylistData = async () => {
@@ -81,16 +87,20 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                     return;
                 }
 
-                // Set tags from the playlist if available
-                setTags(playlist.tags || []);
-
                 // Populate form fields
-                setValue("title", playlist.title);
+                setValue("title", playlist.title, { shouldValidate: true });
                 if (playlist.title?.toLocaleLowerCase() === "general") {
                     setDeleteEnabled(false);
                 }
-                setValue("description", playlist.description);
-                setValue("picture", playlist.picture);
+                setValue("description", playlist.description, {
+                    shouldValidate: true,
+                });
+
+                setValue("picture", playlist.picture, { shouldValidate: true });
+                console.log("POP: ", playlist.tags);
+                if (playlist.tags && playlist.tags.length > 0) {
+                    setTags(playlist.tags);
+                }
 
                 // Populate rightSongs with playlist songs
                 setRightSongs(playlist.songs || []);
@@ -144,147 +154,15 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
 
     // image ----------------------------------------------------------------
 
-    const [base64Picture, setBase64Picture] = useState<string>("");
+    const { selectedImage, handleImageSelect } = useImageSelector();
 
-    // The image the user selects if they wish to change album art
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    useEffect(() => {
-        const pictureValue = base64Picture || selectedImage;
-        if (pictureValue) {
-            setValue("picture", pictureValue); // Update the form value whenever base64Picture or selectedImage changes
-        }
-    }, [base64Picture, selectedImage, setValue]);
-
-    const handleImageSelect = async () => {
-        const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-
-        try {
-            const selectedFile = await open({
-                multiple: false,
-                filters: [
-                    {
-                        name: "Images",
-                        extensions: ["jpg", "jpeg", "png", "gif"],
-                    },
-                ],
-            });
-
-            if (!selectedFile) {
-                toast("File", {
-                    description: "No file selected.",
-                });
-                return;
-            }
-
-            // Read the file as binary
-            const fileBuffer = await readFile(selectedFile as string);
-
-            // Get extension
-            const fileExtension = selectedFile.split(".").pop()?.toLowerCase();
-
-            if (
-                !fileExtension ||
-                !["jpg", "jpeg", "png", "gif"].includes(fileExtension)
-            ) {
-                toast("Unsupported", {
-                    description:
-                        "Unsupported file format. Please upload a JPG, JPEG, PNG, or GIF file.",
-                });
-                return;
-            }
-
-            const extensionToMime: Record<string, string> = {
-                jpg: "image/jpeg",
-                jpeg: "image/jpeg",
-                png: "image/png",
-                gif: "image/gif",
-            };
-
-            // Validate the extension and find the MIME type
-            const mimeType = extensionToMime[fileExtension];
-
-            // Convert the binary file into a Blob
-            const fileBlob = new Blob([new Uint8Array(fileBuffer)], {
-                type: mimeType,
-            });
-
-            // Create a File object
-            const file = new File(
-                [fileBlob],
-                `image.${fileExtension || "unknown"}`
-            );
-
-            // Check file size
-            if (file.size > MAX_FILE_SIZE) {
-                toast("File Size", {
-                    description:
-                        "File size exceeds 1MB. Please select a smaller file.",
-                });
-                return;
-            }
-
-            // Convert Blob to Base64
-            const base64Image = await convertToBase64(fileBlob);
-            console.log("base64Image: ", base64Image);
-
-            // Update the image state
-            setSelectedImage(base64Image); // Updates the selected image
-            setBase64Picture(base64Image); // Updates the base64Picture state
-
-            // Update the form value
+    const handleImageUpload = () => {
+        handleImageSelect((base64Image) => {
             setValue("picture", base64Image);
-        } catch (error) {
-            console.error("Error processing the selected image:", error);
-            toast("Error Processing Image", {
-                description: "Error processing the selected image.",
-            });
-        }
+        });
     };
 
     // end image ----------------------------------------------------------------
-
-    // tags ----------------------------------------------------------------
-
-    const MAX_TAGS = 5;
-    const MAX_TAG_LENGTH = 20;
-
-    const [tags, setTags] = useState<string[]>([]);
-    const [tagInput, setTagInput] = useState<string>(""); // Input field for adding tags
-
-    const addTag = (e: React.FormEvent) => {
-        e.preventDefault();
-        const trimmedTag = tagInput.trim().toLowerCase();
-
-        // Regular expression to allow only letters and numbers
-        const isValidTag = /^[a-zA-Z0-9]+$/.test(trimmedTag);
-
-        // Only add tag if conditions are met
-        if (
-            isValidTag && // Tag must only contain letters and numbers
-            trimmedTag &&
-            trimmedTag.length <= MAX_TAG_LENGTH &&
-            !tags.includes(trimmedTag) &&
-            tags.length < MAX_TAGS
-        ) {
-            setTags((prevTags) => [...prevTags, trimmedTag]);
-            setTagInput("");
-        } else if (!isValidTag) {
-            toast("Invalid Tag", {
-                description: "Tags can only contain letters and numbers.",
-            });
-        } else if (trimmedTag.length > MAX_TAG_LENGTH) {
-            toast("Tag Length", {
-                description: `Tags must be ${MAX_TAG_LENGTH} characters or less.`,
-            });
-        }
-    };
-
-    const removeTag = (tag: string) => {
-        setTags((prevTags) => prevTags.filter((t) => t !== tag));
-    };
-
-    // end tags ----------------------------------------------------------------
 
     // delete confirmation modal ----------------------------------------------------------------
 
@@ -293,7 +171,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
         setDeleteConfirmationModalVisible,
     ] = useState(false);
 
-    const handleConfirm = async () => {
+    const handleDeletionConfirm = async () => {
         if (!store) {
             console.error("Store is not initialized.");
             return;
@@ -362,10 +240,10 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
             const updatedPlaylist: Playlist = {
                 ...data,
                 id,
-                tags,
                 createdAt: originalPlaylist.createdAt, // Retain the original createdAt value
                 updatedAt: new Date(),
                 songs: rightSongs,
+                tags,
             };
 
             const updatedPlaylists = storedPlaylists.map((p: Playlist) =>
@@ -394,7 +272,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                 <AlertConfirmationModal
                     title="Confirm Deletion"
                     description="Are you sure you want to delete this playlist?"
-                    onConfirm={handleConfirm}
+                    onConfirm={handleDeletionConfirm}
                     onCancel={handleCancel}
                 />
             )}
@@ -445,12 +323,11 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                             {...register("title")}
                                             className="w-full border px-2 py-1 rounded"
                                             maxLength={100}
+                                            disabled={
+                                                titleValue?.toLowerCase() ===
+                                                "general"
+                                            }
                                         />
-                                        {errors.title && (
-                                            <div className="text-red-500 text-xs mt-1">
-                                                {errors.title.message}
-                                            </div>
-                                        )}
                                     </div>
 
                                     {/* Description */}
@@ -463,117 +340,18 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                             className="w-full border px-2 py-1 rounded"
                                             maxLength={100}
                                         />
-                                        {errors.description && (
-                                            <div className="text-red-500 text-xs mt-1">
-                                                {errors.description.message}
-                                            </div>
-                                        )}
                                     </div>
 
-                                    <div className="col-span-1">
+                                    <div className="col-span-3">
                                         {/* Tags Input */}
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">
-                                                Tags
-                                            </label>
-                                            <div className="flex gap-2 mb-2">
-                                                <Input
-                                                    type="text"
-                                                    autoCapitalize="off"
-                                                    autoComplete="off"
-                                                    autoCorrect="off"
-                                                    value={tagInput}
-                                                    onChange={(e) =>
-                                                        setTagInput(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    onKeyDown={(e) => {
-                                                        if (
-                                                            e.key === "Enter" &&
-                                                            tagInput.trim()
-                                                        ) {
-                                                            addTag(e); // Call addTag function when Enter is pressed
-                                                        }
-                                                    }}
-                                                    placeholder="Add a tag"
-                                                    className="flex-1"
-                                                    disabled={
-                                                        tags.length >= MAX_TAGS
-                                                    } // Disable input if max tags reached
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="secondary"
-                                                    onClick={addTag}
-                                                    disabled={
-                                                        tags.length >=
-                                                            MAX_TAGS || // Max tags reached
-                                                        tagInput.trim()
-                                                            .length === 0 || // Empty input
-                                                        tagInput.trim().length >
-                                                            MAX_TAG_LENGTH || // Exceeds max length
-                                                        !/^[a-zA-Z0-9]*$/.test(
-                                                            tagInput.trim()
-                                                        ) // Contains invalid characters
-                                                    }
-                                                >
-                                                    Add
-                                                </Button>
-                                            </div>
-                                            {tagInput.trim().length >
-                                                MAX_TAG_LENGTH && (
-                                                <p className="text-red-500 text-xs">
-                                                    Tags cannot exceed{" "}
-                                                    {MAX_TAG_LENGTH} characters.
-                                                </p>
-                                            )}
-                                            {tags.length === MAX_TAGS && (
-                                                <p className="text-red-500 text-xs">
-                                                    Max tags reached.
-                                                </p>
-                                            )}
-                                            {tagInput.trim().length > 0 &&
-                                                !/^[a-zA-Z0-9]*$/.test(
-                                                    tagInput
-                                                ) && (
-                                                    <p className="text-red-500 text-xs">
-                                                        Tags can only contain
-                                                        letters and numbers.
-                                                    </p>
-                                                )}
-                                        </div>
-                                    </div>
 
-                                    <div className="col-span-2">
-                                        {/* Tags Display */}
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            {tags.map((tag, index) => (
-                                                <Badge
-                                                    key={index}
-                                                    className="flex items-center space-x-1"
-                                                    size={"sm"}
-                                                    variant={"default"}
-                                                >
-                                                    <span
-                                                        className="truncate max-w-[80px]"
-                                                        title={tag}
-                                                    >
-                                                        {tag}
-                                                    </span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            removeTag(tag)
-                                                        }
-                                                        className="ml-1"
-                                                    >
-                                                        <XIcon size={14} />
-                                                    </button>
-                                                </Badge>
-                                            ))}
-                                        </div>
+                                        <TagInput
+                                            tags={tags} // Initial tags from form state
+                                            onChange={
+                                                (updatedTags) =>
+                                                    setTags(updatedTags) // Update form state when tags change
+                                            }
+                                        />
                                     </div>
 
                                     <div className="col-span-3">
@@ -660,12 +438,16 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
 
                             {/* Playlist Art */}
                             <div className="flex justify-center items-center relative">
-                                {selectedImage || base64Picture ? (
+                                {getValues("picture") || selectedImage ? (
                                     <img
-                                        src={selectedImage || base64Picture} // Update the image source
+                                        src={
+                                            getValues("picture") ||
+                                            selectedImage ||
+                                            undefined
+                                        }
                                         alt="Playlist Art"
                                         className="w-full h-full max-w-sm max-h-sm object-contain rounded-lg shadow cursor-pointer"
-                                        onClick={handleImageSelect} // Handle image selection
+                                        onClick={handleImageUpload}
                                     />
                                 ) : (
                                     <div className="w-full h-full max-w-sm max-h-sm min-h-44 max-h-96 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
@@ -675,7 +457,7 @@ export default function EditPlaylistPanel({ id }: EditPlaylistPanelProps) {
                                 <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full cursor-pointer">
                                     <EditIcon
                                         size={20}
-                                        onClick={handleImageSelect} // Open file dialog on click
+                                        onClick={handleImageUpload}
                                     />
                                 </div>
                             </div>

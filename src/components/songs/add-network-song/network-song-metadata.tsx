@@ -43,7 +43,6 @@ export default function NetworkSongMetadataPanel({
             title: undefined,
             artist: undefined,
             picture: undefined,
-            tags: [],
             album: undefined,
             genre: undefined,
             year: undefined,
@@ -68,6 +67,8 @@ export default function NetworkSongMetadataPanel({
     // this song object will be saved once populated
     const [song, setSong] = useState<Song | undefined>(undefined);
 
+    const [tags, setTags] = useState<string[]>([]);
+
     // this playlist selector modal will show when the user clicks save. It allow the user to decide what playlist to place the song.
     const [
         isPlaylistSelectionModalVisible,
@@ -90,9 +91,6 @@ export default function NetworkSongMetadataPanel({
     useEffect(() => {
         const updateFields = async () => {
             try {
-                // tags will be empty as they don't exist on a files metadata
-                setValue("tags", []);
-
                 // Populate form fields from metadata
                 setValue("title", fileDetail.title ?? "", {
                     shouldValidate: true,
@@ -144,8 +142,6 @@ export default function NetworkSongMetadataPanel({
             return;
         }
 
-        console.log(data);
-
         const defaultDownloadFolder = await store.get<{ value: string }>(
             "download-folder"
         );
@@ -163,6 +159,7 @@ export default function NetworkSongMetadataPanel({
                 extension: fileDetail.extension,
                 downloadFolder: defaultDownloadFolder.value,
                 ...data,
+                tags,
             };
 
             // ensure id is unique throughout all playlists:
@@ -400,18 +397,12 @@ export default function NetworkSongMetadataPanel({
                                     </div>
 
                                     <div className="w-full">
+                                        {/* Tags Input */}
                                         <TagInput
-                                            initialTags={getValues("tags")} // Initial tags from form state
+                                            tags={tags} // Initial tags from form state
                                             onChange={
                                                 (updatedTags) =>
-                                                    setValue(
-                                                        "tags",
-                                                        updatedTags,
-                                                        {
-                                                            shouldValidate:
-                                                                false,
-                                                        }
-                                                    ) // Update form state when tags change
+                                                    setTags(updatedTags) // Update form state when tags change
                                             }
                                         />
                                     </div>

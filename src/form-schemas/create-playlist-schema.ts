@@ -10,4 +10,8 @@ export const createPlaylistSchema = z.object({
         .max(100, "Description cannot exceed 100 characters")
         .optional(),
     picture: z.string().optional(),
+    tags: z
+        .array(z.string().min(1).max(20))
+        .max(5, "You can add up to 5 tags")
+        .optional(),
 });
