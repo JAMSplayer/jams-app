@@ -1,14 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { CirclePlusIcon, EditIcon, XIcon } from "lucide-react";
+import { CirclePlusIcon, EditIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { convertToBase64 } from "@/lib/utils/images";
-import { open } from "@tauri-apps/plugin-dialog";
-import { readFile } from "@tauri-apps/plugin-fs";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createPlaylistSchema } from "@/form-schemas/create-playlist-schema";
 import { Playlist } from "@/types/playlists/playlist";

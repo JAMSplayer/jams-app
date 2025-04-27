@@ -1,6 +1,5 @@
 import {
     Settings,
-    LayoutGrid,
     LucideIcon,
     Music,
     List,
