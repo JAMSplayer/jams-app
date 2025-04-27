@@ -19,10 +19,10 @@ jobs:
             args: "--target aarch64-apple-darwin"
           - platform: "macos-latest" # for Intel based macs.
             args: "--target x86_64-apple-darwin"
-#          - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
-#            args: ""
-#          - platform: "windows-latest"
-#            args: ""
+          - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
+            args: ""
+          - platform: "windows-latest"
+            args: ""
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -69,7 +69,7 @@ jobs:
         with:
           tagName: release-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "JAMS MVP v__VERSION__"
-          releaseBody: "An initial version of JAMS Player. Changes: Resize cover art when uploading #76, AddNetworkSong panel logic update #77, export playlist feature #78, import playlist #82 Change log level at runtime #83, Redact playlist #84, add console logger for frontend #85, Enable local media server for Linux #90, Default playlist if none exist #91, download all songs from playlist #94, upload functionality #95, upload song add to playlist #101, edit existing song #102, navigate to dashboard on sign out #105, ensure profile is above other components #106, make favorite page update #109, make logging clear button be fixed #110, status update #111, added padding and disable multi upload button #115, remove cryptographic account functions #116"
+          releaseBody: "An initial version of JAMS Player. Changes: Update package versions #118, Update agreeement p #120, Update color & added background blur #128, Edit playlist update 2 #129, Remove dashboard and move backend notifications to settings #134, Upgrade Safe to 0.4.0"
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
