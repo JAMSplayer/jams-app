@@ -50,7 +50,6 @@ export default function SingleFilePanel({
             title: undefined,
             artist: undefined,
             picture: undefined,
-            tags: [],
             album: undefined,
             genre: undefined,
             year: undefined,
@@ -72,6 +71,8 @@ export default function SingleFilePanel({
     const { isPlayerVisible } = usePlayerStore();
 
     const [isUploading, setIsUploading] = useState<boolean>(false);
+
+    const [tags, setTags] = useState<string[]>([]);
 
     // this song object will be saved to playlist once song is uploaded
     const [song, setSong] = useState<Song | undefined>(undefined);
@@ -200,12 +201,14 @@ export default function SingleFilePanel({
             return;
         }
 
-        console.log("Submitted Values:", { ...data });
+        console.log("Submitted Values:", { ...data, tags });
 
         try {
             setIsUploading(true);
 
-            const localSongFile = createLocalSongFile(data, fileDetail);
+            const finalData = { ...data, tags };
+
+            const localSongFile = createLocalSongFile(finalData, fileDetail);
 
             await saveMetadata(localSongFile);
 
@@ -235,6 +238,7 @@ export default function SingleFilePanel({
                 extension: fileDetail.extension,
                 downloadFolder: fileDetail.folderPath,
                 ...data,
+                tags,
             };
 
             setSong(localSongToSave);
@@ -500,17 +504,10 @@ export default function SingleFilePanel({
                                         </div>
 
                                         <TagInput
-                                            initialTags={getValues("tags")} // Initial tags from form state
+                                            tags={tags} // Initial tags from form state
                                             onChange={
                                                 (updatedTags) =>
-                                                    setValue(
-                                                        "tags",
-                                                        updatedTags,
-                                                        {
-                                                            shouldValidate:
-                                                                false,
-                                                        }
-                                                    ) // Update form state when tags change
+                                                    setTags(updatedTags) // Update form state when tags change
                                             }
                                         />
                                     </div>

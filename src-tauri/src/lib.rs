@@ -5,7 +5,7 @@ use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::{ItemKey, TaggedFileExt};
 use lofty::read_from_path;
 use lofty::tag::{Accessor, Tag, TagExt};
-use safeapi::{Safe, XorNameBuilder, Multiaddr, SecretKey, XorName};
+use safeapi::{Network, Safe, XorNameBuilder, Multiaddr, SecretKey, XorName};
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Cursor, path::PathBuf};
 use tauri::{AppHandle, Emitter, Manager, State};
@@ -182,28 +182,15 @@ async fn connect(peer: Option<String>, app: AppHandle) -> Result<(), Error> {
     }
     app.manage(Mutex::new(None::<Safe>));
 
-    let mut peers: Vec<Multiaddr> = Vec::new();
+	let network = match peer {
+		Some(peer_str) => Network::Local(vec![peer_str]),
+//		None => Network::Alpha,
+		None => Network::Mainnet,
+	};
 
-    let add_network_contacts = peer
-        .map(|p_str| {
-            p_str
-                .parse::<Multiaddr>()
-                .inspect(|multi_addr| {
-                    println!("Peer: {}", &multi_addr);
-                    peers.push(multi_addr.clone());
-                })
-                .map(|_| false)
-                .unwrap_or(true)
-        })
-        .unwrap_or(true);
+    println!("Connecting {:?} ...", network);
 
-    if add_network_contacts {
-        println!("Connecting to official network.");
-    }
-
-    println!("\n\nConnecting...");
-
-    let safe = Safe::connect(peers, add_network_contacts, None, DEFAULT_LOG_LEVEL)
+    let safe = Safe::connect(network, None, DEFAULT_LOG_LEVEL)
         .await
         .inspect_err(|_| {
             app.unmanage::<Mutex<Option<Safe>>>();

@@ -16,7 +16,7 @@ export function AgreementModal({ onAgree }: AgreementModalProps) {
                 <h2 className="text-xl font-semibold mb-4">Terms of Service</h2>
 
                 <div className="flex-1 overflow-y-auto border border-gray-200 rounded-lg p-4">
-                    <p className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600">
                         <p>
                             End User License Agreement (EULA) for Jams Player
                             (also referred to as “JAMS”)
@@ -317,7 +317,7 @@ export function AgreementModal({ onAgree }: AgreementModalProps) {
                             By using JAMS, you acknowledge that you have read,
                             understood, and agree to be bound by this Agreement.
                         </p>
-                    </p>
+                    </div>
                 </div>
 
                 <div className="mt-4 flex justify-end">

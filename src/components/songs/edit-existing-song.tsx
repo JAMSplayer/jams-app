@@ -36,7 +36,6 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
             title: undefined,
             artist: undefined,
             picture: undefined,
-            tags: [],
             album: undefined,
             genre: undefined,
             year: undefined,
@@ -59,6 +58,8 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
     const [song, setSong] = useState<Song | undefined>(undefined);
     const { xorname } = useParams<{ xorname: string }>();
     const { isPlayerVisible } = usePlayerStore();
+
+    const [tags, setTags] = useState<string[]>([]);
 
     if (!xorname) {
         return <p>No Song xorname provided.</p>;
@@ -111,8 +112,6 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
                 // find the song with the matching xorname
                 const foundSong = allSongs.find((s) => s.xorname === xorname);
 
-                console.log("found: ", foundSong);
-
                 if (!foundSong) {
                     console.error("Song Metadata not found.");
                     return;
@@ -123,9 +122,7 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
                 }
 
                 // set tags from the song if available
-                setValue("tags", foundSong.tags || [], {
-                    shouldValidate: true,
-                });
+                setTags(foundSong.tags ?? []);
 
                 setValue("title", foundSong.title, {
                     shouldValidate: true,
@@ -208,9 +205,8 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
         if (data.trackNumber) {
             updatedSong.trackNumber = data.trackNumber;
         }
-        if (data.tags) {
-            updatedSong.tags = data.tags;
-        }
+
+        updatedSong.tags = tags;
 
         setSong(updatedSong); // update the state with the modified song
         await updateSongInStore(updatedSong);
@@ -425,18 +421,12 @@ export default function EditSongPanel({ onReturn }: EditSongPanelProps) {
                                     </div>
 
                                     <div className="w-full">
+                                        {/* Tags Input */}
                                         <TagInput
-                                            initialTags={getValues("tags")} // Initial tags from form state
+                                            tags={tags} // Initial tags from form state
                                             onChange={
                                                 (updatedTags) =>
-                                                    setValue(
-                                                        "tags",
-                                                        updatedTags,
-                                                        {
-                                                            shouldValidate:
-                                                                false,
-                                                        }
-                                                    ) // Update form state when tags change
+                                                    setTags(updatedTags) // Update form state when tags change
                                             }
                                         />
                                     </div>

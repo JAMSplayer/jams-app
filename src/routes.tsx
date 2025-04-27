@@ -1,6 +1,5 @@
 // Routes.tsx
 import { Routes, Route } from "react-router-dom";
-import Dashboard from "./components/dashboard";
 // import NotFound from "./components/NotFound"; TODO reimplement
 import Settings from "./pages/settings";
 import StatusSettings from "./components/settings/status-settings";
@@ -21,7 +20,7 @@ import EditSongPanel from "./components/songs/edit-existing-song";
 const AppRoutes = () => {
     return (
         <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Songs />} />
             <Route path="/songs" element={<Songs />} />
             <Route path="/add-network-song" element={<AddNetworkSong />} />
             <Route path="/upload-songs" element={<UploadSongs />} />
