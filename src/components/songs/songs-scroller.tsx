@@ -256,14 +256,14 @@ const SongScroller = ({
     return (
         <div className="p-4 flex flex-col md:flex-row">
             {isDeleteConfirmationModalVisible && (
-                <Portal>
+                <>
                     <AlertConfirmationModal
                         title="Confirm Deletion"
                         description={`Are you sure you want to delete this song from all playlists?\n\nYou can manually add it again via the 'Add Song' page.`}
                         onConfirm={handleConfirm}
                         onCancel={handleCancel}
                     />
-                </Portal>
+                </>
             )}
 
             <div className="flex-grow md:w-2/3 space-y-4 pb-16 overflow-y-auto">
