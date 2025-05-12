@@ -38,40 +38,45 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
     const [songs, setSongs] = useState<Song[]>([]);
 
     useEffect(() => {
-        const fetchAllSongs = async () => {
-            if (!store) {
-                console.error("Store is not initialized.");
+        refreshSongs();
+    }, [playlist, store]); // trigger effect when playlist or store changes
+
+    const refreshSongs = async () => {
+        if (!store) {
+            console.error("Store is not initialized.");
+            return;
+        }
+
+        try {
+            const storedPlaylists = await store.get("playlists");
+
+            if (!storedPlaylists || !Array.isArray(storedPlaylists)) {
+                console.error("Playlists not found or invalid format.");
                 return;
             }
+            if (
+                playlist &&
+                Array.isArray(playlist.songs) &&
+                playlist.songs.length > 0
+            ) {
+                setSongs(playlist.songs);
+                handlePlaySong(playlist.songs[0]);
+            } else {
+                const allSongs: Song[] = storedPlaylists.flatMap(
+                    (playlist: Playlist) => playlist.songs || []
+                );
 
-            try {
-                // Fetch all playlists from the store
-                const storedPlaylists = await store.get("playlists");
+                const uniqueSongsMap = new Map<string, Song>();
+                allSongs.forEach((song) => {
+                    if (song?.id) uniqueSongsMap.set(song.id, song);
+                });
 
-                if (!storedPlaylists || !Array.isArray(storedPlaylists)) {
-                    console.error("Playlists not found or invalid format.");
-                    return;
-                }
-
-                // If a specific playlist is selected, display its songs
-                if (playlist && playlist.songs && playlist.songs.length > 0) {
-                    setSongs(playlist.songs);
-                    handlePlaySong(playlist.songs[0]); // Play first song
-                } else {
-                    // Flatten all songs from all playlists
-                    const allSongs: Song[] = storedPlaylists.flatMap(
-                        (playlist: Playlist) => playlist.songs || []
-                    ); // Get songs from each playlist
-                    // If no specific playlist is selected, show all songs
-                    setSongs(allSongs);
-                }
-            } catch (error) {
-                console.error("Failed to fetch songs from playlists:", error);
+                setSongs(Array.from(uniqueSongsMap.values()));
             }
-        };
-
-        fetchAllSongs();
-    }, [playlist, store]); // Trigger effect when playlist or store changes
+        } catch (error) {
+            console.error("Failed to fetch songs from playlists:", error);
+        }
+    };
 
     return (
         <div className="w-full">
@@ -113,6 +118,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                     filterValue={filterValue}
                     sortOrder={sortOrder}
                     variant="default"
+                    onSongDeleted={refreshSongs}
                 />
             </div>
         </div>

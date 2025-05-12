@@ -16,6 +16,7 @@ interface SongScrollerProps {
     filterValue: string;
     sortOrder: "asc" | "desc";
     variant: string;
+    onSongDeleted?: () => void;
 }
 
 const SongScroller = ({
@@ -23,6 +24,7 @@ const SongScroller = ({
     filterValue,
     sortOrder,
     variant,
+    onSongDeleted,
 }: SongScrollerProps) => {
     const { t } = useTranslation();
     const { store } = useStorage();
@@ -32,25 +34,6 @@ const SongScroller = ({
     const player = useAudioPlayer();
 
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
-
-    useEffect(() => {
-        const loadPlaylists = async () => {
-            if (!store) {
-                console.error("Store is not initialized.");
-                return;
-            }
-
-            try {
-                const storedPlaylists: Playlist[] =
-                    (await store.get("playlists")) || [];
-                setPlaylists(storedPlaylists); // Store playlists in state
-            } catch (error) {
-                console.error("Failed to fetch playlists:", error);
-            }
-        };
-
-        loadPlaylists();
-    }, []); // This runs only once when the component mounts
 
     const handlePlaySong = (song: Song) => {
         setPlayerVisibility(true);
@@ -183,6 +166,10 @@ const SongScroller = ({
             toast("Song Deleted", {
                 description: "Your song has been deleted from all playlists.",
             });
+
+            if (onSongDeleted) {
+                onSongDeleted();
+            }
         } catch (error) {
             console.error("Failed to delete the song:", error);
         }
