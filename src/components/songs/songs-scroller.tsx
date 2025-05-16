@@ -32,7 +32,7 @@ const SongScroller = ({
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
 
-    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [playlists, _setPlaylists] = useState<Playlist[]>([]);
 
     const handlePlaySong = (song: Song) => {
         setPlayerVisibility(true);
