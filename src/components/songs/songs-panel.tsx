@@ -19,14 +19,19 @@ interface SongsPanelProps {
     playlist?: Playlist;
 }
 
-const SongsPanel = ({ playlist }: SongsPanelProps) => {
+const SongsPanel = ({ playlist: initialPlaylist }: SongsPanelProps) => {
     const { t } = useTranslation();
     const { store } = useStorage();
-    const [filterValue, setFilterValue] = useState(""); // Filter/search text
+    const [filterValue, setFilterValue] = useState("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
+
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [playlist, setPlaylist] = useState<Playlist | undefined>(
+        initialPlaylist
+    );
+    const [songs, setSongs] = useState<Song[]>([]);
 
     const handlePlaySong = (song: Song) => {
         setPlayerVisibility(true);
@@ -34,58 +39,59 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
         player.play(song);
     };
 
-    // This will be filled from the fetchedSongs below
-    const [songs, setSongs] = useState<Song[]>([]);
-
-    useEffect(() => {
-        refreshSongs();
-    }, [playlist, store]); // trigger effect when playlist or store changes
-
     const refreshSongs = async () => {
-        if (!store) {
-            console.error("Store is not initialized.");
-            return;
-        }
+        if (!store) return;
 
         try {
-            const storedPlaylists = await store.get("playlists");
-
+            const storedPlaylists = (await store.get(
+                "playlists"
+            )) as Playlist[];
             if (!storedPlaylists || !Array.isArray(storedPlaylists)) {
                 console.error("Playlists not found or invalid format.");
                 return;
             }
-            if (
-                playlist &&
-                Array.isArray(playlist.songs) &&
-                playlist.songs.length > 0
-            ) {
-                setSongs(playlist.songs);
-                handlePlaySong(playlist.songs[0]);
-            } else {
-                const allSongs: Song[] = storedPlaylists.flatMap(
-                    (playlist: Playlist) => playlist.songs || []
+
+            setPlaylists(storedPlaylists);
+
+            if (playlist?.id) {
+                const updatedPlaylist = storedPlaylists.find(
+                    (p) => p.id === playlist.id
                 );
+                setPlaylist(updatedPlaylist);
 
-                const uniqueSongsMap = new Map<string, Song>();
-                allSongs.forEach((song) => {
-                    if (song?.id) uniqueSongsMap.set(song.id, song);
-                });
-
-                setSongs(Array.from(uniqueSongsMap.values()));
+                if (updatedPlaylist?.songs?.length) {
+                    setSongs(updatedPlaylist.songs);
+                    handlePlaySong(updatedPlaylist.songs[0]);
+                    return;
+                }
             }
+
+            const allSongs: Song[] = storedPlaylists.flatMap(
+                (p) => p.songs || []
+            );
+            const uniqueSongsMap = new Map<string, Song>();
+            allSongs.forEach((song) => {
+                if (song?.id) uniqueSongsMap.set(song.id, song);
+            });
+
+            setSongs(Array.from(uniqueSongsMap.values()));
         } catch (error) {
             console.error("Failed to fetch songs from playlists:", error);
         }
     };
 
+    useEffect(() => {
+        refreshSongs();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [playlist?.id]);
+
     return (
         <div className="w-full">
-            {/* Filters */}
             <div className="w-full sticky top-[3.5rem] bg-background z-10 border-b border-t border-secondary p-4 border-l">
                 <div className="flex items-center space-x-2">
                     <Input
                         type="text"
-                        placeholder="Search"
+                        placeholder={t("search") || "Search"}
                         value={filterValue}
                         onChange={(e) => setFilterValue(e.target.value)}
                         className="border px-2 py-1 w-full md:w-1/3"
@@ -97,7 +103,7 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                         }
                     >
                         <SelectTrigger className="border px-2 py-1 w-full md:w-1/4">
-                            <SelectValue placeholder="Select Sort Order" />
+                            <SelectValue placeholder={t("select_sort_order")} />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="asc">
@@ -111,10 +117,10 @@ const SongsPanel = ({ playlist }: SongsPanelProps) => {
                 </div>
             </div>
 
-            {/* Song Scroller */}
             <div className="relative">
                 <SongScroller
                     songs={songs}
+                    playlists={playlists}
                     filterValue={filterValue}
                     sortOrder={sortOrder}
                     variant="default"

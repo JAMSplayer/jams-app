@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 interface SongScrollerProps {
     songs: Song[];
+    playlists: Playlist[];
     filterValue: string;
     sortOrder: "asc" | "desc";
     variant: string;
@@ -20,6 +21,7 @@ interface SongScrollerProps {
 
 const SongScroller = ({
     songs,
+    playlists,
     filterValue,
     sortOrder,
     variant,
@@ -32,8 +34,6 @@ const SongScroller = ({
     const { setPlayerVisibility, setHasLoaded } = usePlayerStore();
     const player = useAudioPlayer();
 
-    const [playlists, _setPlaylists] = useState<Playlist[]>([]);
-
     const handlePlaySong = (song: Song) => {
         setPlayerVisibility(true);
         setHasLoaded(true);
@@ -42,88 +42,56 @@ const SongScroller = ({
 
     const filterSongs = (songs: Song[], filterValue: string): Song[] => {
         const trimmedFilterValue = filterValue.trim().toLowerCase();
+        if (!trimmedFilterValue) return songs;
 
-        if (!trimmedFilterValue) return songs; // Return all songs if no filter is applied
-
-        // Check for exact matches first
         const exactMatches = songs.filter((song) =>
-            [song.title, song.artist, song.artist].some(
-                (field) => field?.toLowerCase() === trimmedFilterValue // Exact match check
+            [song.title, song.artist].some(
+                (field) => field?.toLowerCase() === trimmedFilterValue
             )
         );
+        if (exactMatches.length > 0) return exactMatches;
 
-        // If there are exact matches, return only those
-        if (exactMatches.length > 0) {
-            return exactMatches;
-        }
-
-        // If no exact matches, return partial matches
         return songs.filter((song) =>
-            [song.title, song.artist, song.artist].some(
-                (field) => field?.toLowerCase().includes(trimmedFilterValue) // Partial match check
+            [song.title, song.artist].some((field) =>
+                field?.toLowerCase().includes(trimmedFilterValue)
             )
         );
     };
 
     const sortSongs = (songs: Song[], sortOrder: "asc" | "desc") => {
         return songs.sort((a, b) => {
-            // convert dateCreated to a Date object if it's a string
             const dateA = new Date(a.dateCreated);
             const dateB = new Date(b.dateCreated);
-
-            // handle invalid date cases (if conversion fails, date will be invalid)
-            if (isNaN(dateA.getTime())) {
-                console.warn(`Invalid date for song: ${a.title}`);
-                return 0; // Treat invalid date as equal
-            }
-            if (isNaN(dateB.getTime())) {
-                console.warn(`Invalid date for song: ${b.title}`);
-                return 0; // treat invalid date as equal
-            }
-
-            if (sortOrder === "asc") {
-                return dateA.getTime() - dateB.getTime();
-            } else {
-                return dateB.getTime() - dateA.getTime();
-            }
+            if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0;
+            return sortOrder === "asc"
+                ? dateA.getTime() - dateB.getTime()
+                : dateB.getTime() - dateA.getTime();
         });
     };
 
-    // Apply filter and sort to the songs
     const filteredAndSortedSongs = useMemo(() => {
-        let filteredSongs = filterSongs(songs, filterValue);
-        return sortSongs(filteredSongs, sortOrder);
+        const filtered = filterSongs(songs, filterValue);
+        return sortSongs(filtered, sortOrder);
     }, [songs, filterValue, sortOrder]);
 
-    // Find all the playlist titles for a song id
-    const findPlaylistsBySongId = (songId: string): string[] => {
-        if (!Array.isArray(playlists)) {
-            console.error("Playlists data is not in an array format.");
-            return [];
-        }
-
-        // Filter playlists that contain the song and map their titles
+    const findPlaylistsBySongXorname = (xorname: string): string[] => {
+        if (!Array.isArray(playlists)) return [];
         return playlists
-            .filter(
-                (playlist) =>
-                    playlist.songs &&
-                    playlist.songs.some((song) => song.id === songId)
+            .filter((playlist) =>
+                playlist.songs?.some((song) => song.xorname === xorname)
             )
             .map((playlist) => playlist.title);
     };
-
-    // delete confirmation modal ----------------------------------------------------------------
 
     const [
         isDeleteConfirmationModalVisible,
         setDeleteConfirmationModalVisible,
     ] = useState(false);
-
-    const [selectedSongId, setSelectedSongId] = useState<string | null>(null); // Track the song ID
+    const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
 
     const handleDeleteClick = (id: string) => {
-        setSelectedSongId(id); // Set the song ID
-        setDeleteConfirmationModalVisible(true); // Show the modal
+        setSelectedSongId(id);
+        setDeleteConfirmationModalVisible(true);
     };
 
     const handleEditClick = (xorname: string) => {
@@ -131,25 +99,10 @@ const SongScroller = ({
     };
 
     const handleConfirm = async () => {
-        if (!store || !selectedSongId) {
-            console.error("Store is not initialized or no song ID provided.");
-            return;
-        }
-
+        if (!store || !selectedSongId) return;
         try {
-            // Retrieve existing playlists from the store
             const storedPlaylists: Playlist[] =
                 (await store.get("playlists")) || [];
-
-            // Ensure playlists is an array
-            if (!Array.isArray(storedPlaylists)) {
-                console.error(
-                    "Playlists are not in the expected array format."
-                );
-                return;
-            }
-
-            // Remove the song with the selected ID from all playlists
             const updatedPlaylists = storedPlaylists.map((playlist) => ({
                 ...playlist,
                 songs:
@@ -157,101 +110,65 @@ const SongScroller = ({
                         (song) => song.id !== selectedSongId
                     ) || [],
             }));
-
-            // Save the updated playlists back to the store
             await store.set("playlists", updatedPlaylists);
             await store.save();
-
             toast("Song Deleted", {
                 description: "Your song has been deleted from all playlists.",
             });
-
-            if (onSongDeleted) {
-                onSongDeleted();
-            }
+            if (onSongDeleted) onSongDeleted();
         } catch (error) {
             console.error("Failed to delete the song:", error);
         }
-
         setDeleteConfirmationModalVisible(false);
-        setSelectedSongId(null); // Reset the selected song ID
+        setSelectedSongId(null);
     };
 
     const handleCancel = () => {
         setDeleteConfirmationModalVisible(false);
-        setSelectedSongId(null); // Reset the selected song ID
+        setSelectedSongId(null);
     };
-
-    // end delete confirmation modal ----------------------------------------------------------------
-
-    // start favorite handler ----------------------------------------------------------------
 
     const [favoriteSongs, setFavoriteSongs] = useState<string[]>([]);
 
     useEffect(() => {
         const loadFavoriteSongs = async () => {
-            if (!store) {
-                console.error("Store is not initialized.");
-                return;
-            }
-
+            if (!store) return;
             try {
-                const storedFavoriteSongs: string[] =
+                const storedFavorites: string[] =
                     (await store.get("favorites")) || [];
-                setFavoriteSongs(storedFavoriteSongs); // Store favorite songs in state
-            } catch (error) {
-                console.error("Failed to fetch favorite songs:", error);
+                setFavoriteSongs(storedFavorites);
+            } catch (err) {
+                console.error("Failed to load favorite songs:", err);
             }
         };
-
         loadFavoriteSongs();
-    }, []); // This runs only once when the component mounts
+    }, []);
 
     const handleFavoriteClicked = async (id: string) => {
-        if (!store) {
-            console.error("Store is not initialized.");
-            return;
-        }
+        if (!store) return;
+        const updatedFavorites = favoriteSongs.includes(id)
+            ? favoriteSongs.filter((favId) => favId !== id)
+            : [...favoriteSongs, id];
 
         try {
-            // toggle the song in the favoriteSongs array
-            let updatedFavorites: string[];
-
-            if (favoriteSongs.includes(id)) {
-                // if the song is already a favorite, remove it
-                updatedFavorites = favoriteSongs.filter(
-                    (songId) => songId !== id
-                );
-            } else {
-                // if the song is not a favorite, add it
-                updatedFavorites = [...favoriteSongs, id];
-            }
-
-            // Update state and save to persistent storage
             setFavoriteSongs(updatedFavorites);
             await store.set("favorites", updatedFavorites);
             await store.save();
-            console.log(favoriteSongs);
         } catch (error) {
-            console.error("Failed to update favorite songs:", error);
+            console.error("Failed to update favorites:", error);
         }
     };
-
-    // end favorite handler ----------------------------------------------------------------
 
     return (
         <div className="p-4 flex flex-col md:flex-row">
             {isDeleteConfirmationModalVisible && (
-                <>
-                    <AlertConfirmationModal
-                        title="Confirm Deletion"
-                        description={`Are you sure you want to delete this song from all playlists?\n\nYou can manually add it again via the 'Add Song' page.`}
-                        onConfirm={handleConfirm}
-                        onCancel={handleCancel}
-                    />
-                </>
+                <AlertConfirmationModal
+                    title="Confirm Deletion"
+                    description={`Are you sure you want to delete this song from all playlists?\n\nYou can manually add it again via the 'Add Song' page.`}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
             )}
-
             <div className="flex-grow md:w-2/3 space-y-4 pb-16 overflow-y-auto">
                 {filteredAndSortedSongs.length > 0 ? (
                     filteredAndSortedSongs.map((song) => (
@@ -260,7 +177,7 @@ const SongScroller = ({
                             className="relative flex items-stretch bg-background hover:bg-secondary rounded-lg shadow-lg transition-all duration-200 group cursor-pointer overflow-hidden"
                             onClick={() => handlePlaySong(song)}
                         >
-                            {/* Album art */}
+                            {/* album art */}
                             <div className="relative flex-shrink-0 w-20 md:max-h-20 bg-background rounded-l-lg overflow-hidden">
                                 {song.picture ? (
                                     <img
@@ -278,9 +195,9 @@ const SongScroller = ({
                                     </div>
                                 </div>
                             </div>
-                            {/* Song details */}
+                            {/* song details */}
                             <div className="grid grid-cols-1 md:grid-cols-4 w-full">
-                                {/* First column (left-aligned) */}
+                                {/* first column (left) */}
                                 <div className="flex justify-start p-2">
                                     <div className="flex flex-col justify-start">
                                         <h2 className="text-foreground font-semibold text-lg truncate">
@@ -292,18 +209,18 @@ const SongScroller = ({
                                     </div>
                                 </div>
 
-                                {/* Second column (left-aligned) */}
+                                {/* second column (left) */}
                                 <div className="flex justify-start p-2">
                                     <div className="flex flex-col justify-start">
                                         <h2 className="text-foreground font-semibold truncate">
                                             <p>
                                                 <small>
                                                     Playlists:{" "}
-                                                    {findPlaylistsBySongId(
-                                                        song.id
+                                                    {findPlaylistsBySongXorname(
+                                                        song.xorname
                                                     ).length > 0
-                                                        ? findPlaylistsBySongId(
-                                                              song.id
+                                                        ? findPlaylistsBySongXorname(
+                                                              song.xorname
                                                           ).join(", ")
                                                         : "Not found"}
                                                 </small>
