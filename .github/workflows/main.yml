@@ -69,7 +69,7 @@ jobs:
         with:
           tagName: release-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "JAMS MVP v__VERSION__"
-          releaseBody: "An initial version of JAMS Player. Changes: Update package versions #118, Update agreeement p #120, Update color & added background blur #128, Edit playlist update 2 #129, Remove dashboard and move backend notifications to settings #134, Upgrade Safe to 0.4.0"
+          releaseBody: "An initial version of JAMS Player. Changes: Fix #138 (Cannot play music on Windows), Fix deletion #137"
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
