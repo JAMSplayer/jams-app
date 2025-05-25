@@ -1,10 +1,4 @@
-import {
-    Settings,
-    LucideIcon,
-    Music,
-    List,
-    Heart,
-} from "lucide-react";
+import { Settings, LucideIcon, Music, List, Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 type Submenu = {
@@ -41,7 +35,7 @@ export function getMenuList(_pathname: string): Group[] {
                     submenus: [
                         {
                             href: "/songs",
-                            label: t("allSongs"),
+                            label: t("songsList"),
                         },
                         {
                             href: "/upload-songs",

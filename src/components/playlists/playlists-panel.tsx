@@ -24,23 +24,17 @@ import { LoadingSpinner } from "../ui/loading-spinner";
 export default function PlaylistsPanel() {
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
-
-    const [filterValue, setFilterValue] = useState(""); // Filter/search text
+    const [filterValue, setFilterValue] = useState("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
     const { store } = useStorage();
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
     const loadPlaylists = async () => {
-        if (!store) {
-            console.error("Store is not initialized.");
-            return;
-        }
-
+        if (!store) return;
         try {
             const storedPlaylists: Playlist[] =
                 (await store.get("playlists")) || [];
-
             setPlaylists(storedPlaylists);
         } catch (error) {
             console.error("Failed to load playlists:", error);
@@ -49,50 +43,29 @@ export default function PlaylistsPanel() {
 
     useEffect(() => {
         loadPlaylists();
-    }, [store]); // Dependency ensures this runs only when the store is ready
+    }, [store]);
 
     const importPlaylistData = async () => {
-        if (!store) {
-            console.error("Store is not initialized.");
-            return;
-        }
+        if (!store) return;
 
         try {
             const defaultDownloadFolder = await store.get<{ value: string }>(
                 "download-folder"
             );
-            if (!defaultDownloadFolder || !defaultDownloadFolder.value) {
-                console.error("No default download folder found.");
-                return;
-            }
+            if (!defaultDownloadFolder?.value) return;
 
-            // prompt the user to select the playlist file
             const filePath = await open({
                 filters: [{ name: "JSON", extensions: ["json"] }],
             });
+            if (!filePath) return;
 
-            if (!filePath) {
-                console.log("User canceled file selection.");
-                return;
-            }
-
-            // read the file contents
             const fileContent = await readFile(filePath);
             const importedPlaylist = JSON.parse(
                 new TextDecoder().decode(fileContent)
             );
 
-            // ensure the imported data is a valid playlist
-            if (
-                !importedPlaylist ||
-                !importedPlaylist.id ||
-                !importedPlaylist.title
-            ) {
-                console.error("Invalid playlist data.");
-                return;
-            }
+            if (!importedPlaylist?.id || !importedPlaylist?.title) return;
 
-            // set the default downloadFolder for all songs
             if (Array.isArray(importedPlaylist.songs)) {
                 importedPlaylist.songs = importedPlaylist.songs.map(
                     (song: Song) => ({
@@ -102,50 +75,32 @@ export default function PlaylistsPanel() {
                 );
             }
 
-            // retrieve the current playlists from the store
             const playlists = await store.get("playlists");
-
-            // ensure playlists is an array
             const storedPlaylists = Array.isArray(playlists)
                 ? (playlists as Playlist[])
                 : [];
 
-            // check if the playlist already exists to avoid duplicates
             const playlistExists = storedPlaylists.some(
                 (p: Playlist) => p.id === importedPlaylist.id
             );
 
-            if (playlistExists) {
-                console.log("Playlist already exists in the store.");
-            } else {
-                // download the songs in the playlist
-                console.log("starting downloading of songs in playlist");
-                setIsLoading(true);
-                const networkFiles: NetworkFileDetail[] | null =
-                    await downloadPlaylist(importedPlaylist).finally(() => {
-                        setIsLoading(false);
-                    });
-                console.log("finished downloading of songs in playlist");
+            if (playlistExists) return;
 
-                if (!networkFiles) {
-                    console.log("No songs found in playlist to download");
-                    return null;
-                }
+            setIsLoading(true);
+            const networkFiles: NetworkFileDetail[] | null =
+                await downloadPlaylist(importedPlaylist).finally(() =>
+                    setIsLoading(false)
+                );
+            if (!networkFiles) return;
 
-                // append the imported playlist to the stored playlists
-                storedPlaylists.push(importedPlaylist);
+            storedPlaylists.push(importedPlaylist);
+            await store.set("playlists", storedPlaylists);
+            await store.save();
+            loadPlaylists();
 
-                // save the updated playlists to the store
-                await store.set("playlists", storedPlaylists);
-                await store.save();
-
-                // reload the playlists
-                loadPlaylists();
-
-                toast("Playlist Import", {
-                    description: "Your playlist has been imported and saved.",
-                });
-            }
+            toast("Playlist Import", {
+                description: "Your playlist has been imported and saved.",
+            });
         } catch (error) {
             console.error("Failed to import playlist:", error);
         }
@@ -153,7 +108,7 @@ export default function PlaylistsPanel() {
 
     return (
         <div className="w-full">
-            {/* Filters */}
+            {/* filters */}
             <div className="w-full sticky top-[3.5rem] bg-background z-20 border-b border-t border-secondary p-4 border-l">
                 <div className="flex items-center space-x-2">
                     <Input
@@ -181,12 +136,7 @@ export default function PlaylistsPanel() {
                             </SelectItem>
                         </SelectContent>
                     </Select>
-                    <Button
-                        disabled={isLoading}
-                        onClick={async () => {
-                            await importPlaylistData();
-                        }}
-                    >
+                    <Button disabled={isLoading} onClick={importPlaylistData}>
                         {isLoading ? (
                             <>
                                 Downloading... <LoadingSpinner />
@@ -201,11 +151,11 @@ export default function PlaylistsPanel() {
                 </div>
             </div>
 
-            {/* Playlist Scroller */}
             <PlaylistScroller
                 playlists={playlists}
                 filterValue={filterValue}
                 sortOrder={sortOrder}
+                onPlaylistsChange={loadPlaylists}
             />
         </div>
     );
