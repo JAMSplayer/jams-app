@@ -13,14 +13,14 @@
     "windows": [
       {
         "title": "JAMS",
-        "width": 1100,
+        "width": 1250,
         "height": 600,
         "resizable": true,
         "fullscreen": false
       }
     ],
     "security": {
-      "csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost;",
+      "csp": "default-src 'self'; media-src 'self' asset: http://asset.localhost https://asset.localhost;",
       "assetProtocol": {
        "enable": true,
        "scope": ["**", "**/*"]

@@ -24,6 +24,7 @@ const FavoritesPanel = () => {
     // This will be filled from the fetchedFavoriteSongs below
     const [songs, setSongs] = useState<Song[]>([]);
     const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
     useEffect(() => {
         const fetchFavoriteSongs = async () => {
@@ -35,6 +36,9 @@ const FavoritesPanel = () => {
             try {
                 const playlists: Playlist[] =
                     (await store.get("playlists")) || [];
+
+                setPlaylists(playlists);
+
                 const favoriteIds: string[] =
                     (await store.get("favorites")) || [];
                 setFavoriteIds(favoriteIds); // store the latest favorites list
@@ -97,6 +101,7 @@ const FavoritesPanel = () => {
                     filterValue={filterValue}
                     sortOrder={sortOrder}
                     variant={"favorites"}
+                    playlists={playlists}
                 />
             </div>
         </div>
