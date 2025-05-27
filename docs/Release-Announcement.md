@@ -40,7 +40,26 @@ Another feature we would like to have is a node integrated with the app binary, 
 
 ### Front End, App Logic and Integrations - @safemedia aka Cobite
 
-> whatever you feel is relevant and can provide insight to other developers and / or laymen community members!
+The application was created from scratch using the Tauri framework. For the frontend side of the stack used react & tailwind, along with shadcn for styling.
+
+Some of the features we added are:
+- in-built wallet logic & UI
+- connection detection & routing updates
+- testnet connection
+- user management
+- account (create/recover/update/sign-in/sign-out)
+- upload/download interfaces with metadata
+- secondary navigation panels
+- audio player
+- animation effects
+- settings panel (console logger/network config/toast/status/storage)
+- playlist creation, updating & adding/removing songs
+- song creation & updating with drag-drop/browse
+- song/player scroller
+- favorites
+- translations
+- themes
+  
 
 ```
 ?? image ??
