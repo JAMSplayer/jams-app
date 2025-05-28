@@ -1,8 +1,6 @@
 # Introducing: 🎉JAMS MVP!!!🎉
 
-```
-?? image ??
-```
+![jams-website](https://github.com/user-attachments/assets/00943b4f-741b-4ade-ad24-11d00eddd1b0)
 
 The moment is finally here, and it’s my utmost pleasure to announce to this amazing community the official release of JAMS Minimum Viable Product (MVP)!
 
@@ -18,9 +16,9 @@ It’s worth mentioning that these rockstars also have their own individual Auto
 
 A massive thank you to @maidsafe for the years of dedication as well as @bamboogarden and the Autonomi foundation as we are now officially proud and grateful participants of the Autonomi Builders Program. 🤗
 
-## Technical Rundown
+<img src="https://github.com/user-attachments/assets/19314073-8cf6-4b75-b458-62a2de786b94" width="800">
 
-> Loz or Cobite, please review and edit the below technical summary as you see fit
+## Technical Rundown
 
 The focus was previously on a web based app but we recently shifted to a desktop approach in order to get something into the communities hands sooner without having to rely on a non existent browser. This comes with a lot of cool advantages as well!
 
@@ -55,17 +53,13 @@ Some of the features we added are:
 - settings panel (console logger/network config/toast/status/storage)
 - playlist creation, updating & adding/removing songs
 - song creation & updating with drag-drop/browse
+- import existing songs from network
 - song/player scroller
 - favorites
 - translations
 - themes
-  
 
-```
-?? image ??
-```
-
-> Loz and Cobite - please review MVP Features, add/remove at your discretion
+<img src="https://github.com/user-attachments/assets/93c6b432-07bc-4150-820c-e7d02382109c" width="800">
 
 ## JAMS MVP Features
 
