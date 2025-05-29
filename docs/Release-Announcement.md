@@ -38,7 +38,7 @@ Another feature we would like to have is a node integrated with the app binary, 
 
 ### Front End, App Logic and Integrations - @safemedia aka Cobite
 
-The application was created from scratch using the Tauri framework. For the frontend side of the stack used react & tailwind, along with shadcn for styling.
+The application was created from scratch using the Tauri framework. For the frontend side of the stack we used react & tailwind, along with shadcn for styling.
 
 Some of the features we added are:
 - in-built wallet logic & UI
