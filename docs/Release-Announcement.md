@@ -64,8 +64,7 @@ Some of the features we added are:
 ## JAMS MVP Features
 
 * Account and wallet connection / creation
-* Multi Language Support (English, Spanish, German?, Mandarin Chinese, Hindi, Polish)
-* Import
+* Multi Language Support - Implemented but not populated.
 * Music upload and Download
 * Edit song metadata
 * Export Account (.zip)
